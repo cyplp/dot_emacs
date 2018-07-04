@@ -10,3 +10,5 @@
 ;; If you want to start completion manually from the beginning
 (setq auto-complete-nxml-automatic-p nil)
 
+(use-package html5-schema
+  :ensure t)
