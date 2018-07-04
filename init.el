@@ -78,6 +78,9 @@
 ;; just one line
 (setq next-line-add nil)
 
+;; activate ido-mode
+(ido-mode t)
+
 ;; org-stuff
 (load-file "conf-org.el")
 
