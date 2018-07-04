@@ -37,3 +37,6 @@
 ;; display line and colum
 (setq column-number-mode t)
 (setq line-number-mode t)
+
+;; utf-8
+(prefer-coding-system 'mule-utf-8)
