@@ -84,3 +84,9 @@
 ;; misc
 (load-file "conf-misc.el")
 
+;; automatic pair
+(setq skeleton-pair t)
+(global-set-key "[" 'skeleton-pair-insert-maybe)
+(global-set-key "{" 'skeleton-pair-insert-maybe)
+(global-set-key "(" 'skeleton-pair-insert-maybe)
+(global-set-key "\"" 'skeleton-pair-insert-maybe)
