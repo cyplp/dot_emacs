@@ -24,3 +24,6 @@
   :config
   (which-key-mode))
 
+;; theme
+(use-package tangotango-theme
+  :ensure t)
