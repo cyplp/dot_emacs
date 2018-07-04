@@ -54,3 +54,9 @@
 ;; trailing whitespaces
 (setq whitespace-line-column 88
       whitespace-style '(tabs trailing lines-tail))
+
+;; pretty-icons
+(use-package mode-icons
+  :ensure t
+  :config
+  (mode-icons-mode))
