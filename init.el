@@ -17,9 +17,10 @@
 	(package-install 'use-package))
 
 (use-package try
-	:ensure t)
+  :ensure t)
 
 (use-package which-key
-	:ensure t
-	:config
-	(which-key-mode))
+  :ensure t
+  :config
+  (which-key-mode))
+
