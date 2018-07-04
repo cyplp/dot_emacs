@@ -106,6 +106,11 @@
     (global-auto-complete-mode t)
     ))
 
+(use-package expand-region
+  :ensure t)
+(global-set-key (kbd "C-²") 'er/expand-region)
+
+
 ;; org-stuff
 (load-file "conf-org.el")
 
