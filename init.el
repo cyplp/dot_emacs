@@ -115,5 +115,6 @@
 ;; secret stuff
 (load-file "secret.el")
 
+;; python 
 (load-file "conf-python.el")
 
