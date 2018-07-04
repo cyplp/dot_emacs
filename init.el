@@ -27,3 +27,7 @@
 ;; theme
 (use-package tangotango-theme
   :ensure t)
+(setq inhibit-splash-screen t)
+
+;; window title
+(setq frame-title-format `(buffer-file-name "Emacs %d %f" "emacs %d"))
