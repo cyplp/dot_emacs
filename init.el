@@ -78,4 +78,5 @@
 ;; just one line
 (setq next-line-add nil)
 
+;; org-stuff
 (load-file "conf-org.el")
