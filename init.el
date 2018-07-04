@@ -40,3 +40,6 @@
 
 ;; utf-8
 (prefer-coding-system 'mule-utf-8)
+
+;; move mouse cursor
+(mouse-avoidance-mode 'animate)
