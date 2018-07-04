@@ -43,3 +43,8 @@
 
 ;; move mouse cursor
 (mouse-avoidance-mode 'animate)
+
+;; display only tails of lines longer than 80 columns, tabs and
+;; trailing whitespaces
+(setq whitespace-line-column 88
+      whitespace-style '(tabs trailing lines-tail))
