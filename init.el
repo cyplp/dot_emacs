@@ -90,3 +90,11 @@
 (global-set-key "{" 'skeleton-pair-insert-maybe)
 (global-set-key "(" 'skeleton-pair-insert-maybe)
 (global-set-key "\"" 'skeleton-pair-insert-maybe)
+
+(use-package auto-complete
+  :ensure t
+  :init
+  (progn
+    (ac-config-default)
+    (global-auto-complete-mode t)
+    ))
