@@ -79,7 +79,12 @@
 (setq next-line-add nil)
 
 ;; activate ido-mode
-(ido-mode t)
+(setq ido-enable-flex-matching t)
+(ido-everywhere 1)
+(use-package ido-yes-or-no
+  :ensure t)
+(ido-yes-or-no-mode 1)
+(ido-mode 1)
 
 ;; clipboard
 (setq x-select-enable-clipboard t)
