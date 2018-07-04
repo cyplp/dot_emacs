@@ -80,3 +80,7 @@
 
 ;; org-stuff
 (load-file "conf-org.el")
+
+;; misc
+(load-file "conf-misc.el")
+
