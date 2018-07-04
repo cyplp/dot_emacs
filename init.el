@@ -35,7 +35,10 @@
 (setq frame-title-format `(buffer-file-name "Emacs %d %f" "emacs %d"))
 
 ;; remove menu-bar
-(menu-bar-mode f)
+(menu-bar-mode 0)
+
+;; remove menu-bar
+(tool-bar-mode 0)
 
 ;; display line and colum
 (setq column-number-mode t)
