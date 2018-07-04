@@ -120,7 +120,7 @@
 ;; secret stuff
 (load-file "secret.el")
 
-;; python 
+;; python
 (load-file "conf-python.el")
 
 ;; git
@@ -128,3 +128,8 @@
 
 ;; shortcut
 (load-file "shortcut.el")
+
+;; load old stuff from old .emacs
+;; migrating from old to here
+;; not in git
+(load-file "old.el")
