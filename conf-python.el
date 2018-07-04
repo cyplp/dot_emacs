@@ -105,3 +105,9 @@
 
 
 (defun py-help-at-point nil)
+
+(use-package sphinx-doc
+  :ensure t)
+(add-hook 'python-mode-hook (lambda ()
+                                  (require 'sphinx-doc)
+                                  (sphinx-doc-mode t)))
