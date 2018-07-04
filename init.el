@@ -90,6 +90,9 @@
 ;; misc
 (load-file "conf-misc.el")
 
+;; secret stuff
+(load-file "secret.el")
+
 ;; automatic pair
 (setq skeleton-pair t)
 (global-set-key "[" 'skeleton-pair-insert-maybe)
