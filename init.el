@@ -132,6 +132,9 @@
 ;; auto load mode
 (load-file "conf-auto-load.el")
 
+;; jabber.el
+(load-file "conf-jabber.el")
+
 ;; load old stuff from old .emacs
 ;; migrating from old to here
 ;; not in git
