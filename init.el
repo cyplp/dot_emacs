@@ -27,6 +27,8 @@
 ;; theme
 (use-package tangotango-theme
   :ensure t)
+
+;; no splash screen
 (setq inhibit-splash-screen t)
 
 ;; window title
