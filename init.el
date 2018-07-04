@@ -81,6 +81,9 @@
 ;; activate ido-mode
 (ido-mode t)
 
+;; clipboard
+(setq x-select-enable-clipboard t)
+
 ;; org-stuff
 (load-file "conf-org.el")
 
