@@ -19,3 +19,13 @@
 		     )
       )
 (global-set-key (kbd "C-+") 'increment-number-at-point)
+
+
+(defun kill-start-of-line()
+  "kill from point to start of line"
+  (interactive)
+  (kill-line 0)
+  )
+
+(global-set-key  (kbd "M-k") 'kill-start-of-line)
+
