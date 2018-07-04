@@ -129,6 +129,9 @@
 ;; shortcut
 (load-file "shortcut.el")
 
+;; auto load mode
+(load-file "conf-auto-load.el")
+
 ;; load old stuff from old .emacs
 ;; migrating from old to here
 ;; not in git
