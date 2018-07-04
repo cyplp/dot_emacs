@@ -120,3 +120,6 @@
 
 ;; git
 (load-file "conf-git.el")
+
+;; shortcut
+(load-file "shortcut.el")
