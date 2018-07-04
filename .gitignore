@@ -9,3 +9,9 @@
 
 # Undo-tree save-files
 *.~undo-tree
+
+ac-comphist.dat
+bookmarks
+ido.last
+smex-items
+
