@@ -110,6 +110,10 @@
   :ensure t)
 (global-set-key (kbd "C-²") 'er/expand-region)
 
+(use-package yasnippet
+  :ensure t
+  :init
+  (yas-global-mode 1))
 
 ;; org-stuff
 (load-file "conf-org.el")
@@ -134,6 +138,9 @@
 
 ;; jabber.el
 (load-file "conf-jabber.el")
+
+;; some nxml stuff
+(load-file "conf-xml.el")
 
 ;; load old stuff from old .emacs
 ;; migrating from old to here
