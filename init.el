@@ -84,14 +84,6 @@
 ;; clipboard
 (setq x-select-enable-clipboard t)
 
-;; org-stuff
-(load-file "conf-org.el")
-
-;; misc
-(load-file "conf-misc.el")
-
-;; secret stuff
-(load-file "secret.el")
 
 ;; automatic pair
 (setq skeleton-pair t)
@@ -108,3 +100,12 @@
     (ac-config-default)
     (global-auto-complete-mode t)
     ))
+
+;; org-stuff
+(load-file "conf-org.el")
+
+;; misc
+(load-file "conf-misc.el")
+
+;; secret stuff
+(load-file "secret.el")
