@@ -109,3 +109,6 @@
 
 ;; secret stuff
 (load-file "secret.el")
+
+(load-file "conf-python.el")
+
