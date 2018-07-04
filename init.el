@@ -118,3 +118,5 @@
 ;; python 
 (load-file "conf-python.el")
 
+;; git
+(load-file "conf-git.el")
