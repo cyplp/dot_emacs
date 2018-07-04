@@ -33,3 +33,7 @@
 
 ;; window title
 (setq frame-title-format `(buffer-file-name "Emacs %d %f" "emacs %d"))
+
+;; display line and colum
+(setq column-number-mode t)
+(setq line-number-mode t)
