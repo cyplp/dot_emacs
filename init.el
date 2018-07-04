@@ -77,3 +77,5 @@
 
 ;; just one line
 (setq next-line-add nil)
+
+(load-file "conf-org.el")
