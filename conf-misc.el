@@ -5,3 +5,6 @@
 (defvar calendar-month-name-array
   ["janvier" "février" "mars" "avril" "mai" "juin"
    "juillet" "août" "septembre" "octobre" "novembre" "décembre"])
+
+;; short anwser
+(fset 'yes-or-no-p 'y-or-n-p)
