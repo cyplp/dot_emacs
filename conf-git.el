@@ -12,3 +12,6 @@
   :ensure t)
 ;; TODO better shortcut
 (global-set-key (kbd "C-x v p") 'git-messenger:popup-message)
+
+(use-package gitignore-mode
+  :ensure t)
