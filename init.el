@@ -58,7 +58,6 @@
 ;; nuke trailing whitespaces when writing to a file
 (add-hook 'write-file-functions 'delete-trailing-whitespace)
 
-
 ;; pretty-icons
 (use-package mode-icons
   :ensure t
