@@ -49,3 +49,8 @@
 (use-package flycheck-color-mode-line
   :ensure t)
 (add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode)
+
+(use-package auto-complete-rst
+  :ensure t)
+
+(eval-after-load "rst" '(auto-complete-rst-init))
