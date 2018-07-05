@@ -117,6 +117,10 @@
   :init
   (yas-global-mode 1))
 
+(use-package auto-indent-mode
+  :ensure t
+  :init (auto-indent-global-mode))
+
 ;; org-stuff
 (load-file "conf-org.el")
 
