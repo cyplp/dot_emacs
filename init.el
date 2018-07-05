@@ -89,6 +89,8 @@
 ;; clipboard
 (setq x-select-enable-clipboard t)
 
+;; see the other parent
+(show-paren-mode t )
 
 ;; automatic pair
 (setq skeleton-pair t)

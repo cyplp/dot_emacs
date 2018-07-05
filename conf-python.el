@@ -111,3 +111,8 @@
 (add-hook 'python-mode-hook (lambda ()
                                   (require 'sphinx-doc)
                                   (sphinx-doc-mode t)))
+;; add elpy
+(use-package elpy
+  :ensure t
+  :config
+  (elpy-enable))
