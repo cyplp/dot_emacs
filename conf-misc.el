@@ -44,3 +44,8 @@
 ;;graphviz-dot-mode
 (use-package graphviz-dot-mode
   :ensure t)
+					;
+;;flycheck-color-mode-line-mode
+(use-package flycheck-color-mode-line
+  :ensure t)
+(add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode)
