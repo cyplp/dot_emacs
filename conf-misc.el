@@ -60,3 +60,7 @@
 
 (use-package restclient-helm
   :ensure t)
+
+(use-package rainbow-mode
+  :ensure t
+  :init (rainbow-mode t))
