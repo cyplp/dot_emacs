@@ -144,9 +144,11 @@
 ;; some nxml stuff
 (load-file "conf-xml.el")
 
-
 ;; rust
 (load-file "conf-rust.el")
+
+;;sql
+(load-file "conf-sql.el")
 
 ;; load old stuff from old .emacs
 ;; migrating from old to here
