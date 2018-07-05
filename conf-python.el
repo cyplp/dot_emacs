@@ -115,3 +115,10 @@
 ;; (use-package elpy
 ;;   :ensure t
 ;;   :config (elpy-enable))
+
+(use-package flycheck-pycheckers
+  :ensure t)
+(global-flycheck-mode 1)
+(with-eval-after-load 'flycheck
+  (add-hook 'flycheck-mode-hook #'flycheck-pycheckers-setup)
+  )
