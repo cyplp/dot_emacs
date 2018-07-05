@@ -54,3 +54,9 @@
   :ensure t)
 
 (eval-after-load "rst" '(auto-complete-rst-init))
+
+(use-package restclient
+  :ensure t)
+
+(use-package restclient-helm
+  :ensure t)
