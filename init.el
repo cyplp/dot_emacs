@@ -157,6 +157,10 @@
 ;;sql
 (load-file "conf-sql.el")
 
+
+;;web
+(load-file "conf-web.el")
+
 ;; load old stuff from old .emacs
 ;; migrating from old to here
 ;; not in git
