@@ -112,7 +112,6 @@
                                   (require 'sphinx-doc)
                                   (sphinx-doc-mode t)))
 ;; add elpy
-(use-package elpy
-  :ensure t
-  :config
-  (elpy-enable))
+;; (use-package elpy
+;;   :ensure t
+;;   :config (elpy-enable))
