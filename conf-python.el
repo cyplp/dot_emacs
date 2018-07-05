@@ -122,3 +122,7 @@
 (with-eval-after-load 'flycheck
   (add-hook 'flycheck-mode-hook #'flycheck-pycheckers-setup)
   )
+
+(use-package flycheck-cython
+  :ensure t)
+(add-hook 'cython-mode-hook 'flycheck-mode)
