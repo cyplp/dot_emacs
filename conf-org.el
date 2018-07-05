@@ -34,3 +34,9 @@
 		(lambda ()
 		  (interactive)
 		  (org-capture nil "a")))
+
+;; nicer bullets
+(use-package org-bullets
+  :ensure t)
+
+(org-bullets-mode t)
