@@ -126,3 +126,6 @@
 (use-package flycheck-cython
   :ensure t)
 (add-hook 'cython-mode-hook 'flycheck-mode)
+
+(use-package ac-python
+  :ensure t)
