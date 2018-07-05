@@ -40,3 +40,7 @@
 (add-to-list 'auto-mode-alist '("/known_hosts\\'"       . ssh-known-hosts-mode))
 (add-to-list 'auto-mode-alist '("/authorized_keys2?\\'" . ssh-authorized-keys-mode))
 (add-hook 'ssh-config-mode-hook 'turn-on-font-lock)
+
+;;graphviz-dot-mode
+(use-package graphviz-dot-mode
+  :ensure t)
