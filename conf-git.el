@@ -15,3 +15,9 @@
 
 (use-package gitignore-mode
   :ensure t)
+
+(use-package gitconfig-mode
+  :ensure t)
+
+(use-package gist
+  :ensure t)
