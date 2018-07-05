@@ -129,3 +129,8 @@
 
 (use-package ac-python
   :ensure t)
+
+(add-hook 'python-mode-hook
+	  (lambda ()
+	    (flycheck-select-checker 'python-flake8))
+	  )
