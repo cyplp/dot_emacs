@@ -64,3 +64,10 @@
 (use-package rainbow-mode
   :ensure t
   :init (rainbow-mode t))
+
+;; move selection
+(use-package move-text
+ :ensure t)
+(move-text-default-bindings)
+(global-set-key [M-up] 'move-text-up)
+(global-set-key [M-down] 'move-text-down)
