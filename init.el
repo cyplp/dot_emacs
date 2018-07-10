@@ -161,6 +161,10 @@
 ;;web
 (load-file "conf-web.el")
 
+;; thinkpad stuff
+(load-file "thinkpad.el")
+
+
 ;; load old stuff from old .emacs
 ;; migrating from old to here
 ;; not in git
