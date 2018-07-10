@@ -124,7 +124,8 @@
   :ensure t
   :init (auto-indent-global-mode))
 
-
+;; save custom in separete file
+;; thanks to https://github.com/bdejean
 (setq custom-file "~/.emacs.d/custom.el")
 (if (file-exists-p custom-file)
     (load custom-file))
