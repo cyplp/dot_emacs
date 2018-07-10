@@ -124,6 +124,11 @@
   :ensure t
   :init (auto-indent-global-mode))
 
+
+(setq custom-file "~/.emacs.d/custom.el")
+(if (file-exists-p custom-file)
+    (load custom-file))
+
 ;; org-stuff
 (load-file "conf-org.el")
 
