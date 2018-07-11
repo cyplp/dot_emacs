@@ -61,9 +61,10 @@
 (use-package restclient-helm
   :ensure t)
 
+;; colorize color in hexa
 (use-package rainbow-mode
-  :ensure t
-  :init (rainbow-mode t))
+  :ensure t)
+(rainbow-mode t)
 
 ;; move selection
 (use-package move-text
