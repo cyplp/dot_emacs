@@ -1,2 +1,2 @@
 # dot_emacs
-my .emacs.d diretory
+my .emacs.d directory
