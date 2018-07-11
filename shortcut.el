@@ -14,7 +14,7 @@
 (global-set-key [f5] 'comment-region)
 (global-set-key [f7] 'uncomment-region)
 (global-set-key [f8] 'indent-region)
-(global-set-key [f12] 'flymake-display-err-menu-for-current-line)
+(global-set-key [f12] 'flycheck-display-error-at-point)
 (global-set-key [delete] 'delete-char)
 ;;(global-set-key [home] 'beginning-of-buffer)
 ;;(global-set-key [end] 'end-of-buffer)
