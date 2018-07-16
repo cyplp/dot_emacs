@@ -63,8 +63,9 @@
 
 ;; colorize color in hexa
 (use-package rainbow-mode
-  :ensure t)
-(rainbow-mode t)
+  :ensure t
+  :commands rainbow-mode)
+
 
 ;; move selection
 (use-package move-text
