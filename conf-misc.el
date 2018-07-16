@@ -72,3 +72,8 @@
 (move-text-default-bindings)
 (global-set-key [M-up] 'move-text-up)
 (global-set-key [M-down] 'move-text-down)
+
+;;iedit
+(use-package iedit
+  :ensure t
+  :commands iedit-mode)
