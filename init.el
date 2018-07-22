@@ -131,47 +131,53 @@
     (load custom-file))
 
 ;; org-stuff
-(load-file "conf-org.el")
+(load-file "~/.emacs.d/conf-org.el")
 
 ;; misc
-(load-file "conf-misc.el")
+(load-file "~/.emacs.d/conf-misc.el")
 
 ;; secret stuff
-(load-file "secret.el")
+(setq secret-file "~/.emacs.d/secret.el")
+(if (file-exists-p secret-file)
+    (load secret-file))
 
 ;; python
-(load-file "conf-python.el")
+(load-file "~/.emacs.d/conf-python.el")
 
 ;; git
-(load-file "conf-git.el")
+(load-file "~/.emacs.d/conf-git.el")
 
 ;; shortcut
-(load-file "shortcut.el")
+(load-file "~/.emacs.d/shortcut.el")
 
 ;; auto load mode
-(load-file "conf-auto-load.el")
+(load-file "~/.emacs.d/conf-auto-load.el")
 
 ;; jabber.el
-(load-file "conf-jabber.el")
+(load-file "~/.emacs.d/conf-jabber.el")
 
 ;; some nxml stuff
-(load-file "conf-xml.el")
+(load-file "~/.emacs.d/conf-xml.el")
 
 ;; rust
-(load-file "conf-rust.el")
+(load-file "~/.emacs.d/conf-rust.el")
 
 ;;sql
-(load-file "conf-sql.el")
+(load-file "~/.emacs.d/conf-sql.el")
 
 
 ;;web
-(load-file "conf-web.el")
+(load-file "~/.emacs.d/conf-web.el")
 
 ;; thinkpad stuff
-(load-file "thinkpad.el")
+(load-file "~/.emacs.d/thinkpad.el")
 
 
 ;; load old stuff from old .emacs
 ;; migrating from old to here
 ;; not in git
-(load-file "old.el")
+(setq old-file "~/.emacs.d/old.el")
+(if (file-exists-p old-file)
+    (load old-file))
+
+(message "conf loaded")
