@@ -32,7 +32,7 @@
 
 (use-package ssh-config-mode
   :ensure t
-  :init (ssh-config-mode t)
+  :commands (ssh-config-mode)
   )
 
 (add-to-list 'auto-mode-alist '("/\\.ssh/config\\'"     . ssh-config-mode))
