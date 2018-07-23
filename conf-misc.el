@@ -63,8 +63,9 @@
 
 ;; colorize color in hexa
 (use-package rainbow-mode
-  :ensure t)
-(rainbow-mode t)
+  :ensure t
+  :commands rainbow-mode)
+
 
 ;; move selection
 (use-package move-text
@@ -72,3 +73,8 @@
 (move-text-default-bindings)
 (global-set-key [M-up] 'move-text-up)
 (global-set-key [M-down] 'move-text-down)
+
+;;iedit
+(use-package iedit
+  :ensure t
+  :commands iedit-mode)
