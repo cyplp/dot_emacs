@@ -12,3 +12,7 @@
 
 (use-package html5-schema
   :ensure t)
+
+;;could be usefull sometimes
+(use-package x-path-walker
+  :ensure t)
