@@ -78,3 +78,10 @@
 (use-package iedit
   :ensure t
   :commands iedit-mode)
+
+;;highlight-indent-guides
+(use-package highlight-indent-guides
+  :ensure t)
+
+(add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+(setq highlight-indent-guides-method 'character)
