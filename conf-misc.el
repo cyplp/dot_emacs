@@ -106,3 +106,15 @@
 (use-package beacon
   :ensure t
   :commands beacon-mode)
+
+;; plantuml stuff
+(use-package plantuml-mode
+  :ensure t)
+(use-package flycheck-plantuml
+  :ensure t)
+
+(with-eval-after-load 'flycheck
+  (require 'flycheck-plantuml)
+  ;; Enable plantuml-mode for PlantUML files
+  (add-to-list 'auto-mode-alist '("\\.plantuml\\'" . plantuml-mode))
+  (flycheck-plantuml-setup))
