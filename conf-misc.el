@@ -92,3 +92,6 @@
   :ensure t)
 
 (add-hook 'prog-mode-hook 'highlight-parentheses-mode)
+
+(use-package origami
+  :ensure t)
