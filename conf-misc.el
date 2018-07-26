@@ -101,3 +101,8 @@
 ;; buuildin emacs
 (require 'icomplete)
 (icomplete-mode 1)
+
+;; blink on cursor
+(use-package beacon
+  :ensure t
+  :commands beacon-mode)
