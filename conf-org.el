@@ -53,3 +53,8 @@
 (global-set-key (kbd "M-;") 'ort/capture-todo)
 (global-set-key (kbd "M-'") 'ort/capture-checkitem)
 (global-set-key (kbd "M-l") 'ort/goto-todos)
+
+(use-package dashboard
+  :ensure t
+  :config
+  (dashboard-setup-startup-hook))
