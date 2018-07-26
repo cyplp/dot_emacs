@@ -85,3 +85,10 @@
 
 (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
 (setq highlight-indent-guides-method 'character)
+
+
+;; set parenthe in color
+(use-package highlight-parentheses
+  :ensure t)
+
+(add-hook 'prog-mode-hook 'highlight-parentheses-mode)
