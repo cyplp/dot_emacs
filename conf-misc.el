@@ -96,3 +96,8 @@
 ;; fold stuff
 (use-package origami
   :ensure t)
+
+;; better minibuffer explanation
+;; buuildin emacs
+(require 'icomplete)
+(icomplete-mode 1)
