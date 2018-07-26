@@ -93,5 +93,6 @@
 
 (add-hook 'prog-mode-hook 'highlight-parentheses-mode)
 
+;; fold stuff
 (use-package origami
   :ensure t)
