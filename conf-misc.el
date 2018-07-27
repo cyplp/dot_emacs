@@ -118,3 +118,9 @@
   ;; Enable plantuml-mode for PlantUML files
   (add-to-list 'auto-mode-alist '("\\.plantuml\\'" . plantuml-mode))
   (flycheck-plantuml-setup))
+
+;; more colors !
+(use-package color-identifiers-mode
+  :ensure t)
+(color-identifiers-mode t)
+(add-hook 'after-init-hook 'global-color-identifiers-mode)
