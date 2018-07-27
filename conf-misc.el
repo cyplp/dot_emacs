@@ -139,3 +139,7 @@
   :after spaceline
   :config (spaceline-all-the-icons-theme))
 
+;; display in powerline number of match in search
+(use-package anzu
+  :ensure t)
+(global-anzu-mode +1)
