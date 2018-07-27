@@ -99,8 +99,8 @@
 
 ;; better minibuffer explanation
 ;; buuildin emacs
-(require 'icomplete)
-(icomplete-mode 1)
+;;(require 'icomplete)
+;;(icomplete-mode 1)
 
 ;; blink on cursor
 (use-package beacon
