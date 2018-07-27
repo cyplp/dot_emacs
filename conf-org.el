@@ -40,3 +40,21 @@
   :ensure t)
 
 (org-bullets-mode t)
+
+(use-package org
+  :ensure t)
+(define-key global-map "\C-cl" 'org-store-link)
+(define-key global-map "\C-ca" 'org-agenda)
+(setq org-log-done t)
+
+(use-package org-repo-todo
+  :ensure t)
+
+(global-set-key (kbd "M-;") 'ort/capture-todo)
+(global-set-key (kbd "M-'") 'ort/capture-checkitem)
+(global-set-key (kbd "M-d") 'ort/goto-todos)
+
+(use-package dashboard
+  :ensure t
+  :config
+  (dashboard-setup-startup-hook))

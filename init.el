@@ -83,7 +83,7 @@
 
 ;; activate ido-mode
 (setq ido-enable-flex-matching t)
-(ido-everywhere 1)
+;;(ido-everywhere 1)
 (use-package ido-yes-or-no
   :ensure t)
 (ido-yes-or-no-mode 1)
@@ -170,6 +170,9 @@
 
 ;; thinkpad stuff
 (load-file "~/.emacs.d/thinkpad.el")
+
+;; dired stuff
+(load-file "~/.emacs.d/conf-dired.el")
 
 ;; load old stuff from old .emacs
 ;; migrating from old to here

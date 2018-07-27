@@ -78,3 +78,68 @@
 (use-package iedit
   :ensure t
   :commands iedit-mode)
+
+;;highlight-indent-guides
+(use-package highlight-indent-guides
+  :ensure t)
+
+(add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+(setq highlight-indent-guides-method 'character)
+
+
+;; set parenthe in color
+(use-package highlight-parentheses
+  :ensure t)
+
+(add-hook 'prog-mode-hook 'highlight-parentheses-mode)
+
+;; fold stuff
+(use-package origami
+  :ensure t)
+
+;; better minibuffer explanation
+;; buuildin emacs
+;;(require 'icomplete)
+;;(icomplete-mode 1)
+
+;; blink on cursor
+(use-package beacon
+  :ensure t
+  :commands beacon-mode)
+
+;; plantuml stuff
+(use-package plantuml-mode
+  :ensure t)
+(use-package flycheck-plantuml
+  :ensure t)
+
+(with-eval-after-load 'flycheck
+  (require 'flycheck-plantuml)
+  ;; Enable plantuml-mode for PlantUML files
+  (add-to-list 'auto-mode-alist '("\\.plantuml\\'" . plantuml-mode))
+  (flycheck-plantuml-setup))
+
+;; more colors !
+(use-package color-identifiers-mode
+  :ensure t)
+(color-identifiers-mode t)
+(add-hook 'after-init-hook 'global-color-identifiers-mode)
+
+;; search on google
+(use-package heml-google
+  :ensure t)
+
+;;powerline
+(use-package spaceline
+  :ensure t)
+(require 'spaceline-config)
+(spaceline-emacs-theme)
+
+(use-package spaceline-all-the-icons
+  :after spaceline
+  :config (spaceline-all-the-icons-theme))
+
+;; display in powerline number of match in search
+(use-package anzu
+  :ensure t)
+(global-anzu-mode +1)
