@@ -165,13 +165,11 @@
 ;;sql
 (load-file "~/.emacs.d/conf-sql.el")
 
-
 ;;web
 (load-file "~/.emacs.d/conf-web.el")
 
 ;; thinkpad stuff
 (load-file "~/.emacs.d/thinkpad.el")
-
 
 ;; load old stuff from old .emacs
 ;; migrating from old to here
