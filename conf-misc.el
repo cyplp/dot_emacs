@@ -129,3 +129,13 @@
 (use-package heml-google
   :ensure t)
 
+;;powerline
+(use-package spaceline
+  :ensure t)
+(require 'spaceline-config)
+(spaceline-emacs-theme)
+
+(use-package spaceline-all-the-icons
+  :after spaceline
+  :config (spaceline-all-the-icons-theme))
+
