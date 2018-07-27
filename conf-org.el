@@ -52,7 +52,7 @@
 
 (global-set-key (kbd "M-;") 'ort/capture-todo)
 (global-set-key (kbd "M-'") 'ort/capture-checkitem)
-(global-set-key (kbd "M-l") 'ort/goto-todos)
+(global-set-key (kbd "M-d") 'ort/goto-todos)
 
 (use-package dashboard
   :ensure t
