@@ -124,3 +124,8 @@
   :ensure t)
 (color-identifiers-mode t)
 (add-hook 'after-init-hook 'global-color-identifiers-mode)
+
+;; search on google
+(use-package heml-google
+  :ensure t)
+
