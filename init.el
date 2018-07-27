@@ -172,6 +172,8 @@
 ;; thinkpad stuff
 (load-file "~/.emacs.d/thinkpad.el")
 
+;; dired stuff
+(load-file "~/.emacs.d/conf-dired.el")
 
 ;; load old stuff from old .emacs
 ;; migrating from old to here
