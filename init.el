@@ -184,6 +184,9 @@
 ;; dired stuff
 (load-file "~/.emacs.d/conf-dired.el")
 
+;; elisp stuff
+(load-file "~/.emacs.d/conf-elisp.el")
+
 ;; load old stuff from old .emacs
 ;; migrating from old to here
 ;; not in git
