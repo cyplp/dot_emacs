@@ -143,3 +143,7 @@
 (use-package anzu
   :ensure t)
 (global-anzu-mode +1)
+
+;; focus on current block
+(use-package focus
+  :ensure t)
