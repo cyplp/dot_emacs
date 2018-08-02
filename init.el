@@ -34,6 +34,11 @@
 ;; This is your old M-x.
 (global-set-key (kbd "C-c C-c M-x") 'execute-extended-command)
 
+;; paradox : better pacage manager
+;; github token is in secret.el
+(use-package paradox
+  :ensure t)
+
 ;; theme
 (use-package tangotango-theme
   :ensure t)
