@@ -105,7 +105,7 @@
 (ido-mode 1)
 
 ;; clipboard
-(setq x-select-enable-clipboard t)
+(setq select-enable-clipboard t)
 
 ;; see the other parent
 (show-paren-mode t )
