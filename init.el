@@ -135,9 +135,10 @@
   :init
   (yas-global-mode 1))
 
-(use-package auto-indent-mode
-  :ensure t
-  :init (auto-indent-global-mode))
+;; (use-package auto-indent-mode
+;;   :ensure t
+;;   :init (auto-indent-global-mode))
+;; (setq auto-indent-indent-style 'conservative)
 
 ;; save custom in separete file
 ;; thanks to https://github.com/bdejean
