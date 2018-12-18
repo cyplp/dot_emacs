@@ -126,8 +126,8 @@
 (add-hook 'after-init-hook 'global-color-identifiers-mode)
 
 ;; search on google
-(use-package heml-google
-  :ensure t)
+;;(use-package heml-google
+;;  :ensure t)
 
 ;;powerline
 (use-package spaceline
@@ -135,9 +135,9 @@
 (require 'spaceline-config)
 (spaceline-emacs-theme)
 
-(use-package spaceline-all-the-icons
-  :after spaceline
-  :config (spaceline-all-the-icons-theme))
+;; (use-package spaceline-all-the-icons
+;;   :after spaceline
+;;   :config (spaceline-all-the-icons-theme))
 
 ;; display in powerline number of match in search
 (use-package anzu
