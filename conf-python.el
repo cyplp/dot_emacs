@@ -104,6 +104,12 @@
 (define-key python-mode-map (kbd "C-p") 'python-add-nocover)
 
 
+(defun telnet-rpdb()
+  "Launch telnet on the default port of rpdb."
+  (interactive)
+  (telnet "127.0.0.1" 4444))
+
+
 (defun py-help-at-point nil)
 
 (use-package sphinx-doc
