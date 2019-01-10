@@ -6,3 +6,13 @@
 
 (eval-after-load "sql"
   '(load-library "sql-indent"))
+
+
+;; upper case sql
+(use-package sqlup-mode
+  :ensure t)
+
+(global-set-key (kbd "C-c u") 'sqlup-capitalize-keywords-in-region)
+
+(add-hook 'sql-mode-hook 'sqlup-mode)
+(add-hook 'sql-interactive-mode-hook 'sqlup-mode)
