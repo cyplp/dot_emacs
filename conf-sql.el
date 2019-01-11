@@ -16,3 +16,14 @@
 
 (add-hook 'sql-mode-hook 'sqlup-mode)
 (add-hook 'sql-interactive-mode-hook 'sqlup-mode)
+
+
+;; menu for connecting to db
+(use-package helm-sql-connect
+  :ensure t)
+
+;; by pass https://github.com/eric-hansen/helm-sql-connect/issues/3
+(defvar helm-sql-connection-pool helm-sql-connect-pool)
+
+;; read db connection
+(load-file "~/.emacs.d/dbconnections.el")
