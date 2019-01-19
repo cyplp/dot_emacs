@@ -159,3 +159,9 @@
 ;; lorem ipsum
 (use-package lorem-ipsum
   :ensure t)
+
+;; goto EOL and newline and indent
+(defun eol-newline-indent ()
+  (interactive)
+  (end-of-line)
+  (newline-and-indent))
