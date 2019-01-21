@@ -165,3 +165,7 @@
   (interactive)
   (end-of-line)
   (newline-and-indent))
+
+;; helm-ls-git
+(use-package helm-ls-git
+  :ensure t)
