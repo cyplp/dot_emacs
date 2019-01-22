@@ -173,7 +173,14 @@
 (use-package helm-ls-git
   :ensure t)
 
-
 ;; cheat.sh see http://cheat.sh/
 (use-package cheat-sh
   :ensure t)
+
+
+;; weather toy
+(use-package wttrin
+  :ensure t)
+
+(setq wttrin-default-accept-language '("Accept-Language" . "fr-FR"))
+(setq wttrin-default-cities '("tls"))
