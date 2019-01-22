@@ -177,7 +177,6 @@
 (use-package cheat-sh
   :ensure t)
 
-
 ;; weather toy
 (use-package wttrin
   :ensure t)
