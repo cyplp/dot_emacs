@@ -166,7 +166,7 @@
   (end-of-line)
   (newline-and-indent))
 
-(global-set-key "M-<return>" 'eol-newline-indent)
+(global-set-key (kbd "M-<return>") 'eol-newline-indent)
 
 ;; helm-ls-git
 (use-package helm-ls-git
