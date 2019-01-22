@@ -171,3 +171,8 @@
 ;; helm-ls-git
 (use-package helm-ls-git
   :ensure t)
+
+
+;; cheat.sh see http://cheat.sh/
+(use-package cheat-sh
+  :ensure t)
