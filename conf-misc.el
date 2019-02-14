@@ -183,3 +183,8 @@
 
 (setq wttrin-default-accept-language '("Accept-Language" . "fr-FR"))
 (setq wttrin-default-cities '("tls"))
+
+
+;; pocket
+(use-package pocket-reader
+  :ensure t)
