@@ -188,3 +188,7 @@
 ;; pocket
 (use-package pocket-reader
   :ensure t)
+
+;; list on the side
+(use-package imenu-list
+  :ensure t)
