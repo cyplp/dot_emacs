@@ -192,3 +192,4 @@
 ;; list on the side
 (use-package imenu-list
   :ensure t)
+(global-set-key [f1] 'imenu-list-smart-toggle)
