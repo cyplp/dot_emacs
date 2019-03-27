@@ -193,3 +193,10 @@
 (use-package imenu-list
   :ensure t)
 (global-set-key [f1] 'imenu-list-smart-toggle)
+
+
+;; neotree
+(use-package neotree
+  :ensure t)
+
+(global-set-key [f2] 'neotree-toggle)
