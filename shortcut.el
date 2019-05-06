@@ -6,9 +6,6 @@
 
 ;; redéfinition de quelques touches
 
-(global-set-key [f1] 'fill-region)
-(global-set-key [f2] 'auto-fill-mode)
-
 (global-set-key [f3] 'revert-buffer)
 (global-set-key [f4] 'kill-this-buffer)
 (global-set-key [f5] 'comment-region)
