@@ -58,3 +58,8 @@
   :ensure t
   :config
   (dashboard-setup-startup-hook))
+
+;; active Babel languages
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((sql . t)))
