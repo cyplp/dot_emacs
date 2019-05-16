@@ -204,3 +204,7 @@
   :ensure t)
 
 (global-set-key [f2] 'neotree-toggle)
+
+;; yaml
+(use-package yaml-mode
+  :ensure t)
