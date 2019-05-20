@@ -40,6 +40,7 @@
   :ensure t)
 
 (org-bullets-mode t)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 
 (use-package org
   :ensure t)
