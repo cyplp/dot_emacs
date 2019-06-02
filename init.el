@@ -117,6 +117,13 @@
 ;; clipboard
 (setq select-enable-clipboard t)
 
+;; xclip
+(use-package xclip
+  :ensure t
+  :config
+  (xclip-mode 1))
+
+
 ;; see the other parent
 (show-paren-mode t )
 
