@@ -40,6 +40,7 @@
   :ensure t)
 
 (org-bullets-mode t)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 
 (use-package org
   :ensure t)
@@ -58,3 +59,12 @@
   :ensure t
   :config
   (dashboard-setup-startup-hook))
+
+;; active Babel languages
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((sql . t)
+   (python . t)
+   (shell . t)))
+
+(setq org-src-fontify-natively t)
