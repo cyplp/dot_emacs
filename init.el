@@ -236,6 +236,9 @@
 ;; elisp stuff
 (load-file "~/.emacs.d/conf-elisp.el")
 
+;; yaml stuff
+(load-file "~/.emacs.d/conf-yaml.el")
+
 ;; load old stuff from old .emacs
 ;; migrating from old to here
 ;; not in git

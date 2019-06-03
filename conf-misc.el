@@ -204,11 +204,3 @@
   :ensure t)
 
 (global-set-key [f2] 'neotree-toggle)
-
-;; yaml
-(use-package yaml-mode
-  :ensure t)
-
-(quelpa '(discover-my-major
-	  :fetcher git
-	  :url "https://github.com/magoyette/openapi-yaml-mode.git"))
