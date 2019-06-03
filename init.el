@@ -29,6 +29,10 @@
 (use-package try
   :ensure t)
 
+;; quelpa : non melpa package
+(use-package quelpa
+  :ensure t)
+
 (use-package which-key
   :ensure t
   :config
