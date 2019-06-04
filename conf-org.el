@@ -13,7 +13,9 @@
 	 "* %?"
 	 :clock-in t
 	 :clock-resume t)
-      ("t" "todo" entry (file+olp+datetree "~/dev/log_cyp/activities.org")
+      ("t" "todo" entry (file+olp+datetree "~/dev/log_cyp/todos.org")
+       "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
+      ("T" "todo" entry (file "~/dev/log_cyp/todos.org")
        "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
       ("r" "respond" entry (file+olp+datetree "~/dev/log_cyp/activities.org")
        "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
@@ -34,6 +36,18 @@
 		(lambda ()
 		  (interactive)
 		  (org-capture nil "a")))
+
+;; register TODOS
+(global-set-key [f8]
+ 		(lambda ()
+		 (interactive)
+		 (org-capture nil "T")))
+
+;; shortcut for activities
+(global-set-key (kbd "<S-f6>") (lambda() (interactive)(find-file "~/dev/log_cyp/activities.org")))
+
+;; shortcut for TODOS
+(global-set-key (kbd "<S-f8>") (lambda() (interactive)(find-file "~/dev/log_cyp/todos.org")))
 
 ;; nicer bullets
 (use-package org-bullets
