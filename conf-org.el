@@ -32,17 +32,19 @@
       ("h" "Habit" entry (file+olp+datetree "~/dev/log_cyp/activities.org")
        "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")))
 
+;; shortcut for activités
 (global-set-key [f6]
 		(lambda ()
 		  (interactive)
 		  (org-capture nil "a")))
 
-;; register TODOS
+;; shortcut for todo without file
 (global-set-key [f8]
  		(lambda ()
 		 (interactive)
 		 (org-capture nil "T")))
 
+;; shortcut for todo file
 (global-set-key (kbd "<C-f8>")
  		(lambda ()
 		 (interactive)
