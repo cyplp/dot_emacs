@@ -43,6 +43,11 @@
 		 (interactive)
 		 (org-capture nil "T")))
 
+(global-set-key (kbd "<C-f8>")
+ 		(lambda ()
+		 (interactive)
+		 (org-capture nil "t")))
+
 ;; shortcut for activities
 (global-set-key (kbd "<S-f6>") (lambda() (interactive)(find-file "~/dev/log_cyp/activities.org")))
 
