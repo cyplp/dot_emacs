@@ -219,3 +219,11 @@
  "Remove duplicate adjacent lines in the current buffer."
  (interactive)
  (uniquify-region-lines (point-min) (point-max)))
+
+
+;; edit a region in a second buffer
+(use-package edit-indirect
+  :ensure t)
+
+(provide 'conf-misc)
+;;; conf-misc ends here
