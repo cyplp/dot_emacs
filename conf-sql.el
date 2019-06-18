@@ -25,7 +25,10 @@
 ;; by pass https://github.com/eric-hansen/helm-sql-connect/issues/3
 (defvar helm-sql-connection-pool helm-sql-connect-pool)
 
-;; read db connectio
-;; (let* (db_connections "~/.emacs.d/dbconnections.el")
-;;   (if (file-exists-p db_connections)
-;;       (load db_connections)))
+;; read db connection
+(setq db_connections "~/.emacs.d/dbconnections.el")
+(if (file-exists-p db_connections)
+    (load db_connections))
+
+(provide 'conf-sql)
+;;; conf-sql ends here
