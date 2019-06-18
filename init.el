@@ -23,6 +23,10 @@
 ;; each 50MB of allocated data (the default is on every 0.76MB)
 (setq gc-cons-threshold 50000000)
 
+(setq make-backup-files nil) ; stop creating backup~ files
+(setq auto-save-default nil) ; stop creating #autosave# files
+(setq create-lockfiles nil)  ; stop creating .# files
+
 ;; warn when opening files bigger than 100MB
 (setq large-file-warning-threshold 100000000)
 
