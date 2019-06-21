@@ -61,6 +61,8 @@
 (use-package tangotango-theme
   :ensure t)
 
+(load-theme 'tangotango t)
+
 ;; no splash screen
 (setq inhibit-splash-screen t)
 
