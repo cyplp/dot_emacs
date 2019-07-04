@@ -137,6 +137,10 @@
 ;; see the other parent
 (show-paren-mode t )
 
+
+;;winner mode
+(winner-mode t)
+
 ;; automatic pair
 (setq skeleton-pair t)
 (global-set-key "[" 'skeleton-pair-insert-maybe)
