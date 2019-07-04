@@ -277,5 +277,10 @@
 (defengine youtube
   "http://www.youtube.com/results?aq=f&oq=&search_query=%s")
 
+;; undo-tree
+(use-package undo-tree
+  :ensure t)
+(global-set-key (kbd "C-x :") 'undo-tree-visualize)
+
 (provide 'conf-misc)
 ;;; conf-misc ends here
