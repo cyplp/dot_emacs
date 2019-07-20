@@ -15,11 +15,11 @@
 	 :clock-resume t)
 	("t" "todo" entry
 	 (file "~/dev/log_cyp/todos.org")
-	 "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
+	 "\n** TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
 	("T" "todo whitout file" item (file "~/dev/log_cyp/todos.org")
-	 "* TODO %?\n%U\n" :clock-in t :clock-resume t)
+	 "\n** TODO %?\n%U\n" :clock-in t :clock-resume t)
 	("p" "Phone call" entry (file+olp+datetree "~/dev/log_cyp/activities.org")
-	 "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)
+	 "\n* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)
 ))
 
 ;; shortcut for activités
