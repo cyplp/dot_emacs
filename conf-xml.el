@@ -39,3 +39,12 @@
 
 ;; optional key bindings, easier than hs defaults
 (define-key nxml-mode-map (kbd "C-c h") 'hs-toggle-hiding)
+
+(use-package reformatter
+  :ensure t)
+
+(reformatter-define xml-format
+  :program "xmllint"
+  :args '("--format" "-")
+  :mode ((nxml-mode
+	  (mode . xml-format-on-save))))
