@@ -98,6 +98,6 @@
   (org-mode . org-fancy-priorities-mode)
   :config
   (setq org-fancy-priorities-list '("☇" "↑" "↓")
-	org-priority-faces '((?A :foreground "red")
-			     (?B :foreground "orange")
-			     (?C :foreground "green"))))
+	org-priority-faces '((?A :foreground "red" :weight bold :size 15)
+			     (?B :foreground "orange" :weight bold :size 15)
+			     (?C :foreground "green" :weight bold :size 15))))
