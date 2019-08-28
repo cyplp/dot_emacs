@@ -83,7 +83,8 @@
 (setq org-todo-keyword-faces
          '(("ARCHIVE" . (:foreground "light green" :weight bold))
            ("DISPATCHED" . (:foreground "light blue" :weight bold))
-           ("LATER" . (:foreground "pink" :weight bold)))
+           ("LATER" . (:foreground "pink" :weight bold))
+	   ("INPROGRESS" . (:foreground "light green" :weight bold)))
 	 )
 
 
