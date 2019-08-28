@@ -85,3 +85,18 @@
            ("DISPATCHED" . (:foreground "light blue" :weight bold))
            ("LATER" . (:foreground "pink" :weight bold)))
 	 )
+
+
+(use-package ox-rst
+  :ensure t)
+
+
+(use-package org-fancy-priorities
+  :ensure t
+  :hook
+  (org-mode . org-fancy-priorities-mode)
+  :config
+  (setq org-fancy-priorities-list '("☇" "↑" "↓")
+	org-priority-faces '((?A :foreground "red")
+			     (?B :foreground "orange")
+			     (?C :foreground "green"))))
