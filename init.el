@@ -201,55 +201,33 @@
 (if (file-exists-p custom-file)
     (load custom-file))
 
-;; org-stuff
-(load-file "~/.emacs.d/conf-org.el")
+(setq to-load '(;; org-stuff
+		"~/.emacs.d/conf-org.el"
+		;; misc
+		"~/.emacs.d/conf-misc.el"
+		"~/.emacs.d/conf-python.el"
+		"~/.emacs.d/conf-git.el"
+		"~/.emacs.d/shortcut.el"
+		"~/.emacs.d/conf-auto-load.el"
+		"~/.emacs.d/conf-jabber.el"
+		"~/.emacs.d/conf-xml.el"
+		"~/.emacs.d/conf-rust.el"
+		"~/.emacs.d/conf-sql.el"
+		"~/.emacs.d/conf-web.el"
+		"~/.emacs.d/thinkpad.el"
+		"~/.emacs.d/conf-dired.el"
+		"~/.emacs.d/conf-elisp.el"
+		"~/.emacs.d/conf-yaml.el"
+		;; secret stuff such as passwords
+		"~/.emacs.d/secret.el"))
 
-;; misc
-(load-file "~/.emacs.d/conf-misc.el")
+(defun load-local-file (file)
+  "Load a local file.
+FILE is the file to load."
+  (if (file-exists-p file)
+      (load-file file)))
 
-;; secret stuff
-(setq secret-file "~/.emacs.d/secret.el")
-(if (file-exists-p secret-file)
-    (load secret-file))
-
-;; python
-(load-file "~/.emacs.d/conf-python.el")
-
-;; git
-(load-file "~/.emacs.d/conf-git.el")
-
-;; shortcut
-(load-file "~/.emacs.d/shortcut.el")
-
-;; auto load mode
-(load-file "~/.emacs.d/conf-auto-load.el")
-
-;; jabber.el
-(load-file "~/.emacs.d/conf-jabber.el")
-
-;; some nxml stuff
-(load-file "~/.emacs.d/conf-xml.el")
-
-;; rust
-(load-file "~/.emacs.d/conf-rust.el")
-
-;;sql
-(load-file "~/.emacs.d/conf-sql.el")
-
-;;web
-(load-file "~/.emacs.d/conf-web.el")
-
-;; thinkpad stuff
-(load-file "~/.emacs.d/thinkpad.el")
-
-;; dired stuff
-(load-file "~/.emacs.d/conf-dired.el")
-
-;; elisp stuff
-(load-file "~/.emacs.d/conf-elisp.el")
-
-;; yaml stuff
-(load-file "~/.emacs.d/conf-yaml.el")
+(mapc 'load-local-file to-load)
 
 ;; load old stuff from old .emacs
 ;; migrating from old to here
