@@ -76,7 +76,8 @@
  'org-babel-load-languages
  '((sql . t)
    (python . t)
-   (shell . t)))
+   (shell . t)
+   (plantuml . t)))
 
 (setq org-src-fontify-natively t)
 
@@ -101,3 +102,6 @@
 	org-priority-faces '((?A :foreground "red" :weight bold :size 15)
 			     (?B :foreground "orange" :weight bold :size 15)
 			     (?C :foreground "green" :weight bold :size 15))))
+
+(setq org-plantuml-jar-path
+      (expand-file-name "/usr/share/plantuml/plantuml.jar"))
