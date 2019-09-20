@@ -105,3 +105,7 @@
 
 (setq org-plantuml-jar-path
       (expand-file-name "/usr/share/plantuml/plantuml.jar"))
+
+
+(use-package ox-pandoc
+  :ensure t)
