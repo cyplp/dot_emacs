@@ -30,5 +30,31 @@
 (if (file-exists-p db_connections)
     (load db_connections))
 
+
+(defun sql-beautiful-after (word)
+   (while (search-forward-regexp word nil t)
+     (replace-match (format "\\1%s\n" word)
+		    )))
+
+(defun sql-beautiful-before (word)
+   (while (search-forward-regexp word nil t)
+     (replace-match (format "\n\\1%s" word)
+		    )))
+
+
+(defun sql-beautiful-region (start-pos end-pos)
+  "Beautiful SQL."
+  (interactive "r")
+  (save-excursion
+    (sqlup-capitalize-keywords-in-region start-pos end-pos)
+    (goto-char 1)
+
+    (mapc 'sql-beautiful-after '("," "JOIN" "AND"))
+    (mapc 'sql-beautiful-before '("FROM" "WHERE"))
+
+     (indent-region start-pos end-pos))
+    (message "Ah, much better!"))
+
+
 (provide 'conf-sql)
 ;;; conf-sql ends here
