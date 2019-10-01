@@ -71,13 +71,21 @@
   :config
   (dashboard-setup-startup-hook))
 
+(use-package ob-restclient
+  :ensure t)
+
+(use-package ob-rust
+  :ensure t)
+
 ;; active Babel languages
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((sql . t)
    (python . t)
    (shell . t)
-   (plantuml . t)))
+   (plantuml . t)
+   (restclient . t)
+   (rust . t)))
 
 (setq org-src-fontify-natively t)
 
