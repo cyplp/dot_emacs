@@ -21,3 +21,14 @@
 
 (use-package ansible-vault
   :ensure t)
+
+
+;; kubernetes
+(use-package k8s-mode
+  :ensure t)
+
+(use-package kubernetes
+  :ensure t)
+
+(use-package kubernetes-helm
+  :ensure t)
