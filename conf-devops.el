@@ -10,3 +10,14 @@
 
 (use-package marcopolo
   :ensure t)
+
+
+;; ansible
+(use-package ansible
+  :ensure t)
+
+(use-package ansible-doc
+  :ensure t)
+
+(use-package ansible-vault
+  :ensure t)
