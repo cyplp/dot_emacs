@@ -109,3 +109,8 @@
 
 (use-package ox-pandoc
   :ensure t)
+
+;; sidebar
+(quelpa '(org-sidebar
+	  :fetcher git
+	  :url "https://github.com/alphapapa/org-sidebar.git"))
