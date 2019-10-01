@@ -282,5 +282,9 @@
   :ensure t)
 (global-set-key (kbd "C-x :") 'undo-tree-visualize)
 
+;; unicode help
+(use-package helm-unicode
+  :ensure t)
+
 (provide 'conf-misc)
 ;;; conf-misc ends here
