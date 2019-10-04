@@ -122,3 +122,7 @@
 (quelpa '(org-sidebar
 	  :fetcher git
 	  :url "https://github.com/alphapapa/org-sidebar.git"))
+
+;; add auto commit for some org mode file
+(use-package git-auto-commit-mode
+  :ensure t)
