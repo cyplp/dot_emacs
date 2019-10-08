@@ -153,8 +153,23 @@
   :ensure t)
 
 ;;emms
+;; from https://www.reddit.com/r/emacs/comments/981khz/emacs_music_player_with_emms/e4cnhzi/
 (use-package emms
-  :ensure t)
+  :ensure t
+  :config
+  (emms-all)
+  (emms-default-players)
+  (setq emms-playlist-buffer-name "*Music*")
+  (setq emms-info-asynchronously t)
+  (setq emms-source-file-default-directory "~/musique/")
+  (require 'emms-info-libtag) ;;; load functions that will talk to emms-print-metadata which in turn talks to libtag and gets metadata
+  (setq emms-info-functions '(emms-info-libtag)) ;;; make sure libtag is the only thing delivering metadata
+  (require 'emms-mode-line)
+  (emms-mode-line 1)
+  (require 'emms-playing-time)
+  (emms-playing-time 1)
+  )
+
 
 ;; lorem ipsum
 (use-package lorem-ipsum
