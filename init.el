@@ -135,7 +135,7 @@
 
 
 ;; see the other parent
-(show-paren-mode t )
+(show-paren-mode t)
 
 
 ;;winner mode
