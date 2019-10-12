@@ -164,7 +164,10 @@
 (use-package yasnippet
   :ensure t
   :init
-  (yas-global-mode 1))
+  (yas-global-mode 1)
+  :config (use-package yasnippet-snippets
+	    :ensure t)
+  (yas-reload-all))
 
 ;; Helm
 (use-package helm
