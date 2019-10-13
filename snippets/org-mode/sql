@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: sql
+# key: sql
+# --
+#+name: $1
+#+header: :engine ${2:$$(yas-choose-value '("postgres" "mysql"))}
+#+header: :dbhost $3
+#+header: :dbuser $4
+#+header: :dbpassword $5
+#+header: :database $6
+#+begin_src sql
+$0
+#+end_src
