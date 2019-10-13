@@ -161,13 +161,17 @@
   :ensure t)
 (global-set-key (kbd "C-²") 'er/expand-region)
 
+
+;; yasnippets
 (use-package yasnippet
   :ensure t
   :init
   (yas-global-mode 1)
   :config (use-package yasnippet-snippets
-	    :ensure t)
-  (yas-reload-all))
+		  :ensure t)
+          (use-package aws-snippets
+	   :ensure t)
+	  (yas-reload-all))
 
 ;; Helm
 (use-package helm
