@@ -301,5 +301,10 @@
 (use-package helm-unicode
   :ensure t)
 
+;; hl current buffer
+(use-package dimmer
+  :ensure t)
+(dimmer-mode)
+
 (provide 'conf-misc)
 ;;; conf-misc ends here
