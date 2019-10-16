@@ -28,7 +28,8 @@
   :ensure t)
 
 (use-package kubernetes
-  :ensure t)
+  :ensure t
+  :commands (kubernetes-overview))
 
 (use-package kubernetes-helm
   :ensure t)
