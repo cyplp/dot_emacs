@@ -140,3 +140,6 @@
 	  (lambda ()
 	    (flycheck-select-checker 'python-flake8))
 	  )
+;; pip stuff
+(use-package pip-requirements
+  :ensure t)
