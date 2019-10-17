@@ -37,3 +37,7 @@
   :after flycheck gitlab-ci-mode
   :init
   (gitlab-ci-mode-flycheck-enable))
+
+;; open current line in forge web-page
+(use-package browse-at-remote
+  :ensure t)
