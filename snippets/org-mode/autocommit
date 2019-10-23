@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: autocommit
+# key: autocommit
+# --
+# -*- eval: (git-auto-commit-mode 1) -*-
