@@ -194,8 +194,8 @@
   :config
   (helm-mode 1))
 
-
-
+;; tramp default method
+(setq tramp-default-method "ssh")
 
 ;; (use-package auto-indent-mode
 ;;   :ensure t
