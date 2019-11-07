@@ -48,3 +48,8 @@
   :args '("--format" "-")
   :mode ((nxml-mode
 	  (mode . xml-format-on-save))))
+
+(use-package xml-format
+  :ensure t
+  :demand t
+  :after nxml-mode)
