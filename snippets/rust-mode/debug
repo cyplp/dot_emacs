@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: println!("{:?}", value);
+# key: debug
+# --
+println!("${{:?}}", $1);
+$0
