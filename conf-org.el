@@ -126,3 +126,7 @@
 ;; add auto commit for some org mode file
 (use-package git-auto-commit-mode
   :ensure t)
+
+(use-package org-sticky-header
+  :ensure t
+  :hook (org-mode . org-sticky-header-mode))
