@@ -24,9 +24,9 @@
 (use-package gist
   :ensure t)
 
-;; (use-package forge
-;;   :ensure t
-;;   :after magit)
+(use-package forge
+  :ensure t
+  :after magit)
 
 ;; gitlab stuff
 (use-package gitlab-ci-mode
