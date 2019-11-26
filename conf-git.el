@@ -41,3 +41,7 @@
 ;; open current line in forge web-page
 (use-package browse-at-remote
   :ensure t)
+
+;; better git blame
+(use-package vc-msg
+  :ensure t)
