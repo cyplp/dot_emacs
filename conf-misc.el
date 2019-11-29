@@ -306,5 +306,14 @@
   :ensure t)
 (dimmer-mode)
 
+;; keyfreq
+(use-package keyfreq
+  :ensure t
+  :config
+  (require 'keyfreq)
+  (keyfreq-mode 1)
+  (keyfreq-autosave-mode 1)
+  )
+
 (provide 'conf-misc)
 ;;; conf-misc ends here
