@@ -315,5 +315,11 @@
   (keyfreq-autosave-mode 1)
   )
 
+;; see https://editorconfig.org/
+(use-package editorconfig
+  :ensure t
+  :config
+  (editorconfig-mode 1))
+
 (provide 'conf-misc)
 ;;; conf-misc ends here
