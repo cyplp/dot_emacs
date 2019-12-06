@@ -321,5 +321,10 @@
   :config
   (editorconfig-mode 1))
 
+
+;; nginx
+(use-package nginx-mode
+  :ensure t)
+
 (provide 'conf-misc)
 ;;; conf-misc ends here
