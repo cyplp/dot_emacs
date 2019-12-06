@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: src_restclient
+# key: srcrest
+# --
+#+name:${1:title}
+#+begin_src restclient
+$0
+#+end_src
