@@ -35,3 +35,7 @@ tramp
 session.*
 custom.el
 
+.org-id-locations
+forge-database.sqlite
+recentf
+request/
