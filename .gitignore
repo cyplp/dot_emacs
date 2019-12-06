@@ -26,3 +26,12 @@ url
 quelpa
 \#*
 .cache
+
+emms/
+eshell/
+transient/
+var/
+tramp
+session.*
+custom.el
+
