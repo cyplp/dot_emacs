@@ -326,5 +326,9 @@
 (use-package nginx-mode
   :ensure t)
 
+;; c-sharp
+(use-package csharp-mode
+  :ensure t)
+
 (provide 'conf-misc)
 ;;; conf-misc ends here
