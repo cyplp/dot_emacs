@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: test_function
+# key: tt
+# group : testing
+# --
+def test_${1:toTest}(self):
+    """Test of $1."""
+    $0
