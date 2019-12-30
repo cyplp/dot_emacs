@@ -36,6 +36,10 @@
 ;; warn when opening files bigger than 100MB
 (setq large-file-warning-threshold 100000000)
 
+;; Turn Off Cursor Alarms
+;; from https://github.com/MatthewZMD/.emacs.d
+(setq ring-bell-function 'ignore)
+
 (use-package try
   :ensure t)
 
