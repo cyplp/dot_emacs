@@ -330,5 +330,38 @@
 (use-package csharp-mode
   :ensure t)
 
+;; hl stuf
+(use-package highlight-symbol
+  :ensure t
+    :init (progn  (add-hook 'prog-mode-hook 'highlight-symbol-mode)
+                  (add-hook 'prog-mode-hook 'highlight-symbol-nav-mode)))
+
+;; uuid generator
+;; copy from https://nullprogram.com/blog/2010/05/11/
+(defun uuid-create ()
+  "Return a newly generated UUID. This uses a simple hashing of variable data."
+  (let ((s (md5 (format "%s%s%s%s%s%s%s%s%s%s"
+                        (user-uid)
+                        (emacs-pid)
+                        (system-name)
+                        (user-full-name)
+                        user-mail-address
+                        (current-time)
+                        (emacs-uptime)
+                        (garbage-collect)
+                        (random)
+                        (recent-keys)))))
+    (format "%s-%s-3%s-%s-%s"
+            (substring s 0 8)
+            (substring s 8 12)
+            (substring s 13 16)
+            (substring s 16 20)
+            (substring s 20 32))))
+
+(defun uuid-insert ()
+  "Inserts a new UUID at the point."
+  (interactive)
+  (insert (uuid-create)))
+
 (provide 'conf-misc)
 ;;; conf-misc ends here
