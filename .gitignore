@@ -26,3 +26,16 @@ url
 quelpa
 \#*
 .cache
+
+emms/
+eshell/
+transient/
+var/
+tramp
+session.*
+custom.el
+
+.org-id-locations
+forge-database.sqlite
+recentf
+request/

@@ -6,9 +6,9 @@
   :ensure t)
 (setq magit-refresh-status-buffer nil)
 
-(use-package magit-filenotify
-  :ensure t)
-(add-hook 'magit-status-mode-hook 'magit-filenotify-mode)
+;; (use-package magit-filenotify
+;;   :ensure t)
+;; (add-hook 'magit-status-mode-hook 'magit-filenotify-mode)
 
 (use-package git-messenger
   :ensure t)

@@ -28,7 +28,7 @@
 
 
 (defun python-add-breakpoint ()
-    "Add a break point"
+    "Add a break point."
     (interactive)
     (newline-and-indent)
     (insert "import pdb; pdb.set_trace()")
@@ -39,7 +39,7 @@
  (define-key python-mode-map (kbd "C-c C-b") 'python-add-breakpoint)
 
 (defun python-add-remote-breakpoint ()
-    "Add a break point"
+    "Add a break point."
     (interactive)
     (newline-and-indent)
     (insert "import rpdb; rpdb.set_trace()")
@@ -50,7 +50,7 @@
 (define-key python-mode-map (kbd "C-c C-r") 'python-add-remote-breakpoint)
 
 (defun python-add-nose-breakpoint ()
-    "Add a break point"
+    "Add a break point."
     (interactive)
     (newline-and-indent)
     (insert "import nose; nose.tools.set_trace()")
@@ -61,7 +61,7 @@
 (define-key python-mode-map (kbd "C-c C-n") 'python-add-nose-breakpoint)
 
 (defun python-add-noqa ()
-  "add # NOQA"
+  "add # NOQA."
   (interactive)
   (move-end-of-line nil)
   (insert "  # NOQA")
