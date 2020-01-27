@@ -236,6 +236,7 @@
 		"~/.emacs.d/conf-elisp.el"
 		"~/.emacs.d/conf-yaml.el"
 		"~/.emacs.d/conf-devops.el"
+		"~/.emacs.d/conf-latex.el"
 		;; secret stuff such as passwords
 		"~/.emacs.d/secret.el"))
 
