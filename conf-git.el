@@ -45,3 +45,11 @@
 ;; better git blame
 (use-package vc-msg
   :ensure t)
+
+;; magithub
+(use-package magithub
+  :ensure t
+  :after magit
+  :config
+  (magithub-feature-autoinject t)
+  (setq magithub-clone-default-directory "~/dev"))
