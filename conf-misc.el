@@ -363,5 +363,17 @@
   (interactive)
   (insert (uuid-create)))
 
+;; remind binding
+(use-package remind-bindings
+  :hook (after-init . remind-bindings-initialise)
+  :bind (("C-c C-d" . 'remind-bindings-toggle-buffer)   ;; toggle buffer
+         ("C-c M-d" . 'remind-bindings-specific-mode))) ;; buffer-specific only
+
+
+;; smoth-scrolling
+(use-package smoth-scrolling
+  :ensure t)
+(smooth-scrolling-mode 1)
+
 (provide 'conf-misc)
 ;;; conf-misc ends here
