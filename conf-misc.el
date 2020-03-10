@@ -365,6 +365,7 @@
 
 ;; remind binding
 (use-package remind-bindings
+  :ensure t
   :hook (after-init . remind-bindings-initialise)
   :bind (("C-c C-d" . 'remind-bindings-toggle-buffer)   ;; toggle buffer
          ("C-c M-d" . 'remind-bindings-specific-mode))) ;; buffer-specific only
