@@ -11,6 +11,12 @@
 (use-package marcopolo
   :ensure t)
 
+;; docker-explorer
+(quelpa '(docker-explorer
+	  :fetcher git
+	  :url "https://gitlab.com/ndw/docker-explorer.git"))
+
+
 
 ;; ansible
 (use-package ansible
