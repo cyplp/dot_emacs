@@ -129,6 +129,8 @@
   (add-hook 'flycheck-mode-hook #'flycheck-pycheckers-setup)
   )
 
+(define-key python-mode-map (kbd "C-f") 'flycheck-next-error)
+
 (use-package flycheck-cython
   :ensure t)
 (add-hook 'cython-mode-hook 'flycheck-mode)
