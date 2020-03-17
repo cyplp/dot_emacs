@@ -20,4 +20,6 @@
 (global-set-key "\M-g" 'goto-line)
 (global-set-key (quote [C-return]) 'nxml-complete)
 
+(global-set-key (kbd "C-S-s") 'isearch-forward-symbol-at-point)
+
 (global-set-key (kbd "C-x g") 'magit-status)
