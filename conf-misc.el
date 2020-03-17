@@ -372,7 +372,7 @@
 
 
 ;; smoth-scrolling
-(use-package smoth-scrolling
+(use-package smooth-scrolling
   :ensure t)
 (smooth-scrolling-mode 1)
 
