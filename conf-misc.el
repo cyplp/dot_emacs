@@ -376,5 +376,10 @@
   :ensure t)
 (smooth-scrolling-mode 1)
 
+
+;; tldr
+(use-package tldr
+  :ensure t)
+
 (provide 'conf-misc)
 ;;; conf-misc ends here
