@@ -381,5 +381,15 @@
 (use-package tldr
   :ensure t)
 
+;; ibuffer
+(use-package ibuffer-git
+  :ensure t)
+(use-package ibuffer-vc
+  :ensure t)
+(use-package ibuffer-tramp
+  :ensure t)
+
+
+(global-set-key (kbd "C-x C-b") 'ibuffer)
 (provide 'conf-misc)
 ;;; conf-misc ends here
