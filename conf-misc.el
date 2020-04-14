@@ -376,9 +376,12 @@
   :ensure t)
 (smooth-scrolling-mode 1)
 
-
 ;; tldr
 (use-package tldr
+  :ensure t)
+
+;; lua
+(use-package lua-mode
   :ensure t)
 
 (provide 'conf-misc)
