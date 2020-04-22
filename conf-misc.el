@@ -384,5 +384,9 @@
 (use-package lua-mode
   :ensure t)
 
+;; sudo-edit
+(use-package sudo-edit
+  :ensure t)
+
 (provide 'conf-misc)
 ;;; conf-misc ends here
