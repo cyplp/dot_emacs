@@ -8,6 +8,11 @@
 (use-package docker-compose-mode
   :ensure t)
 
+;; launch docker-compose menu, up and down
+(define-key docker-compose-mode-map (kbd "C-c C-c") 'docker-compose)
+(define-key docker-compose-mode-map (kbd "C-c C-u") 'docker-compose-up)
+(define-key docker-compose-mode-map (kbd "C-c C-w") 'docker-compose-down)
+
 (use-package marcopolo
   :ensure t)
 
