@@ -12,6 +12,7 @@
 (define-key docker-compose-mode-map (kbd "C-c C-c") 'docker-compose)
 (define-key docker-compose-mode-map (kbd "C-c C-u") 'docker-compose-up)
 (define-key docker-compose-mode-map (kbd "C-c C-w") 'docker-compose-down)
+(define-key docker-compose-mode-map (kbd "C-c C-r") 'docker-compose-restart)
 
 (use-package marcopolo
   :ensure t)
