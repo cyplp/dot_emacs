@@ -376,7 +376,6 @@
   :ensure t)
 (smooth-scrolling-mode 1)
 
-
 ;; tldr
 (use-package tldr
   :ensure t)
@@ -391,5 +390,13 @@
 
 
 (global-set-key (kbd "C-x C-b") 'ibuffer)
+;; lua
+(use-package lua-mode
+  :ensure t)
+
+;; sudo-edit
+(use-package sudo-edit
+  :ensure t)
+
 (provide 'conf-misc)
 ;;; conf-misc ends here
