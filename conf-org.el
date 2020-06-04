@@ -5,7 +5,6 @@
 (global-set-key (kbd "C-c c") 'org-capture)
 
 ;; Capture templates for: TODO tasks, Notes, appointments, phone calls, meetings, and org-protocol
-
 (setq org-capture-templates
       '(("a" "Activité"
 	 entry
