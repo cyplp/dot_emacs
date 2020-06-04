@@ -149,10 +149,13 @@
                  (org-present-show-cursor)
                  (org-present-read-write)))))
 
+(setq org-roam-directory "~/dev/log_cyp/roam")
+(make-directory org-roam-directory)
+
 (use-package org-roam
       :ensure t
       :hook (after-init . org-roam-mode)
-      :custom (org-roam-directory "~/dev/log_cyp/")
+      :custom (org-roam-directory org-roam-directory)
       :bind (:map org-roam-mode-map
               (("C-c n l" . org-roam)
                ("C-c n f" . org-roam-find-file)
