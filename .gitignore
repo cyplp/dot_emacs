@@ -39,3 +39,5 @@ custom.el
 forge-database.sqlite
 recentf
 request/
+
+magithub/
