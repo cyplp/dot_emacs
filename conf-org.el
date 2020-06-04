@@ -174,3 +174,6 @@
   (org-journal-file-format "%Y-%m-%d.org")
   (org-journal-dir "~/dev/log_cyp")
   (org-journal-date-format "%A, %d %B %Y"))
+
+(use-package org-chef
+  :ensure t)
