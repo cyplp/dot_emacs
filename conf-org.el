@@ -24,7 +24,7 @@
          "%(org-chef-get-recipe-from-url)"
          :empty-lines 1)
         ("r" "Recette" entry (file "~/dev/log_cyp/cookbook.org")
-         "* %^{Recipe title: }\n  :PROPERTIES:\n  :source-url:\n  :servings:\n  :prep-time:\n  :cook-time:\n  :ready-in:\n  :END:\n** Ingredients\n   %?\n** Instruction\n\n")
+         "* %^{Recipe title: }\n  :PROPERTIES:\n  :source-url:\n  :servings:\n  :prep-time:\n  :cook-time:\n  :ready-in:\n  :END:\n** Ingredients\n   %?\n** Instructions\n\n")
 ))
 
 ;; shortcut for activités
