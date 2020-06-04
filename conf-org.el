@@ -164,3 +164,13 @@
                ("C-c n g" . org-roam-show-graph))
               :map org-mode-map
               (("C-c n i" . org-roam-insert))))
+
+(use-package org-journal
+  :ensure t
+  :bind
+  ("C-c n j" . org-journal-new-entry)
+  :custom
+  (org-journal-date-prefix "# -*- eval: (git-auto-commit-mode 1) -*-\n#+TITLE: ")
+  (org-journal-file-format "%Y-%m-%d.org")
+  (org-journal-dir "~/dev/log_cyp")
+  (org-journal-date-format "%A, %d %B %Y"))
