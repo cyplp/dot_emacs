@@ -150,7 +150,8 @@
                  (org-present-read-write)))))
 
 (setq org-roam-directory "~/dev/log_cyp/roam")
-(make-directory org-roam-directory)
+(if (not(file-exists-p org-roam-directory))
+    (make-directory org-roam-directory))
 
 (use-package org-roam
       :ensure t
