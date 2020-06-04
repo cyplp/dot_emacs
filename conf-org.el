@@ -20,6 +20,11 @@
 	 "\n* TODO %?\n%U\n" :clock-in t :clock-resume t)
 	("p" "Phone call" entry (file+olp+datetree "~/dev/log_cyp/activities.org")
 	 "\n* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)
+	("R" "lien vers une recette" entry (file "~/dev/log_cyp/cookbook.org")
+         "%(org-chef-get-recipe-from-url)"
+         :empty-lines 1)
+        ("r" "Recette" entry (file "~/dev/log_cyp/cookbook.org")
+         "* %^{Recipe title: }\n  :PROPERTIES:\n  :source-url:\n  :servings:\n  :prep-time:\n  :cook-time:\n  :ready-in:\n  :END:\n** Ingredients\n   %?\n** Instruction\n\n")
 ))
 
 ;; shortcut for activités
