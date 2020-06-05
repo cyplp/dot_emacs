@@ -1,28 +1,34 @@
-(setq org-directory "~/dev/org")
-(setq org-default-notes-file "~/dev/org/refile.org")
+(setq org-directory "~/dev/log_cyp")
+
+(defun my-org-root (target)
+  (concat (file-name-as-directory org-directory) target))
+
+(setq org-default-notes-file (my-org-root"refile.org"))
 
 ;; I use C-c c to start capture mode
 (global-set-key (kbd "C-c c") 'org-capture)
+
+
 
 ;; Capture templates for: TODO tasks, Notes, appointments, phone calls, meetings, and org-protocol
 (setq org-capture-templates
       '(("a" "Activité"
 	 entry
-	 (file+olp+datetree "~/dev/log_cyp/activities.org")
+	 (file+olp+datetree (my-org-root "activities.org"))
 	 "* %?"
 	 :clock-in t
 	 :clock-resume t)
 	("t" "todo" entry
-	 (file "~/dev/log_cyp/todos.org")
+	 (file  (my-org-root "todos.org"))
 	 "\n* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
-	("T" "todo whitout file" item (file "~/dev/log_cyp/todos.org")
+	("T" "todo whitout file" item (file  (my-org-root "todos.org"))
 	 "\n* TODO %?\n%U\n" :clock-in t :clock-resume t)
-	("p" "Phone call" entry (file+olp+datetree "~/dev/log_cyp/activities.org")
+	("p" "Phone call" entry (file+olp+datetree (my-org-root "activities.org"))
 	 "\n* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)
-	("R" "lien vers une recette" entry (file "~/dev/log_cyp/cookbook.org")
+	("R" "lien vers une recette" entry (file (my-org-root "cookbook.org"))
          "%(org-chef-get-recipe-from-url)"
          :empty-lines 1)
-        ("r" "Recette" entry (file "~/dev/log_cyp/cookbook.org")
+        ("r" "Recette" entry (file (my-org-root "cookbook.org"))
          "* %^{Recipe title: }\n  :PROPERTIES:\n  :source-url:\n  :servings:\n  :prep-time:\n  :cook-time:\n  :ready-in:\n  :END:\n** Ingredients\n   %?\n** Instructions\n\n")
 ))
 
@@ -45,10 +51,10 @@
 		 (org-capture nil "t")))
 
 ;; shortcut for activities
-(global-set-key (kbd "<S-f6>") (lambda() (interactive)(find-file "~/dev/log_cyp/activities.org")))
+(global-set-key (kbd "<S-f6>") (lambda() (interactive)(find-file (my-org-root "activities.org"))))
 
 ;; shortcut for TODOS
-(global-set-key (kbd "<S-f8>") (lambda() (interactive)(find-file "~/dev/log_cyp/todos.org")))
+(global-set-key (kbd "<S-f8>") (lambda() (interactive)(find-file (my-org-root "todos.org"))))
 
 ;; nicer bullets
 (use-package org-bullets
@@ -153,7 +159,7 @@
                  (org-present-show-cursor)
                  (org-present-read-write)))))
 
-(setq org-roam-directory "~/dev/log_cyp/roam")
+(setq org-roam-directory (my-org-root "roam"))
 (if (not(file-exists-p org-roam-directory))
     (make-directory org-roam-directory))
 
