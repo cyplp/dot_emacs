@@ -128,6 +128,7 @@
 
 ;; activate ido-mode
 (setq ido-enable-flex-matching t)
+
 ;;(ido-everywhere 1)
 (use-package ido-yes-or-no
   :ensure t)
@@ -143,10 +144,8 @@
   :config
   (xclip-mode 1))
 
-
 ;; see the other parent
 (show-paren-mode t)
-
 
 ;;winner mode
 (winner-mode t)
@@ -178,7 +177,7 @@
   :init
   (yas-global-mode 1)
   :config (use-package yasnippet-snippets
-		  :ensure t)
+	    :ensure t)
           (use-package aws-snippets
 	   :ensure t)
 	  (yas-reload-all))
