@@ -168,7 +168,7 @@
 
 (use-package expand-region
   :ensure t)
-(global-set-key (kbd "C-²") 'er/expand-region)
+(global-set-key (kbd "C-œ") 'er/expand-region)
 
 
 ;; yasnippets
