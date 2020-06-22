@@ -169,7 +169,7 @@
 
 ;; goto EOL and newline and indent
 (defun eol-newline-indent ()
-  "Insert a newline from anywhare in the line."
+  "Insert a newline from anywhere in the line."
   (interactive)
   (end-of-line)
   (newline-and-indent))
