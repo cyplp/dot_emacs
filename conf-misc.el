@@ -139,10 +139,6 @@
 ;;   :after spaceline
 ;;   :config (spaceline-all-the-icons-theme))
 
-;; display in powerline number of match in search
-(use-package anzu
-  :ensure t)
-(global-anzu-mode +1)
 
 ;; focus on current block
 (use-package focus
