@@ -30,6 +30,10 @@
 (global-set-key  (kbd "M-k") 'kill-start-of-line)
 
 
+(use-package ctrlf
+  :ensure t
+  :commands (ctrf-mode))
+
 (use-package ssh-config-mode
   :ensure t
   :commands (ssh-config-mode)
