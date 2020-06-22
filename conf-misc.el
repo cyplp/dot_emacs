@@ -140,10 +140,6 @@
 ;;   :config (spaceline-all-the-icons-theme))
 
 
-;; focus on current block
-(use-package focus
-  :ensure t)
-
 ;; quick search in docs
 (use-package helm-dash
   :ensure t)
