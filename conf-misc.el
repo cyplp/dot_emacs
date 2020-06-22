@@ -206,13 +206,6 @@
 (global-set-key [f1] 'imenu-list-smart-toggle)
 
 
-;; neotree
-(use-package neotree
-  :ensure t)
-
-(global-set-key [f2] 'neotree-toggle)
-
-
 ;; from https://www.emacswiki.org/emacs/DuplicateLines
 (defun uniquify-region-lines (beg end)
   "Remove duplicate adjacent lines in region."
