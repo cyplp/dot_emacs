@@ -387,5 +387,9 @@
 (use-package sudo-edit
   :ensure t)
 
+;; shell interface
+(use-package multi-term
+  :ensure t)
+
 (provide 'conf-misc)
 ;;; conf-misc ends here
