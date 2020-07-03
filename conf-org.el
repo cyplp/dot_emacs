@@ -191,7 +191,7 @@
   :custom
   (org-journal-date-prefix "# -*- eval: (git-auto-commit-mode 1) -*-\n#+TITLE: ")
   (org-journal-file-format "%Y-%m-%d.org")
-  (org-journal-dir "~/dev/log_cyp")
+  (org-journal-dir org-directory)
   (org-journal-date-format "%A, %d %B %Y"))
 
 (use-package org-chef
