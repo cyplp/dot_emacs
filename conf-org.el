@@ -180,7 +180,7 @@
 	("d" "default" plain (function org-roam--capture-get-point)
 	 "%?"
 	 :file-name "%(format-time-string \"%Y-%m-%d--%H-%M-%S--${slug}\" (current-time) t)"
-	 :head "# -*- eval: (git-auto-commit-mode 1) -*-\n#+TITLE: ${title}\n* ${title}\n#+BEGIN: clocktable :scope subtree :maxlevel 2\n#+END:\n"
+	 :head "# -*- eval: (git-auto-commit-mode 1) -*-\n#+TITLE: ${title}\n* ${title}\n"
 	 :unnarrowed t)
 	))
 
