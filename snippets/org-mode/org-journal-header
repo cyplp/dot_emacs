@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: org-journal-header
+# key: ojh
+# --
+* `(format-time-string "%A, %d %B %Y")`
+#+BEGIN: clocktable :scope subtree :maxlevel 2
+#+END:
