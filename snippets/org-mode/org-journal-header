@@ -3,5 +3,5 @@
 # key: ojh
 # --
 * `(format-time-string "%A, %d %B %Y")`
-#+BEGIN: clocktable :scope subtree :maxlevel 2
+#+BEGIN: clocktable :scope subtree :maxlevel 2 :tags t
 #+END:
