@@ -194,5 +194,8 @@
   (org-journal-dir org-directory)
   (org-journal-date-format "%A, %d %B %Y"))
 
+;; format duration in hours and minutes not in days
+(setq org-duration-format 'h:mm)
+
 (use-package org-chef
   :ensure t)
