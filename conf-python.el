@@ -155,3 +155,6 @@
 (use-package sphinx-mode
   :ensure t)
 
+;; generate docstring
+(use-package sphinx-doc
+  :ensure t)
