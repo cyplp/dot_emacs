@@ -149,4 +149,8 @@
 (use-package blacken
   :ensure t)
 
+;; binding for sphinx
+(use-package sphinx-mode
+  :ensure t)
+
 (add-hook 'python-mode-hook 'blacken-mode)
