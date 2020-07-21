@@ -171,6 +171,12 @@
 (global-set-key (kbd "C-œ") 'er/expand-region)
 
 
+;; string inflection use in some yassnippet
+(use-package string-inflection
+  :ensure t)
+(require 'string-inflection)
+
+
 ;; yasnippets
 (use-package yasnippet
   :ensure t
