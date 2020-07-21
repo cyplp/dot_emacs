@@ -3,7 +3,7 @@
 # key: sqlat
 # group : sqalachemy
 # --
-class $1(base):
+class $1(Base):
     __tablename__ = "${1:$(string-inflection-underscore-function yas-text)}"
     id_${1:$(string-inflection-underscore-function yas-text)} = Column(Integer, primary_key=True)
     $0
