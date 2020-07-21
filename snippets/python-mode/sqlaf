@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: SqlAlchemy Foreign Key
+# key: sqlaf
+# group : sqalachemy
+# --
+id_$1 = Column(Integer, ForeignKey("$1.id_$1"), nullable=${2:$$(yas-choose-value '("False" "True"))})
+$0
