@@ -6,3 +6,4 @@
 class $1(base):
     __tablename__ = "${1:$(string-inflection-underscore-function yas-text)}"
     id_${1:$(string-inflection-underscore-function yas-text)} = Column(Integer, primary_key=True)
+    $0
