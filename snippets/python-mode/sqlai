@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: SqlAlchemy Index
+# key: sqlai
+# group : sqalachemy
+# --
+Index("${1:$(string-inflection-underscore-function yas-text)}_${2:$(string-inflection-underscore-function yas-text)}", $1.$2, unique=True)
