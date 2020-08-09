@@ -45,3 +45,7 @@
 
 (use-package kubernetes-helm
   :ensure t)
+
+;; logstash
+(use-package logstash-conf-mode
+  :ensure t)
