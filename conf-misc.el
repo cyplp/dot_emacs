@@ -311,10 +311,6 @@
   (editorconfig-mode 1))
 
 
-;; nginx
-(use-package nginx-mode
-  :ensure t)
-
 ;; c-sharp
 (use-package csharp-mode
   :ensure t)
@@ -390,11 +386,6 @@
 ;; shell interface
 (use-package multi-term
   :ensure t)
-
-;; right click
-(use-package right-click-context
-  :ensure t
-  :hook (after-init . right-click-context-mode))
 
 (provide 'conf-misc)
 ;;; conf-misc ends here
