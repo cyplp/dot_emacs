@@ -65,6 +65,9 @@
 (use-package restclient-helm
   :ensure t)
 
+(use-package jq-mode
+  :ensure t)
+
 ;; colorize color in hexa
 (use-package rainbow-mode
   :ensure t
@@ -386,6 +389,15 @@
 ;; shell interface
 (use-package multi-term
   :ensure t)
+
+;; eradio
+(use-package eradio
+  :ensure t)
+
+(global-set-key (kbd "C-c r p") 'eradio-play)
+(global-set-key (kbd "C-c r s") 'eradio-stop)
+
+(setq eradio-channels '(("fip" . "https://stream.radiofrance.fr/fip/fip_hifi.m3u8?id=radiofrance")))
 
 (provide 'conf-misc)
 ;;; conf-misc ends here

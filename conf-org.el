@@ -3,7 +3,7 @@
 (defun my-org-root (target)
   (concat (file-name-as-directory org-directory) target))
 
-(setq org-default-notes-file (my-org-root"refile.org"))
+(setq org-default-notes-file (my-org-root "refile.org"))
 
 ;; I use C-c c to start capture mode
 (global-set-key (kbd "C-c c") 'org-capture)
