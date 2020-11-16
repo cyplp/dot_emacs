@@ -1,7 +1,10 @@
 # -*- mode: snippet -*-
 # name: org-journal-header
 # key: ojh
+# group: journal
 # --
+* TODOS [/]
+
 * `(format-time-string "%A, %d %B %Y")`
 #+BEGIN: clocktable :scope subtree :maxlevel 2 :tags t :hidefiles t :link t :compact t :lang fr
 #+END:
