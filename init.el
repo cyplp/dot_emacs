@@ -40,6 +40,9 @@
 ;; from https://github.com/MatthewZMD/.emacs.d
 (setq ring-bell-function 'ignore)
 
+;; limit message buffer size
+(setq-default message-log-max 100)
+
 (use-package try
   :ensure t)
 
