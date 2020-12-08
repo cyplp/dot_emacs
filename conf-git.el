@@ -4,7 +4,10 @@
 
 (use-package magit
   :ensure t)
+
 (setq magit-refresh-status-buffer nil)
+;; activate to debug magit-performance
+(setq magit-refresh-verbose f)
 
 ;; (use-package magit-filenotify
 ;;   :ensure t)
