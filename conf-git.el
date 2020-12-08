@@ -31,6 +31,10 @@
   :ensure t
   :after magit)
 
+;; remove some hooks for magit performance-s
+(remove-hook 'magit-status-sections-hook 'forge-insert-pullreqs)
+(remove-hook 'magit-status-sections-hook 'forge-insert-issues)
+
 ;; gitlab stuff
 (use-package gitlab-ci-mode
   :ensure t)
