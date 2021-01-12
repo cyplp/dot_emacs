@@ -217,3 +217,13 @@
 
 (use-package org-chef
   :ensure t)
+
+;; org-menu
+(quelpa '(org-menu
+	  :fetcher git
+	  :url "https://github.com/sheijk/org-menu.git"))
+
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "C-c m") 'org-menu))
+
+  (require 'org-menu)
