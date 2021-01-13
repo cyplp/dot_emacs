@@ -226,4 +226,4 @@
 (with-eval-after-load 'org
   (define-key org-mode-map (kbd "C-c m") 'org-menu))
 
-  (require 'org-menu)
+(require 'org-menu)
