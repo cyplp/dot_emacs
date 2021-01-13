@@ -31,9 +31,9 @@
     "Add a break point."
     (interactive)
     (newline-and-indent)
-    (insert "import pdb; pdb.set_trace()")
+    (insert "breakpoint()")
     (newline-and-indent)
-    (highlight-lines-matching-regexp "^[ ]*import pdb; pdb.set_trace()")
+    (highlight-lines-matching-regexp "^[ ]*breakpoint()")
     (save-buffer))
 
  (define-key python-mode-map (kbd "C-c C-b") 'python-add-breakpoint)
