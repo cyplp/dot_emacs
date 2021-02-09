@@ -146,8 +146,8 @@
 (use-package pip-requirements
   :ensure t)
 
-(use-package blacken
-  :ensure t)
+;; (use-package blacken
+;;  :ensure t)
 
 (add-hook 'python-mode-hook 'blacken-mode)
 
