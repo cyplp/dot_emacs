@@ -399,5 +399,11 @@
 
 (setq eradio-channels '(("fip" . "https://stream.radiofrance.fr/fip/fip_hifi.m3u8?id=radiofrance")))
 
+(defun play-fip ()
+  (interactive)
+  (eradio--play-low-level "https://stream.radiofrance.fr/fip/fip_hifi.m3u8?id=radiofrance"))
+
+(global-set-key (kbd "C-c r f") 'play-fip)
+
 (provide 'conf-misc)
 ;;; conf-misc ends here
