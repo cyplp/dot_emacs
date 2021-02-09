@@ -228,3 +228,11 @@
   (define-key org-mode-map (kbd "C-c m") 'org-menu))
 
 (require 'org-menu)
+
+
+;; org-appear
+(quelpa '(org-appear
+	  :fetcher git
+	  :url "https://github.com/awth13/org-appear.git"))
+
+(add-hook 'org-mode-hook 'org-appear-mode)
