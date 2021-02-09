@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: qotto header
+# key: qh
+# group : qotto
+# --
+# Copyright (c) Qotto, `(format-time-string "%Y" (current-time))`

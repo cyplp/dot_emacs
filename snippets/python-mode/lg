@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: qotto logger
+# key: lg
+# group : qotto
+# --
+logger = logging.getLogger(__name__)
