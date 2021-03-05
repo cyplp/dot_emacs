@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: test_function
+# key: envs
+# group : qotto
+# --
+$1 = env.str('$1', '$2')$0

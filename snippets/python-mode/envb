@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: env.bool
+# key: envb
+# group : qotto
+# --
+$1 = env.bool('$1', ${2:$$(yas-choose-value '("True" "Talse"))})
+$0
