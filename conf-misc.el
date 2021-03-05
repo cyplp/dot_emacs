@@ -405,5 +405,10 @@
 
 (global-set-key (kbd "C-c r f") 'play-fip)
 
+
+(use-package whitespace-cleanup-mode
+  :ensure t)
+
+(global-whitespace-cleanup-mode t)
 (provide 'conf-misc)
 ;;; conf-misc ends here
