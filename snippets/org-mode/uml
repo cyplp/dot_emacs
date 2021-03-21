@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: uml
+# key: uml
+# group: helpers
+# --
+#+name: ${1:title}
+#+begin_src plantuml :file imgs/${1:$(sluggify yas-text)}.png
+
+$0
+
+#+end_src
