@@ -236,3 +236,9 @@
 	  :url "https://github.com/awth13/org-appear.git"))
 
 (add-hook 'org-mode-hook 'org-appear-mode)
+
+(defun sluggify (str)
+  (replace-regexp-in-string
+   "[^a-z0-9-]"
+   "-"
+   (downcase str)))
