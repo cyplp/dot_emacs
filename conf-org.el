@@ -108,6 +108,10 @@
 	   ("INPROGRESS" . (:foreground "light green" :weight bold)))
 	 )
 
+(add-hook 'org-babel-after-execute-hook
+          (lambda ()
+            (when org-inline-image-overlays
+              (org-redisplay-inline-images))))
 
 (use-package ox-rst
   :ensure t)
