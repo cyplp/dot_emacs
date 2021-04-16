@@ -66,8 +66,10 @@
 
 (use-package org
   :ensure t)
+
 (define-key global-map "\C-cl" 'org-store-link)
 (define-key global-map "\C-ca" 'org-agenda)
+
 (setq org-log-done t)
 (setq org-agenda-files '("~/dev/log_cyp"))
 
@@ -246,3 +248,7 @@
    "[^a-z0-9-]"
    "-"
    (downcase str)))
+
+;; export markdown
+(eval-after-load "org"
+  '(require 'ox-md nil t))
