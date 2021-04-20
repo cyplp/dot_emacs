@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: dot
+# key: dot
+# group: helpers
+# --
+#+name: ${1:title}
+#+begin_src dot :file imgs/${1:$(sluggify yas-text)}.png :cmdline -Kdot -Tpng :exports results
+digraph ${2:name} {
+  $0
+}
+#+end_src
