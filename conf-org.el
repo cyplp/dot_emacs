@@ -99,7 +99,8 @@
    (shell . t)
    (plantuml . t)
    (restclient . t)
-   (rust . t)))
+   (rust . t)
+   (dot . t)))
 
 (setq org-src-fontify-natively t)
 
