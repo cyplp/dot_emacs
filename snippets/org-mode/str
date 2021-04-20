@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: stand up report
+# key: str
+# --
+- $1
+  - hier:
+    - $0
+  - todo:
