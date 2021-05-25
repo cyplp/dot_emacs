@@ -100,7 +100,8 @@
    (plantuml . t)
    (restclient . t)
    (rust . t)
-   (dot . t)))
+   (dot . t)
+   (asymptote . t)))
 
 (setq org-src-fontify-natively t)
 
