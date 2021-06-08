@@ -1,8 +1,9 @@
 # -*- mode: snippet -*-
-# name: src
+# name: src-cyp
 # key: src
+# group: custom
 # --
 #+name:${1:title}
-#+begin_src
+#+begin_src ${2:bash}
 $0
 #+end_src
