@@ -3,18 +3,17 @@
 ;;; Code:
 
 (require 'package)
-
-(add-to-list 'package-archives
-             '("melpa" . "https://melpa.org/packages/"))
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (when (< emacs-major-version 24)
   ;; For important compatibility libraries like cl-lib
-  (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/")))
+  (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/") t))
 
 (add-to-list 'package-archives
-             '("org" . "https://orgmode.org/elpa/"))
+             '("org" . "https://orgmode.org/elpa/") t)
 
 ;; avoid old .elc
 (setq load-prefer-newer t)
+(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
 
 (package-initialize)
 
