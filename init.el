@@ -104,10 +104,10 @@
 (add-hook 'write-file-functions 'delete-trailing-whitespace)
 
 ;; pretty-icons
-(use-package mode-icons
-  :ensure t
-  :config
-  (mode-icons-mode))
+;;(use-package mode-icons
+;;  :ensure t
+;;  :config
+;;  (mode-icons-mode))
 
 ;; ace-window
 (use-package ace-window

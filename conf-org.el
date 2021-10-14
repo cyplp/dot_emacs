@@ -106,11 +106,11 @@
 (setq org-src-fontify-natively t)
 
 (setq org-todo-keyword-faces
-         '(("ARCHIVE" . (:foreground "light green" :weight bold))
-           ("DISPATCHED" . (:foreground "light blue" :weight bold))
-           ("LATER" . (:foreground "pink" :weight bold))
-	   ("INPROGRESS" . (:foreground "light green" :weight bold)))
-	 )
+      '(("ARCHIVE" . (:foreground "light green" :weight bold))
+        ("DISPATCHED" . (:foreground "light blue" :weight bold))
+        ("LATER" . (:foreground "pink" :weight bold))
+	("INPROGRESS" . (:foreground "light green" :weight bold)))
+      )
 
 (add-hook 'org-babel-after-execute-hook
           (lambda ()
@@ -173,24 +173,30 @@
 (if (not(file-exists-p org-roam-directory))
     (make-directory org-roam-directory))
 
+(setq org-roam-v2-ack t)
+
 (use-package org-roam
       :ensure t
       :hook (after-init . org-roam-mode)
-      :custom (org-roam-directory org-roam-directory)
-      :bind (:map org-roam-mode-map
-              (("C-c n l" . org-roam)
-               ("C-c n f" . org-roam-find-file)
-               ("C-c n b" . org-roam-switch-to-buffer)
-               ("C-c n g" . org-roam-graph))
-              :map org-mode-map
-              (("C-c n i" . org-roam-insert))))
+      :custom (org-roam-directory (file-truename org-roam-directory))
+      :bind (("C-c n l" . org-roam-buffer-toggle)
+             ("C-c n f" . org-roam-node-find)
+             ("C-c n g" . org-roam-graph)
+             ("C-c n i" . org-roam-node-insert)
+             ("C-c n c" . org-roam-capture))
+      :config
+      (org-roam-db-autosync-mode)
+      ;; If using org-roam-protocol
+      (require 'org-roam-protocol)
+      )
+
 
 (setq org-roam-capture-templates
       '(
-	("d" "default" plain (function org-roam--capture-get-point)
-	 "%?"
-	 :file-name "%(format-time-string \"%Y-%m-%d--%H-%M-%S--${slug}\" (current-time) t)"
-	 :head "# -*- eval: (git-auto-commit-mode 1) -*-\n#+TITLE: ${title}\n* ${title}\n"
+	("d" "default" plain "%?"
+	 :target (file+head
+		  "%<%Y-%m-%d--%H-%M-%S--${slug}.org>"
+		  "# -*- eval: (git-auto-commit-mode 1) -*-\n#+TITLE: ${title}\n* ${title}\n")
 	 :unnarrowed t)
 	))
 
