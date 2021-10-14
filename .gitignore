@@ -43,3 +43,10 @@ request/
 magithub/
 
 tldr/
+
+.litable-lists.el
+aws.el
+dbconnectoions.el
+flycheck_init.el
+org-roam.db
+ssh-config-keywords.txt
