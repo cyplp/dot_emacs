@@ -22,3 +22,5 @@
   :ensure t
   :config
   (add-hook 'rust-mode-hook 'cargo-minor-mode))
+
+(define-key rust-mode-map (kbd "C-c b") 'cargo-mode-build)
