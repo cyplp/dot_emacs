@@ -49,3 +49,10 @@
 ;; logstash
 (use-package logstash-conf-mode
   :ensure t)
+
+;; terraform
+(use-package terraform-mode
+  :ensure t)
+
+(use-package terraform-doc
+  :ensure t)
