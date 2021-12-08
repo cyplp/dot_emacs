@@ -4,10 +4,9 @@
 
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-(when (< emacs-major-version 24)
-  ;; For important compatibility libraries like cl-lib
-  (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/") t))
+(add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/") t)
 
+(add-to-list 'package-archives '("nongnu" . "https://elpa.nongnu.org/nongnu/") t)
 (add-to-list 'package-archives
              '("org" . "https://orgmode.org/elpa/") t)
 
@@ -211,6 +210,9 @@
 
 ;; tramp default method
 (setq tramp-default-method "ssh")
+
+;; calendat start monday
+(setq  calendar-week-start-day 1)
 
 ;; (use-package auto-indent-mode
 ;;   :ensure t
