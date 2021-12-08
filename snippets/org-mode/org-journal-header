@@ -6,5 +6,5 @@
 * TODOS [/]
 
 * `(format-time-string "%A, %d %B %Y")`
-#+BEGIN: clocktable :scope subtree :maxlevel 2 :tags t :hidefiles t :link t :compact t :lang fr
+#+BEGIN: clocktable :scope subtree :maxlevel 2 :tags t :hidefiles t :link t :compact t :lang fr  :header "#+TBLNAME: timetable\n"
 #+END:
