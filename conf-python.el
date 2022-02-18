@@ -158,3 +158,19 @@
 ;; generate docstring
 (use-package sphinx-doc
   :ensure t)
+
+
+
+(use-package lsp-mode
+  :ensure t
+  :config
+  (lsp-register-custom-settings
+   '(("pyls.plugins.pyls_mypy.enabled" t t)
+     ("pyls.plugins.pyls_mypy.live_mode" nil t)
+     ("pyls.plugins.pyls_black.enabled" t t)))
+  :hook
+  ((python-mode . lsp)))
+
+(use-package lsp-ui
+  :ensure t
+  :commands lsp-ui-mode)
