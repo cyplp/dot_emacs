@@ -53,3 +53,8 @@
 ;; better git blame
 (use-package vc-msg
   :ensure t)
+
+
+(use-package magit-delta
+  :ensure t
+  :hook (magit-mode . magit-delta-mode))
