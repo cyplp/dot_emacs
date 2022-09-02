@@ -263,3 +263,9 @@
 ;; export markdown
 (eval-after-load "org"
   '(require 'ox-md nil t))
+
+(use-package org-modern
+  :ensure t
+)
+(add-hook 'org-mode-hook #'org-modern-mode)
+(add-hook 'org-agenda-finalize-hook #'org-modern-agenda)
