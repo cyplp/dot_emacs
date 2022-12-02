@@ -104,7 +104,8 @@
    (restclient . t)
    (rust . t)
    (dot . t)
-   (asymptote . t)))
+  ;; (asymptote . t)
+   ))
 
 (setq org-src-fontify-natively t)
 

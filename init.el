@@ -67,10 +67,10 @@
   :ensure t)
 
 ;; theme
-(use-package tangotango-theme
-  :ensure t)
+;; (use-package tangotango-theme
+;;   :ensure t)
 
-(load-theme 'tangotango t)
+(load-theme 'modus-operandi t)
 
 ;; no splash screen
 (setq inhibit-splash-screen t)
