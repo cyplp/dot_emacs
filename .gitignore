@@ -1,6 +1,9 @@
 # Compiled
 *.elc
 
+# Native compilation cache
+eln-cache/
+
 # Packaging
 .cask
 
