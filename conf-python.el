@@ -4,27 +4,15 @@
 (autoload 'python-mode "python-mode" "Python Mode." t)
 (add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
 (add-to-list 'interpreter-mode-alist '("python" . python-mode))
-(setq interpreter-mode-alist
-      (cons '("python" . python-mode)
-	    interpreter-mode-alist)
-      python-mode-hook
-      '(lambda () (progn
-		    (set-variable 'py-indent-offset 4)
-		    (set-variable 'py-smart-indentation nil)
-		    (set-variable 'indent-tabs-mode nil)
-		    (highlight-lines-matching-regexp ".\{101\}" )
-;;		    (highlight-beyond-fill-column)
-                    (define-key python-mode-map "\C-m" 'newline-and-indent)
-		    ;; (pabbrev-mode)
-		    ;; (abbrev-mode)
-	 )
-      )
-)
+(add-to-list 'interpreter-mode-alist '("python" . python-mode))
+
 (add-hook 'python-mode-hook
-      (lambda ()
-        (setq indent-tabs-mode t)
-        (setq tab-width 4)
-        (setq python-indent 4)))
+          (lambda ()
+            (set-variable 'py-indent-offset 4)
+            (set-variable 'py-smart-indentation nil)
+            (setq indent-tabs-mode nil)
+            (setq tab-width 4)
+            (define-key python-mode-map "\C-m" 'newline-and-indent)))
 
 
 (defun python-add-breakpoint ()
@@ -117,16 +105,6 @@
 (add-hook 'python-mode-hook (lambda ()
                                   (require 'sphinx-doc)
                                   (sphinx-doc-mode t)))
-;; add elpy
-;; (use-package elpy
-;;   :ensure t
-;;   :config (elpy-enable))
-
-;; flycheck reste actif globalement : lsp-mode l'utilise comme frontend pour
-;; afficher ses diagnostics. En Python c'est pylsp (flake8 + mypy, cf.
-;; lsp-register-custom-settings plus bas) qui les fournit.
-;; flycheck-pycheckers et la selection forcee de 'python-flake8 ont ete retires :
-;; ils entraient en concurrence avec le checker 'lsp' sur les buffers Python.
 (global-flycheck-mode 1)
 
 (define-key python-mode-map (kbd "C-f") 'flycheck-next-error)
@@ -135,7 +113,6 @@
   :ensure t)
 (add-hook 'cython-mode-hook 'flycheck-mode)
 
-;; ac-python retire : back-end auto-complete, remplace par corfu + lsp.
 
 ;; pip stuff
 (use-package pip-requirements
@@ -150,7 +127,6 @@
 (use-package sphinx-mode
   :ensure t)
 
-;; sphinx-doc : deja declare plus haut (avec son hook python-mode), doublon retire.
 
 
 (use-package lsp-mode
@@ -186,8 +162,3 @@
   (lsp-ui-peek-always-show t)
   (lsp-ui-sideline-show-hover nil)
   (lsp-ui-doc-enable nil))
-
-
-;; elpy retire volontairement : il entrait en conflit avec lsp-mode
-;; (double completion / navigation / verification) sur python-mode.
-;; lsp-mode + lsp-ui (ci-dessus) sont la stack retenue.
