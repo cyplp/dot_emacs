@@ -2,7 +2,7 @@
   :ensure t
   :hook (prog-mode . git-gutter-mode)
   :config
-  (setq git-gutter:update-interval 0.05))
+  (setq git-gutter:update-interval 1.0))
 
 (use-package git-gutter-fringe
   :ensure t
@@ -21,19 +21,14 @@
 ;; activate to debug magit-performance
 (setq magit-refresh-verbose nil)
 
-;; (use-package magit-filenotify
-;;   :ensure t)
-;; (add-hook 'magit-status-mode-hook 'magit-filenotify-mode)
 
 (use-package git-messenger
   :ensure t)
 ;; TODO better shortcut
 (global-set-key (kbd "C-x v p") 'git-messenger:popup-message)
 
-(use-package gitignore-mode
-  :ensure t)
 
-(use-package gitconfig-mode
+(use-package git-modes
   :ensure t)
 
 (use-package gist
@@ -69,3 +64,12 @@
 (use-package magit-delta
   :ensure t
   :hook (magit-mode . magit-delta-mode))
+
+(quelpa '(conventional-commit
+          :fetcher github
+          :repo "akirak/conventional-commit.el"))
+
+(use-package conventional-commit
+  :ensure nil ;;
+  :hook
+  (git-commit-mode . conventional-commit-setup))
