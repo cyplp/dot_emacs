@@ -23,7 +23,7 @@
 
 ;; reduce the frequency of garbage collection by making it happen on
 ;; each 50MB of allocated data (the default is on every 0.76MB)
-(setq gc-cons-threshold 5000000)
+(setq gc-cons-threshold (* 64 1024 1024))
 
 (setq make-backup-files nil) ; stop creating backup~ files
 (setq auto-save-default nil) ; stop creating #autosave# files
@@ -122,17 +122,8 @@
 ;; add line a EOF
 (setq require-final-newline t)
 
-;; just one line
-(setq next-line-add nil)
+(setq next-line-add-newlines nil)
 
-;; activate ido-mode
-(setq ido-enable-flex-matching t)
-
-;;(ido-everywhere 1)
-(use-package ido-yes-or-no
-  :ensure t)
-(ido-yes-or-no-mode 1)
-(ido-mode 1)
 
 ;; clipboard
 (setq select-enable-clipboard t)
@@ -156,9 +147,6 @@
 (global-set-key "(" 'skeleton-pair-insert-maybe)
 (global-set-key "\"" 'skeleton-pair-insert-maybe)
 
-
-;; Completion : corfu (voir conf-go.el, active sur prog-mode) + company via
-;; lsp-mode. auto-complete a ete retire pour eviter trois UIs concurrentes.
 
 (use-package expand-region
   :ensure t)
@@ -231,6 +219,7 @@
 		"~/.emacs.d/conf-jabber.el"
 		"~/.emacs.d/conf-xml.el"
 		"~/.emacs.d/conf-rust.el"
+		"~/.emacs.d/conf-go.el"
 		"~/.emacs.d/conf-sql.el"
 		"~/.emacs.d/conf-web.el"
 		"~/.emacs.d/thinkpad.el"
