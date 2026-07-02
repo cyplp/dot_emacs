@@ -126,16 +126,6 @@
   (add-to-list 'auto-mode-alist '("\\.plantuml\\'" . plantuml-mode))
   (flycheck-plantuml-setup))
 
-;; more colors !
-(use-package color-identifiers-mode
-  :ensure t)
-(color-identifiers-mode t)
-(add-hook 'after-init-hook 'global-color-identifiers-mode)
-
-;; search on google
-;;(use-package heml-google
-;;  :ensure t)
-
 ;;powerline
 (use-package spaceline
   :ensure t)
@@ -185,10 +175,6 @@
 
 ;; helm-ls-git
 (use-package helm-ls-git
-  :ensure t)
-
-;; helm-ag
-(use-package helm-ag
   :ensure t)
 
 ;; cheat.sh see http://cheat.sh/
@@ -288,10 +274,6 @@
 (use-package undo-tree
   :ensure t)
 (global-set-key (kbd "C-x :") 'undo-tree-visualize)
-
-;; unicode help
-(use-package helm-unicode
-  :ensure t)
 
 ;; hl current buffer
 (use-package dimmer

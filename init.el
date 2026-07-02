@@ -157,13 +157,8 @@
 (global-set-key "\"" 'skeleton-pair-insert-maybe)
 
 
-(use-package auto-complete
-  :ensure t
-  :init
-  (progn
-    (ac-config-default)
-    (global-auto-complete-mode t)
-    ))
+;; Completion : corfu (voir conf-go.el, active sur prog-mode) + company via
+;; lsp-mode. auto-complete a ete retire pour eviter trois UIs concurrentes.
 
 (use-package expand-region
   :ensure t)

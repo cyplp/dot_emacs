@@ -122,12 +122,12 @@
 ;;   :ensure t
 ;;   :config (elpy-enable))
 
-(use-package flycheck-pycheckers
-  :ensure t)
+;; flycheck reste actif globalement : lsp-mode l'utilise comme frontend pour
+;; afficher ses diagnostics. En Python c'est pylsp (flake8 + mypy, cf.
+;; lsp-register-custom-settings plus bas) qui les fournit.
+;; flycheck-pycheckers et la selection forcee de 'python-flake8 ont ete retires :
+;; ils entraient en concurrence avec le checker 'lsp' sur les buffers Python.
 (global-flycheck-mode 1)
-(with-eval-after-load 'flycheck
-  (add-hook 'flycheck-mode-hook #'flycheck-pycheckers-setup)
-  )
 
 (define-key python-mode-map (kbd "C-f") 'flycheck-next-error)
 
@@ -135,13 +135,8 @@
   :ensure t)
 (add-hook 'cython-mode-hook 'flycheck-mode)
 
-(use-package ac-python
-  :ensure t)
+;; ac-python retire : back-end auto-complete, remplace par corfu + lsp.
 
-(add-hook 'python-mode-hook
-	  (lambda ()
-	    (flycheck-select-checker 'python-flake8))
-	  )
 ;; pip stuff
 (use-package pip-requirements
   :ensure t)
@@ -155,10 +150,7 @@
 (use-package sphinx-mode
   :ensure t)
 
-;; generate docstring
-(use-package sphinx-doc
-  :ensure t)
-
+;; sphinx-doc : deja declare plus haut (avec son hook python-mode), doublon retire.
 
 
 (use-package lsp-mode
@@ -192,11 +184,10 @@
   :commands lsp-ui-mode
   :custom
   (lsp-ui-peek-always-show t)
-  (lsp-ui-sideline-show-hover t)
+  (lsp-ui-sideline-show-hover nil)
   (lsp-ui-doc-enable nil))
 
 
-(use-package elpy
-  :ensure t
-  :init
-  (elpy-enable))
+;; elpy retire volontairement : il entrait en conflit avec lsp-mode
+;; (double completion / navigation / verification) sur python-mode.
+;; lsp-mode + lsp-ui (ci-dessus) sont la stack retenue.
