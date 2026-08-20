@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: backend-contracts
+# key: @bc
+# --
+@../backend-contracts
