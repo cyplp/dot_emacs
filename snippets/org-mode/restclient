@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: src_restclient
-# key: srcrest
+# key: http
 # --
 #+name:${1:title}
 #+begin_src restclient
