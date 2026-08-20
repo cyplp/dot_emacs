@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: new type
+# key: nt
+# group : python
+# --
+$1  = NewType("$1", ${2:$$(yas-choose-value '("str" "int"))})$0
