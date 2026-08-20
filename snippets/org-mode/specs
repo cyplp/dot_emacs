@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: claude /specs
+# key: /specs
+# --
+#+name:specs $1
+#+begin_src markdown
+/specs
+
+$0
+#+end_src
