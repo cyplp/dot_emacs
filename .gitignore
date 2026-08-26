@@ -10,13 +10,9 @@ eln-cache/
 # Backup files
 *~
 
-# Undo-tree save-files
-*.~undo-tree
-
 ac-comphist.dat
 bookmarks
 ido.last
-smex-items
 
 elpa
 
@@ -50,6 +46,21 @@ tldr/
 .litable-lists.el
 aws.el
 dbconnectoions.el
-flycheck_init.el
 org-roam.db
 ssh-config-keywords.txt
+
+# Grammaires tree-sitter compilees (reinstallables par
+# M-x my-treesit-install-missing-grammars)
+tree-sitter/
+
+# Sessions lsp-mode, retire au profit d'eglot
+.lsp-session-v1
+
+# Cache keyfreq
+.emacs.keyfreq
+
+# Paquets installes par package-vc
+.package-vc-selected-packages.eld
+
+# Trace du dernier purge de paquets orphelins
+.purged-packages.txt

@@ -1,428 +1,344 @@
+;;; conf-misc.el --- Outils generaux -*- lexical-binding: t -*-
 
-;; french calendar
-(defvar calendar-day-name-array
-  ["dim" "lun" "mar" "mer" "jeu" "ven" "sam"])
-(defvar calendar-month-name-array
-  ["janvier" "février" "mars" "avril" "mai" "juin"
-   "juillet" "août" "septembre" "octobre" "novembre" "décembre"])
+;;; Commentary:
 
-;; short anwser
-(fset 'yes-or-no-p 'y-or-n-p)
+;; Tout ce qui n'appartient a aucun langage : edition, navigation, recherche
+;; web, multimedia, petites commandes maison.
+
+;;; Code:
+
+;; --- Localisation -----------------------------------------------------------
+
+;; `setq' et non `defvar' : ces variables sont deja definies par calendar.el,
+;; et `defvar' n'ecrase pas une variable ayant deja une valeur. L'ancienne
+;; version ne fonctionnait que par accident, parce qu'elle s'executait avant le
+;; chargement de calendar.
+(with-eval-after-load 'calendar
+  (setq calendar-day-name-array
+        ["dimanche" "lundi" "mardi" "mercredi" "jeudi" "vendredi" "samedi"])
+  (setq calendar-month-name-array
+        ["janvier" "février" "mars" "avril" "mai" "juin"
+         "juillet" "août" "septembre" "octobre" "novembre" "décembre"]))
+
+;; --- Commandes d'edition ----------------------------------------------------
 
 (defun increment-number-at-point ()
-      (interactive)
-      (skip-chars-backward "0-9")
-      (or (looking-at "[0-9]+")
-          (error "No number at point"))
-      (replace-match (number-to-string (1+ (string-to-number (match-string 0)))
-				       )
-		     )
-      )
-(global-set-key (kbd "C-+") 'increment-number-at-point)
-
-
-(defun kill-start-of-line()
-  "kill from point to start of line"
+  "Incrementer de un le nombre situe sous le curseur."
   (interactive)
-  (kill-line 0)
-  )
+  (skip-chars-backward "0-9")
+  (unless (looking-at "[0-9]+")
+    (error "Aucun nombre sous le curseur"))
+  (replace-match (number-to-string (1+ (string-to-number (match-string 0))))))
 
-(global-set-key  (kbd "M-k") 'kill-start-of-line)
+(global-set-key (kbd "C-+") #'increment-number-at-point)
 
+(defun kill-start-of-line ()
+  "Supprimer du curseur jusqu'au debut de la ligne."
+  (interactive)
+  (kill-line 0))
 
-(use-package ctrlf
-  :ensure t
-  :commands (ctrf-mode))
+(global-set-key (kbd "M-k") #'kill-start-of-line)
 
-(use-package ssh-config-mode
-  :ensure t
-  :commands (ssh-config-mode)
-  )
-
-(add-to-list 'auto-mode-alist '("/\\.ssh/config\\'"     . ssh-config-mode))
-(add-to-list 'auto-mode-alist '("/sshd?_config\\'"      . ssh-config-mode))
-(add-to-list 'auto-mode-alist '("/known_hosts\\'"       . ssh-known-hosts-mode))
-(add-to-list 'auto-mode-alist '("/authorized_keys2?\\'" . ssh-authorized-keys-mode))
-(add-hook 'ssh-config-mode-hook 'turn-on-font-lock)
-
-;;graphviz-dot-mode
-(use-package graphviz-dot-mode
-  :ensure t)
-					;
-;;flycheck-color-mode-line-mode
-(use-package flycheck-color-mode-line
-  :ensure t)
-(add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode)
-
-;; flycheck cible plutot que global : les modes pilotes par eglot (go)
-;; recoivent deja leurs diagnostics via flymake. `global-flycheck-mode' y
-;; ajoutait go-build / go-vet / go-test en sous-processus a chaque
-;; sauvegarde, pour un resultat redondant.
-(dolist (flycheck-target-hook '(python-mode-hook
-                                rust-mode-hook
-                                rustic-mode-hook
-                                cperl-mode-hook
-                                sh-mode-hook
-                                plantuml-mode-hook
-                                gitlab-ci-mode-hook
-                                emacs-lisp-mode-hook))
-  (add-hook flycheck-target-hook #'flycheck-mode))
-
-(use-package auto-complete-rst
-  :ensure t)
-
-(eval-after-load "rst" '(auto-complete-rst-init))
-
-(use-package restclient
-  :ensure t)
-
-(use-package restclient-helm
-  :ensure t)
-
-(use-package jq-mode
-  :ensure t)
-
-;; colorize color in hexa
-(use-package rainbow-mode
-  :ensure t
-  :commands rainbow-mode)
-
-
-;; move selection
-(use-package move-text
- :ensure t)
-(move-text-default-bindings)
-(global-set-key [M-up] 'move-text-up)
-(global-set-key [M-down] 'move-text-down)
-
-;;iedit
-(use-package iedit
-  :ensure t
-  :commands iedit-mode)
-
-;;highlight-indent-guides
-(use-package highlight-indent-guides
-  :ensure t)
-
-(add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
-(setq highlight-indent-guides-method 'character)
-;; le mode "responsive" reevalue les guides a chaque deplacement du curseur
-(setq highlight-indent-guides-responsive nil)
-(setq highlight-indent-guides-suppress-auto-error t)
-
-
-;; set parenthe in color
-(use-package highlight-parentheses
-  :ensure t)
-
-(add-hook 'prog-mode-hook 'highlight-parentheses-mode)
-
-;; fold stuff
-(use-package origami
-  :ensure t)
-
-;; better minibuffer explanation
-;; buuildin emacs
-;;(require 'icomplete)
-;;(icomplete-mode 1)
-
-;; blink on cursor
-(use-package beacon
-  :ensure t
-  :commands beacon-mode)
-
-;; plantuml stuff
-(use-package plantuml-mode
-  :ensure t)
-(use-package flycheck-plantuml
-  :ensure t)
-
-(with-eval-after-load 'flycheck
-  (require 'flycheck-plantuml)
-  ;; Enable plantuml-mode for PlantUML files
-  (add-to-list 'auto-mode-alist '("\\.plantuml\\'" . plantuml-mode))
-  (flycheck-plantuml-setup))
-
-;;powerline
-;; spaceline desactive : les separateurs XPM de powerline sont regeneres a
-;; chaque redisplay, ce qui rend la mode-line responsable d'une part
-;; importante du temps d'affichage. On garde la mode-line de modus-operandi.
-;; (use-package spaceline
-;;   :ensure t)
-;; (require 'spaceline-config)
-;; (spaceline-emacs-theme)
-
-;; (use-package spaceline-all-the-icons
-;;   :after spaceline
-;;   :config (spaceline-all-the-icons-theme))
-
-
-;; quick search in docs
-(use-package helm-dash
-  :ensure t)
-
-;;emms
-;; from https://www.reddit.com/r/emacs/comments/981khz/emacs_music_player_with_emms/e4cnhzi/
-(use-package emms
-  :ensure t
-  :config
-  (emms-all)
-  (emms-default-players)
-  (setq emms-playlist-buffer-name "*Music*")
-  (setq emms-info-asynchronously t)
-  (setq emms-source-file-default-directory "~/musique/")
-  (require 'emms-info-libtag) ;;; load functions that will talk to emms-print-metadata which in turn talks to libtag and gets metadata
-  (setq emms-info-functions '(emms-info-libtag)) ;;; make sure libtag is the only thing delivering metadata
-  (require 'emms-mode-line)
-  (emms-mode-line 1)
-  (require 'emms-playing-time)
-  (emms-playing-time 1)
-  )
-
-
-;; lorem ipsum
-(use-package lorem-ipsum
-  :ensure t)
-
-;; goto EOL and newline and indent
 (defun eol-newline-indent ()
-  "Insert a newline from anywhere in the line."
+  "Ouvrir une ligne indentee sous la ligne courante, depuis n'importe ou."
   (interactive)
   (end-of-line)
   (newline-and-indent))
 
-(global-set-key (kbd "M-<return>") 'eol-newline-indent)
+(global-set-key (kbd "M-<return>") #'eol-newline-indent)
 
-;; helm-ls-git
-(use-package helm-ls-git
-  :ensure t)
-
-;; cheat.sh see http://cheat.sh/
-(use-package cheat-sh
-  :ensure t)
-
-;; weather toy
-(use-package wttrin
-  :ensure t)
-
-(setq wttrin-default-accept-language '("Accept-Language" . "fr-FR"))
-(setq wttrin-default-cities '("tls"))
-
-
-;; pocket
-(use-package pocket-reader
-  :ensure t)
-
-;; list on the side
-(use-package imenu-list
-  :ensure t)
-(global-set-key [f1] 'imenu-list-smart-toggle)
-
-
-;; from https://www.emacswiki.org/emacs/DuplicateLines
-(defun uniquify-region-lines (beg end)
-  "Remove duplicate adjacent lines in region."
+(defun uniquify-region-lines (region-start region-end)
+  "Supprimer les lignes adjacentes identiques entre REGION-START et REGION-END."
   (interactive "*r")
   (save-excursion
-    (goto-char beg)
-    (while (re-search-forward "^\\(.*\n\\)\\1+" end t)
+    (goto-char region-start)
+    (while (re-search-forward "^\\(.*\n\\)\\1+" region-end t)
       (replace-match "\\1"))))
 
 (defun uniquify-buffer-lines ()
- "Remove duplicate adjacent lines in the current buffer."
- (interactive)
- (uniquify-region-lines (point-min) (point-max)))
+  "Supprimer les lignes adjacentes identiques dans tout le buffer."
+  (interactive)
+  (uniquify-region-lines (point-min) (point-max)))
 
+(defun get-string-from-file (file-path)
+  "Renvoyer le contenu de FILE-PATH, sans blancs de bord."
+  (with-temp-buffer
+    (insert-file-contents file-path)
+    (string-trim (buffer-string))))
 
-;; edit a region in a second buffer
-(use-package edit-indirect
-  :ensure t)
+(defun uuid-create ()
+  "Renvoyer un UUID fourni par le noyau."
+  (get-string-from-file "/proc/sys/kernel/random/uuid"))
 
-;; engine mode
-(use-package engine-mode
-  :ensure t)
+(defun uuid-insert ()
+  "Inserer un nouvel UUID au point."
+  (interactive)
+  (insert (uuid-create)))
 
-(engine-mode t)
-(defengine amazon
-  "http://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=%s")
+;; --- Navigation et selection ------------------------------------------------
 
-(defengine duckduckgo
-  "https://duckduckgo.com/?q=%s"
-  :keybinding "d")
-
-(defengine github
-  "https://github.com/search?ref=simplesearch&q=%s")
-
-(defengine google
-  "http://www.google.fr/search?ie=utf-8&oe=utf-8&q=%s"
-  :keybinding "g")
-
-(defengine google-images
-  "http://www.google.com/images?hl=en&source=hp&biw=1440&bih=795&gbv=2&aq=f&aqi=&aql=&oq=&q=%s")
-
-(defengine google-maps
-  "http://maps.google.com/maps?q=%s"
-  :docstring "Mappin' it up.")
-
-(defengine project-gutenberg
-  "http://www.gutenberg.org/ebooks/search/?query=%s")
-
-(defengine rfcs
-  "http://pretty-rfc.herokuapp.com/search?q=%s")
-
-(defengine stack-overflow
-  "https://stackoverflow.com/search?q=%s")
-
-(defengine twitter
-  "https://twitter.com/search?q=%s")
-
-(defengine wikipedia
-  "http://www.wikipedia.org/search-redirect.php?language=fr&go=Go&search=%s"
-  :keybinding "w"
-  :docstring "Searchin' the wikis.")
-
-(defengine wiktionary
-  "https://www.wikipedia.org/search-redirect.php?family=wiktionary&language=fr&go=Go&search=%s")
-
-(defengine wolfram-alpha
-  "http://www.wolframalpha.com/input/?i=%s")
-
-(defengine youtube
-  "http://www.youtube.com/results?aq=f&oq=&search_query=%s")
-
-;; undo-tree
-(use-package undo-tree
-  :ensure t)
-(global-set-key (kbd "C-x :") 'undo-tree-visualize)
-
-;; hl current buffer
-;; dimmer desactive : il recalcule les faces de toutes les fenetres a chaque
-;; changement de buffer ou de fenetre.
-;; (use-package dimmer
-;;   :ensure t)
-;; (dimmer-mode)
-
-;; keyfreq
-(use-package keyfreq
+(use-package move-text
   :ensure t
-  :config
-  (require 'keyfreq)
-  (keyfreq-mode 1)
-  (keyfreq-autosave-mode 1)
-  )
+  :bind (([M-up] . move-text-up)
+         ([M-down] . move-text-down)))
 
-;; see https://editorconfig.org/
-(use-package editorconfig
+(use-package iedit
   :ensure t
-  :config
-  (editorconfig-mode 1))
+  :commands iedit-mode)
 
-
-;; c-sharp
-(use-package csharp-mode
-  :ensure t)
-
-;; hl stuf
-;; highlight-symbol remplace par symbol-overlay : highlight-symbol n'est plus
-;; maintenu et re-parcourait tout le buffer en expression reguliere apres
-;; chaque deplacement du curseur. symbol-overlay borne sa recherche a la
-;; portion affichee et ne pose ses overlays qu'a la demande.
+;; symbol-overlay remplace highlight-symbol : ce dernier n'est plus maintenu et
+;; re-parcourait tout le buffer en expression reguliere apres chaque
+;; deplacement du curseur. symbol-overlay borne sa recherche a la portion
+;; affichee et ne pose ses overlays qu'a la demande.
 (use-package symbol-overlay
   :ensure t
   :hook (prog-mode . symbol-overlay-mode)
   :bind (:map symbol-overlay-mode-map
-         ("M-s s" . symbol-overlay-put)
-         ("M-s n" . symbol-overlay-jump-next)
-         ("M-s p" . symbol-overlay-jump-prev)
-         ("M-s r" . symbol-overlay-rename)))
+              ("M-s s" . symbol-overlay-put)
+              ("M-s n" . symbol-overlay-jump-next)
+              ("M-s p" . symbol-overlay-jump-prev)
+              ("M-s r" . symbol-overlay-rename)))
 
-;; copy from http://ergoemacs.org/emacs/elisp_read_file_content.html
-(defun get-string-from-file (filePath)
-  "Return filePath's file content."
-  (with-temp-buffer
-    (insert-file-contents filePath)
-    (string-trim (buffer-string))))
-
-;; uuid generator
-;; copy from https://nullprogram.com/blog/2010/05/11/
-(defun uuid-create ()
-  "Return a newly generated UUID. This uses a simple hashing of variable data."
-  (get-string-from-file "/proc/sys/kernel/random/uuid")
-  )
-
-(defun uuid-insert ()
-  "Inserts a new UUID at the point."
-  (interactive)
-  (insert (uuid-create)))
-
-;; remind binding
-(use-package remind-bindings
+(use-package imenu-list
   :ensure t
-  :hook (after-init . remind-bindings-initialise)
-  :bind (("C-c C-d" . 'remind-bindings-toggle-buffer)   ;; toggle buffer
-         ("C-c M-d" . 'remind-bindings-specific-mode))) ;; buffer-specific only
+  :bind ([f1] . imenu-list-smart-toggle))
 
+(use-package edit-indirect
+  :ensure t
+  :commands edit-indirect-region)
 
-;; defilement : smooth-scrolling est obsolete et re-implemente le scroll en
-;; Lisp. Emacs 29+ fournit un defilement au pixel natif.
-(pixel-scroll-precision-mode 1)
+;; vundo remplace undo-tree, qui etait installe mais dont le mode global
+;; n'etait jamais active : `undo-tree-visualize' echouait donc a l'appel.
+;; vundo se greffe sur l'historique d'annulation natif au lieu de le
+;; remplacer, ne conserve aucun etat sur disque et ne peut pas corrompre
+;; l'historique du buffer.
+(use-package vundo
+  :ensure t
+  :bind ("C-x :" . vundo)
+  :custom
+  (vundo-glyph-alist vundo-unicode-symbols))
 
-;; tldr
-(use-package tldr
-  :ensure t)
+;; L'historique d'annulation par defaut est vite tronque sur un gros
+;; refactoring, ce qui rend la visualisation inutile.
+(setq undo-limit (* 8 1024 1024))
+(setq undo-strong-limit (* 16 1024 1024))
 
-;; ibuffer
-(use-package ibuffer-git
-  :ensure t)
-(use-package ibuffer-vc
-  :ensure t)
-(use-package ibuffer-tramp
-  :ensure t)
+;; --- Affichage du code ------------------------------------------------------
 
+(use-package highlight-indent-guides
+  :ensure t
+  :hook (prog-mode . highlight-indent-guides-mode)
+  :custom
+  (highlight-indent-guides-method 'character)
+  ;; le mode "responsive" reevalue les guides a chaque deplacement du curseur
+  (highlight-indent-guides-responsive nil)
+  (highlight-indent-guides-suppress-auto-error t))
 
-(global-set-key (kbd "C-x C-b") 'ibuffer)
-;; lua
-(use-package lua-mode
-  :ensure t)
+(use-package highlight-parentheses
+  :ensure t
+  :hook (prog-mode . highlight-parentheses-mode))
 
-;; sudo-edit
-(use-package sudo-edit
-  :ensure t)
+;; Colorise sur place les couleurs ecrites en hexadecimal.
+(use-package rainbow-mode
+  :ensure t
+  :commands rainbow-mode)
 
-;; shell interface
-(use-package multi-term
-  :ensure t)
+;; --- Modes majeurs divers ---------------------------------------------------
 
-;; eradio
-(use-package eradio
-  :ensure t)
+(use-package ssh-config-mode
+  :ensure t
+  :mode (("/\\.ssh/config\\'" . ssh-config-mode)
+         ("/sshd?_config\\'" . ssh-config-mode)
+         ("/known_hosts\\'" . ssh-known-hosts-mode)
+         ("/authorized_keys2?\\'" . ssh-authorized-keys-mode)))
 
-(global-set-key (kbd "C-c r p") 'eradio-play)
-(global-set-key (kbd "C-c r s") 'eradio-stop)
+(use-package graphviz-dot-mode
+  :ensure t
+  :mode ("\\.dot\\'" . graphviz-dot-mode))
 
-(setq eradio-channels '(("fip" . "https://stream.radiofrance.fr/fip/fip_hifi.m3u8?id=radiofrance")))
+(use-package plantuml-mode
+  :ensure t
+  :mode ("\\.plantuml\\'" . plantuml-mode))
 
-(defun play-fip ()
-  (interactive)
-  (eradio--play-low-level "https://stream.radiofrance.fr/fip/fip_hifi.m3u8?id=radiofrance")
-  (message "FIP rox !"))
-
-(global-set-key (kbd "C-c r f") 'play-fip)
-
-
-(use-package whitespace-cleanup-mode
-  :ensure t)
-
-(global-whitespace-cleanup-mode t)
-
-;; markdown
 (use-package markdown-mode
   :ensure t
-  :commands (markdown-mode gfm-mode)
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
          ("\\.markdown\\'" . markdown-mode))
-  :init (setq markdown-command "multimarkdown"))
+  :custom (markdown-command "multimarkdown"))
+
+(use-package jq-mode
+  :ensure t
+  :mode ("\\.jq\\'" . jq-mode))
+
+;; Emacs 30 fournit `lua-ts-mode' : le paquet MELPA `lua-mode' a ete retire,
+;; l'association de .lua est faite dans conf-treesit.el.
+
+;; --- Requetes HTTP ----------------------------------------------------------
+
+(use-package restclient
+  :ensure t
+  :mode ("\\.http\\'" . restclient-mode))
+
+(use-package restclient-helm
+  :ensure t
+  :after restclient)
+
+;; --- Fichiers et buffers ----------------------------------------------------
+
+(use-package helm-ls-git
+  :ensure t
+  :commands helm-ls-git)
+
+(use-package sudo-edit
+  :ensure t
+  :commands (sudo-edit sudo-edit-find-file))
+
+(use-package ibuffer-git :ensure t :after ibuffer)
+(use-package ibuffer-vc :ensure t :after ibuffer)
+(use-package ibuffer-tramp :ensure t :after ibuffer)
+
+(global-set-key (kbd "C-x C-b") #'ibuffer)
+
+;; Nettoyage des espaces en fin de ligne, limite aux buffers deja propres :
+;; un fichier ancien ne se retrouve donc jamais reformate en entier dans un
+;; commit qui ne devait toucher que trois lignes.
+(use-package whitespace-cleanup-mode
+  :ensure t
+  :config
+  (global-whitespace-cleanup-mode t))
+
+;; editorconfig est integre a Emacs 30 ; le paquet MELPA n'est plus necessaire.
+(editorconfig-mode 1)
+
+;; --- Demarrage --------------------------------------------------------------
+
+;; Ecran d'accueil : fichiers recents, projets, marque-pages. Declare ici et
+;; non dans conf-org.el, ou il n'avait rien a faire.
+(use-package dashboard
+  :ensure t
+  :config
+  (dashboard-setup-startup-hook))
+
+;; --- Documentation et aide --------------------------------------------------
+
+(use-package helm-dash
+  :ensure t
+  :commands (helm-dash helm-dash-at-point))
+
+(use-package cheat-sh
+  :ensure t
+  :commands (cheat-sh cheat-sh-search))
+
+(use-package tldr
+  :ensure t
+  :commands tldr)
+
+(use-package lorem-ipsum
+  :ensure t
+  :commands (lorem-ipsum-insert-paragraphs
+             lorem-ipsum-insert-sentences
+             lorem-ipsum-insert-list))
+
+(use-package remind-bindings
+  :ensure t
+  :hook (after-init . remind-bindings-initialise)
+  :bind (("C-c C-d" . remind-bindings-toggle-buffer)
+         ("C-c M-d" . remind-bindings-specific-mode)))
+
+;; Statistiques d'utilisation des touches, utiles pour reperer les commandes
+;; frequentes qui meritent un raccourci.
+(use-package keyfreq
+  :ensure t
+  :config
+  (keyfreq-mode 1)
+  (keyfreq-autosave-mode 1))
+
+;; --- Recherche web ----------------------------------------------------------
+
+;; Les URL sont toutes en HTTPS : plusieurs moteurs refusent aujourd'hui le
+;; texte clair, et le moteur "rfcs" pointait sur pretty-rfc.herokuapp.com,
+;; hors service depuis l'arret des dynos gratuits Heroku. Il est remplace par
+;; le service officiel de l'IETF.
+(use-package engine-mode
+  :ensure t
+  :config
+  (engine-mode t)
+
+  (defengine duckduckgo "https://duckduckgo.com/?q=%s" :keybinding "d")
+  (defengine google "https://www.google.fr/search?ie=utf-8&oe=utf-8&q=%s" :keybinding "g")
+  (defengine github "https://github.com/search?ref=simplesearch&q=%s")
+  (defengine stack-overflow "https://stackoverflow.com/search?q=%s")
+  (defengine rfcs "https://datatracker.ietf.org/doc/search?name=%s&rfcs=on")
+  (defengine wikipedia
+    "https://www.wikipedia.org/search-redirect.php?language=fr&go=Go&search=%s"
+    :keybinding "w")
+  (defengine wiktionary
+    "https://www.wikipedia.org/search-redirect.php?family=wiktionary&language=fr&go=Go&search=%s")
+  (defengine google-maps "https://maps.google.com/maps?q=%s")
+  (defengine wolfram-alpha "https://www.wolframalpha.com/input/?i=%s")
+  (defengine youtube "https://www.youtube.com/results?search_query=%s")
+  (defengine project-gutenberg "https://www.gutenberg.org/ebooks/search/?query=%s"))
+
+;; --- Multimedia -------------------------------------------------------------
+
+(use-package emms
+  :ensure t
+  :commands (emms emms-play-directory emms-play-file)
+  :custom
+  (emms-playlist-buffer-name "*Music*")
+  (emms-info-asynchronously t)
+  (emms-source-file-default-directory "~/musique/")
+  :config
+  (emms-all)
+  (emms-default-players)
+  ;; libtag est le seul fournisseur de metadonnees : les autres lancent un
+  ;; sous-processus par piste.
+  (require 'emms-info-libtag)
+  (setq emms-info-functions '(emms-info-libtag))
+  (emms-mode-line 1)
+  (emms-playing-time 1))
+
+(defconst my-fip-stream-url
+  "https://stream.radiofrance.fr/fip/fip_hifi.m3u8?id=radiofrance"
+  "Flux HLS de la radio FIP.")
+
+(use-package eradio
+  :ensure t
+  :bind (("C-c r p" . eradio-play)
+         ("C-c r s" . eradio-stop))
+  :custom
+  (eradio-channels (list (cons "fip" my-fip-stream-url))))
+
+(defun eradio-play-fip ()
+  "Lancer directement FIP, sans passer par le choix de station."
+  (interactive)
+  (require 'eradio)
+  (eradio--play-low-level my-fip-stream-url)
+  (message "FIP rox !"))
+
+;; Liaison posee hors du `use-package' : passer cette commande par `:bind'
+;; ferait generer a use-package un autoload vers le paquet eradio, qui ne la
+;; definit pas.
+(global-set-key (kbd "C-c r f") #'eradio-play-fip)
+
+;; --- Paquets retires --------------------------------------------------------
+
+;; pocket-reader : le service Pocket a ferme en juillet 2025.
+;; wttrin         : non maintenu, casse par un changement d'API de wttr.in.
+;; multi-term     : non maintenu ; `M-x ansi-term' couvre le meme besoin.
+;; origami        : non maintenu, et aucune touche ne lui etait liee ici.
+;; beacon, ctrlf  : declares mais jamais actives (`ctrf-mode' etait d'ailleurs
+;;                  une coquille pour `ctrlf-mode').
+;; csharp-mode    : integre a Emacs depuis la version 29.
+;; auto-complete-rst : greffon d'auto-complete, remplace par corfu.
+;; flycheck et ses greffons : voir conf-lsp.el.
+;; spaceline / powerline : les separateurs XPM etaient regeneres a chaque
+;;                  redisplay ; la mode-line de modus-operandi les remplace.
+;; dimmer         : recalculait les faces de toutes les fenetres a chaque
+;;                  changement de buffer.
+;; smooth-scrolling : remplace par `pixel-scroll-precision-mode' (init.el).
 
 (provide 'conf-misc)
-;;; conf-misc ends here
+
+;;; conf-misc.el ends here

@@ -1,57 +1,58 @@
-(use-package rust-mode
-  :ensure t)
+;;; conf-rust.el --- Configuration Rust -*- lexical-binding: t -*-
 
-(use-package flycheck-rust
-  :ensure t)
+;;; Commentary:
 
-(with-eval-after-load 'rust-mode
-  (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+;; `rust-ts-mode' (Emacs 30) + eglot + rust-analyzer.
+;;
+;; Cette pile remplace quatre paquets qui se recouvraient : `rust-mode' et
+;; `rustic' fournissaient chacun un mode majeur pour .rs, `racer' proposait la
+;; completion et la documentation — le projet est archive depuis 2021, son role
+;; ayant ete repris par rust-analyzer — et `cargo' faisait double emploi avec
+;; `cargo-mode', tous deux activant un `cargo-minor-mode' sur le meme hook.
+;;
+;; `flycheck-rust' disparait avec flycheck : les diagnostics de clippy arrivent
+;; desormais par rust-analyzer, donc par flymake (voir conf-lsp.el).
 
-;; completion and doc
-(use-package racer
-  :ensure t)
-(add-hook 'rust-mode-hook #'racer-mode)
-(add-hook 'racer-mode-hook #'eldoc-mode)
+;;; Code:
 
-;; cargo
-(use-package cargo
-  :ensure t)
-(add-hook 'rust-mode-hook 'cargo-minor-mode)
+(use-package reformatter
+  :ensure t
+  :demand t)
 
+;; rustfmt lit stdin et ecrit stdout : le formatage ne passe pas par le serveur
+;; de langage et ne peut donc pas geler Emacs en attendant rust-analyzer.
+(reformatter-define rust-format
+  :program "rustfmt"
+  :args '("--emit" "stdout" "--quiet"))
+
+(defun my-rust-setup ()
+  "Reglages communs aux buffers Rust."
+  (eglot-ensure)
+  (rust-format-on-save-mode 1))
+
+;; Les indices de type en ligne, principal apport de rust-analyzer sur du code
+;; fortement infere, sont actives par eglot lui-meme des que le serveur declare
+;; la capacite. Les allumer depuis le hook du mode majeur echouait : a cet
+;; instant `eglot-ensure' n'a pas encore etabli la connexion, et la commande
+;; remontait une erreur "No current JSON-RPC connection" a chaque ouverture de
+;; fichier .rs.
+
+(add-hook 'rust-ts-mode-hook #'my-rust-setup)
+
+;; Lancement des commandes cargo depuis le buffer courant.
 (use-package cargo-mode
   :ensure t
-  :config
-  (add-hook 'rust-mode-hook 'cargo-minor-mode))
+  :hook (rust-ts-mode . cargo-minor-mode)
+  ;; La keymap du mode mineur s'appelle `cargo-minor-mode-map' ; le nom
+  ;; `cargo-mode-map' n'existe pas, et la liaison echouait a l'activation du
+  ;; mode par un "void-variable".
+  :bind (:map cargo-minor-mode-map
+              ("C-c b" . cargo-mode-build)
+              ("C-c t" . cargo-mode-test)))
 
-(define-key rust-mode-map (kbd "C-c b") 'cargo-mode-build)
-(define-key rust-mode-map (kbd "C-c t") 'cargo-mode-test)
+;; Les reglages rust-analyzer (clippy, build scripts, macros procedurales)
+;; sont dans conf-lsp.el.
 
+(provide 'conf-rust)
 
-(use-package rustic
-  :ensure t
-  :bind (:map rustic-mode-map
-              ("M-j" . lsp-ui-imenu)
-              ("M-?" . lsp-find-references)
-              ("C-c C-c l" . flycheck-list-errors)
-              ("C-c C-c a" . lsp-execute-code-action)
-              ("C-c C-c r" . lsp-rename)
-              ("C-c C-c q" . lsp-workspace-restart)
-              ("C-c C-c Q" . lsp-workspace-shutdown)
-              ("C-c C-c s" . lsp-rust-analyzer-status))
-  :config
-  ;; uncomment for less flashiness
-  ;; (setq lsp-eldoc-hook nil)
-  ;; (setq lsp-enable-symbol-highlighting nil)
-  ;; (setq lsp-signature-auto-activate nil)
-
-  ;; comment to disable rustfmt on save
-  (setq rustic-format-on-save t)
-  (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook))
-
-(defun rk/rustic-mode-hook ()
-  ;; so that run C-c C-c C-r works without having to confirm, but don't try to
-  ;; save rust buffers that are not file visiting. Once
-  ;; https://github.com/brotzeit/rustic/issues/253 has been resolved this should
-  ;; no longer be necessary.
-  (when buffer-file-name
-    (setq-local buffer-save-without-query t)))
+;;; conf-rust.el ends here

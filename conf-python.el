@@ -1,169 +1,167 @@
+;;; conf-python.el --- Configuration Python -*- lexical-binding: t -*-
+
+;;; Commentary:
+
 ;; On utilise le python.el integre a Emacs 30 plutot que le paquet MELPA
-;; `python-mode'. Ce dernier lie TAB a `py-indent-line', qui fait defiler les
+;; `python-mode'.  Ce dernier lie TAB a `py-indent-line', qui fait defiler les
 ;; niveaux d'indentation candidats au lieu de calculer le bon : dans un bloc
 ;; src org, le code sautait d'une colonne a l'autre a chaque TAB.
-;; `require' est explicite parce que les `define-key python-mode-map' plus bas
-;; s'executent au chargement de ce fichier.
-;; python.el enregistre lui-meme .py dans `auto-mode-alist' et
-;; `interpreter-mode-alist' via ses autoloads : rien a declarer ici.
+;;
+;; Tout s'accroche a `python-base-mode', ancetre commun de `python-mode' et de
+;; `python-ts-mode'.  C'est ce qui fait que la bascule vers tree-sitter decidee
+;; dans conf-treesit.el ne desactive silencieusement ni les raccourcis ni les
+;; modes mineurs declares ici.
+
+;;; Code:
+
 (require 'python)
 
-(add-hook 'python-mode-hook
+;; eglot est charge par conf-lsp.el, qui precede ce module dans
+;; `my-configuration-modules'.
+
+(add-hook 'python-base-mode-hook
           (lambda ()
-            ;; buffer-local : `python-indent-offset' est une option globale
+            ;; buffer-local : ce sont des options globales par defaut
             (setq-local python-indent-offset 4)
             (setq-local indent-tabs-mode nil)
             (setq-local tab-width 4)))
 
+;; --- Serveur de langage -----------------------------------------------------
+
+(defconst my-python-language-servers
+  '("basedpyright-langserver" "pyright-langserver" "pylsp" "jedi-language-server")
+  "Serveurs de langage Python acceptes, du plus complet au plus simple.
+
+La liste par defaut d'eglot se rabat aussi sur \"ruff server\". C'est un piege
+ici : pyenv installe un shim `ruff' visible depuis `executable-find' alors que
+le binaire n'existe que dans un interpreteur precis. eglot demarrerait donc un
+serveur qui echoue immediatement, a chaque ouverture de fichier.")
+
+(defun my-python-available-language-server ()
+  "Premier serveur de `my-python-language-servers' present sur la machine."
+  (seq-find #'executable-find my-python-language-servers))
+
+(defun my-python-setup-eglot ()
+  "Demarrer eglot seulement si un serveur Python est installe.
+Sans cette garde, chaque ouverture d'un fichier Python sur une machine sans
+serveur produit une erreur de connexion."
+  (when (my-python-available-language-server)
+    (eglot-ensure)))
+
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+               (cons '(python-mode python-ts-mode)
+                     (lambda (&rest _)
+                       (let ((server (my-python-available-language-server)))
+                         (if (member server '("basedpyright-langserver" "pyright-langserver"))
+                             (list server "--stdio")
+                           (list server)))))))
+
+(add-hook 'python-base-mode-hook #'my-python-setup-eglot)
+
+;; --- Aides a l'ecriture -----------------------------------------------------
 
 (defun python-add-breakpoint ()
-    "Add a break point."
-    (interactive)
-    (newline-and-indent)
-    (insert "breakpoint()")
-    (newline-and-indent)
-    (highlight-lines-matching-regexp "^[ ]*breakpoint()")
-    (save-buffer))
-
- (define-key python-mode-map (kbd "C-c C-b") 'python-add-breakpoint)
+  "Inserer un `breakpoint()' sur une nouvelle ligne et sauvegarder."
+  (interactive)
+  (newline-and-indent)
+  (insert "breakpoint()")
+  (newline-and-indent)
+  (highlight-lines-matching-regexp "^[ ]*breakpoint()")
+  (save-buffer))
 
 (defun python-add-remote-breakpoint ()
-    "Add a break point."
-    (interactive)
-    (newline-and-indent)
-    (insert "import rpdb; rpdb.set_trace()")
-    (newline-and-indent)
-    (highlight-lines-matching-regexp "^[ ]*import rpdb; rpdb.set_trace()")
-    (save-buffer))
-
-(define-key python-mode-map (kbd "C-c C-r") 'python-add-remote-breakpoint)
-
-(defun python-add-nose-breakpoint ()
-    "Add a break point."
-    (interactive)
-    (newline-and-indent)
-    (insert "import nose; nose.tools.set_trace()")
-    (newline-and-indent)
-    (highlight-lines-matching-regexp "^[ ]*import nose; nose.tools.set_trace()")
-    (save-buffer))
-
-(define-key python-mode-map (kbd "C-c C-n") 'python-add-nose-breakpoint)
+  "Inserer un point d'arret rpdb, accessible par telnet."
+  (interactive)
+  (newline-and-indent)
+  (insert "import rpdb; rpdb.set_trace()")
+  (newline-and-indent)
+  (highlight-lines-matching-regexp "^[ ]*import rpdb; rpdb.set_trace()")
+  (save-buffer))
 
 (defun python-add-noqa ()
-  "add # NOQA."
+  "Ajouter un marqueur `# NOQA' en fin de ligne courante."
   (interactive)
   (move-end-of-line nil)
-  (insert "  # NOQA")
-  )
-
-(define-key python-mode-map (kbd "<f10>") 'python-add-noqa)
-
-
-(defun python-replace-quote ()
-  (interactive)
-  (move-beginning-of-line nil)
-  (let ((end (copy-marker (line-end-position))))
-    (while (re-search-forward "\"" end t)
-      (replace-match "'" nil nil)))
-  (move-end-of-line nil)
-  )
-
-(define-key python-mode-map (kbd "<f9>") 'python-replace-quote)
-
-(defun python-add-header-file ()
-  (interactive)
-  (goto-line 0)
-  (insert "# coding: utf-8")
-  (newline-and-indent)
-  (insert "\"\"\"Some comment.\"\"\"")
-  (newline-and-indent)
-  (newline-and-indent)
-  )
-
-(define-key python-mode-map (kbd "<f8>") 'python-add-header-file)
+  (insert "  # NOQA"))
 
 (defun python-add-nocover ()
-  "add # NOQA"
+  "Ajouter un marqueur `# pragma: nocover' en fin de ligne courante."
   (interactive)
   (move-end-of-line nil)
   (insert "  # pragma: nocover")
-  (save-buffer)
-  )
+  (save-buffer))
 
-(define-key python-mode-map (kbd "C-p") 'python-add-nocover)
+(defun python-replace-quote ()
+  "Remplacer les guillemets doubles par des simples sur la ligne courante."
+  (interactive)
+  (save-excursion
+    (move-beginning-of-line nil)
+    (let ((line-end (copy-marker (line-end-position))))
+      (while (re-search-forward "\"" line-end t)
+        (replace-match "'" nil nil)))))
 
+(defun python-add-header-file ()
+  "Inserer l'en-tete de module : encodage puis docstring."
+  (interactive)
+  ;; `goto-line' est reserve a l'usage interactif et declenche un
+  ;; avertissement a la compilation ; en Lisp on se deplace directement.
+  (goto-char (point-min))
+  (insert "# coding: utf-8\n")
+  (insert "\"\"\"Some comment.\"\"\"\n\n"))
 
-(defun telnet-rpdb()
-  "Launch telnet on the default port of rpdb."
+(defun telnet-rpdb ()
+  "Ouvrir un telnet sur le port par defaut de rpdb."
   (interactive)
   (telnet "127.0.0.1" 4444))
 
+;; Les raccourcis portent sur `python-base-mode-map' pour valoir aussi bien en
+;; `python-mode' qu'en `python-ts-mode'.
+;;
+;; Les anciennes liaisons "C-p" (nocover) et "C-f" (erreur suivante) sont
+;; abandonnees : elles ecrasaient `previous-line' et `forward-char' dans tous
+;; les buffers Python. Le parcours des erreurs passe desormais par les M-n /
+;; M-p de flymake (conf-lsp.el).
+(defconst my-python-key-bindings
+  '(("C-c C-b" . python-add-breakpoint)
+    ("C-c C-r" . python-add-remote-breakpoint)
+    ("<f7>"    . python-add-nocover)
+    ("<f8>"    . python-add-header-file)
+    ("<f9>"    . python-replace-quote)
+    ("<f10>"   . python-add-noqa))
+  "Raccourcis maison des buffers Python.")
 
+;; Les liaisons sont posees sur les deux keymaps enfants et non sur
+;; `python-base-mode-map'. python.el reserve deja certaines de ces touches dans
+;; les keymaps de `python-mode' et `python-ts-mode' — C-c C-b y vaut
+;; `python-shell-send-block' — et une keymap enfant masque toujours son parent :
+;; declarer dans la keymap commune ne suffit donc pas a reprendre la touche.
+(dolist (python-keymap (list python-mode-map python-ts-mode-map))
+  (dolist (binding my-python-key-bindings)
+    (define-key python-keymap (kbd (car binding)) (cdr binding))))
+
+;; --- Outils -----------------------------------------------------------------
+
+;; Generation de docstrings au format Sphinx.
 (use-package sphinx-doc
-  :ensure t)
-(add-hook 'python-mode-hook (lambda ()
-                                  (require 'sphinx-doc)
-                                  (sphinx-doc-mode t)))
+  :ensure t
+  :hook (python-base-mode . sphinx-doc-mode))
 
-(define-key python-mode-map (kbd "C-f") 'flycheck-next-error)
-
-(use-package flycheck-cython
-  :ensure t)
-(add-hook 'cython-mode-hook 'flycheck-mode)
-
-
-;; pip stuff
-(use-package pip-requirements
-  :ensure t)
-
-(use-package blacken
- :ensure t)
-
-(add-hook 'python-mode-hook 'blacken-mode)
-
-;; binding for sphinx
+;; Coloration et raccourcis pour les fichiers reStructuredText.
 (use-package sphinx-mode
-  :ensure t)
-
-
-
-(use-package lsp-mode
   :ensure t
-  :commands lsp
-  :custom
-  ;; what to use when checking on-save. "check" is default, I prefer clippy
-  (lsp-rust-analyzer-cargo-watch-command "clippy")
-  (lsp-eldoc-render-all nil)
-  (lsp-idle-delay 0.6)
-  ;; lsp-mode pose un watcher par fichier du workspace : sur un gros depot
-  ;; cela sature les inotify et gele Emacs a l'ouverture du projet.
-  (lsp-enable-file-watchers nil)
-  ;; journalisation des echanges JSON : tres couteuse, inutile hors debug
-  (lsp-log-io nil)
-  ;; corfu est le seul frontal de completion dans les buffers prog-mode
-  (lsp-completion-provider :none)
-  ;; enable / disable the hints as you prefer:
-  (lsp-rust-analyzer-server-display-inlay-hints t)
-  (lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")
-  (lsp-rust-analyzer-display-chaining-hints t)
-  (lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names nil)
-  (lsp-rust-analyzer-display-closure-return-type-hints t)
-  (lsp-rust-analyzer-display-parameter-hints nil)
-  (lsp-rust-analyzer-display-reborrow-hints nil)
+  :commands sphinx-mode)
 
-  :config
-  (lsp-register-custom-settings
-   '(("pyls.plugins.pyls_mypy.enabled" t t)
-     ("pyls.plugins.pyls_mypy.live_mode" nil t)
-     ("pyls.plugins.pyls_black.enabled" t t)))
-  :hook
-  ((python-mode . lsp)
-   (lsp-mode-hook . lsp-ui-mode)))
-
-(use-package lsp-ui
+(use-package pip-requirements
   :ensure t
-  :commands lsp-ui-mode
-  :custom
-  (lsp-ui-peek-always-show t)
-  (lsp-ui-sideline-show-hover nil)
-  (lsp-ui-doc-enable nil))
+  :mode ("requirements\\(?:-[^/]*\\)?\\.txt\\'" . pip-requirements-mode))
+
+;; Note sur le formatage : `blacken' a ete retire, black n'etant pas installe
+;; ici. `ruff format' le remplacerait avantageusement, mais son binaire n'est
+;; accessible que dans l'environnement pyenv 3.11 — le brancher sur
+;; `before-save-hook' ferait echouer chaque sauvegarde ailleurs. A rebrancher
+;; le jour ou l'outil est disponible globalement.
+
+(provide 'conf-python)
+
+;;; conf-python.el ends here

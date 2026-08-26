@@ -1,14 +1,34 @@
-;; thumbs in dired
-(use-package image-dired+
-  :ensure t)
-(eval-after-load 'image-dired '(require 'image-dired+))
-(eval-after-load 'image-dired+ '(image-diredx-async-mode 1))
+;;; conf-dired.el --- Navigation dans les fichiers -*- lexical-binding: t -*-
 
-;; icons
-(use-package dired-icon
-  :ensure t)
-(add-hook 'dired-mode-hook 'dired-icon-mode)
+;;; Commentary:
+
+;; Reglages du gestionnaire de fichiers integre.
+;;
+;; `image-dired+' a ete retire : la generation asynchrone des vignettes qu'il
+;; apportait est native depuis Emacs 29.  `dired-icon' aussi : il faisait
+;; exactement le meme travail qu'`all-the-icons-dired', et les deux poses
+;; d'icones se superposaient sur chaque ligne.
+
+;;; Code:
+
+(use-package dired
+  :custom
+  ;; Groupe les repertoires en tete, tailles lisibles, tri naturel des nombres.
+  (dired-listing-switches "-alhv --group-directories-first")
+  ;; Avec deux fenetres dired ouvertes, propose l'autre comme destination par
+  ;; defaut d'une copie ou d'un deplacement.
+  (dired-dwim-target t)
+  ;; Reutilise le buffer courant au lieu d'en ouvrir un par repertoire
+  ;; traverse, qui s'accumulaient jusqu'a saturer la liste des buffers.
+  (dired-kill-when-opening-new-dired-buffer t)
+  ;; Recursion sans confirmation pour les copies ; la suppression reste
+  ;; confirmee.
+  (dired-recursive-copies 'always))
 
 (use-package all-the-icons-dired
-  :ensure t)
-(add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
+  :ensure t
+  :hook (dired-mode . all-the-icons-dired-mode))
+
+(provide 'conf-dired)
+
+;;; conf-dired.el ends here

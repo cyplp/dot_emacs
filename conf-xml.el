@@ -1,55 +1,78 @@
-(use-package auto-complete-nxml
-  :ensure t)
+;;; conf-xml.el --- XML et nXML -*- lexical-binding: t -*-
 
-;; Keystroke for popup help about something at point.
-(setq auto-complete-nxml-popup-help-key "C-:")
+;;; Commentary:
 
-;; Keystroke for toggle on/off automatic completion.
-(setq auto-complete-nxml-toggle-automatic-key "C-c C-t")
+;; `auto-complete-nxml' a ete retire : auto-complete n'est plus maintenu et la
+;; completion dans le buffer passe desormais par corfu (conf-completion.el),
+;; qui consomme directement les candidats de nxml via
+;; `completion-at-point-functions'.
+;;
+;; Le formatage etait declare deux fois : une fois par `reformatter-define'
+;; ici, une fois par le paquet MELPA `xml-format', qui n'est rien d'autre que
+;; le meme appel. Seule la definition locale subsiste.
 
-;; If you want to start completion manually from the beginning
-(setq auto-complete-nxml-automatic-p nil)
+;;; Code:
 
+(use-package reformatter
+  :ensure t
+  :demand t)
+
+(use-package nxml-mode
+  :mode (("\\.xml\\'" . nxml-mode)
+         ("\\.xsl\\'" . nxml-mode)
+         ("\\.zcml\\'" . nxml-mode)
+         ("\\.plist\\'" . nxml-mode)
+         ("\\.pt\\'" . nxml-mode))
+  :bind (:map nxml-mode-map
+              ("C-c h" . hs-toggle-hiding)
+              ;; Liaison deplacee depuis la keymap globale, ou elle rendait
+              ;; C-<return> inutilisable dans tous les autres modes.
+              ;; `nxml-complete' est obsolete depuis Emacs 26 : la completion
+              ;; passe par `completion-at-point', donc par corfu, qui recupere
+              ;; les memes candidats issus du schema RELAX NG.
+              ("C-<return>" . completion-at-point))
+  :custom
+  (nxml-child-indent 2)
+  (nxml-attribute-indent 2)
+  ;; Ferme la balise des l'ouverture du chevron fermant.
+  (nxml-slash-auto-complete-flag t))
+
+;; Schemas HTML5 pour la validation nXML.
 (use-package html5-schema
   :ensure t)
 
-;;could be usefull sometimes
+;; Navigation par chemin dans un document structure (XML, JSON).
 (use-package x-path-walker
-  :ensure t)
+  :ensure t
+  :commands (helm-x-path-walker))
 
-(use-package hideshow
-  :ensure t)
+;; --- Repliage ---------------------------------------------------------------
 
-(use-package sgml-mode
-  :ensure t)
+;; hideshow ne connait pas la syntaxe XML : on lui decrit les delimiteurs.
+;; Voir https://emacs.stackexchange.com/questions/2884/
+(with-eval-after-load 'hideshow
+  (add-to-list 'hs-special-modes-alist
+               '(nxml-mode
+                 "<!--\\|<[^/>]*[^/]>"
+                 "-->\\|</[^/>]*[^/]>"
+                 "<!--"
+                 sgml-skip-tag-forward
+                 nil)))
 
+(add-hook 'nxml-mode-hook #'hs-minor-mode)
 
-;; fold some part
-;; https://emacs.stackexchange.com/questions/2884/the-old-how-to-fold-xml-question
-(add-to-list 'hs-special-modes-alist
-             '(nxml-mode
-               "<!--\\|<[^/>]*[^/]>"
-               "-->\\|</[^/>]*[^/]>"
+;; --- Formatage --------------------------------------------------------------
 
-               "<!--"
-               sgml-skip-tag-forward
-               nil))
-
-(add-hook 'nxml-mode-hook 'hs-minor-mode)
-
-;; optional key bindings, easier than hs defaults
-(define-key nxml-mode-map (kbd "C-c h") 'hs-toggle-hiding)
-
-(use-package reformatter
-  :ensure t)
-
+;; `:mode' est laisse a sa valeur par defaut : c'est lui qui fait engendrer
+;; `xml-format-on-save-mode' par la macro. Le passer a nil supprimait ce mode,
+;; et le hook plus bas ne survivait que grace au paquet MELPA `xml-format', qui
+;; definissait le meme symbole.
 (reformatter-define xml-format
   :program "xmllint"
-  :args '("--format" "-")
-  :mode ((nxml-mode
-	  (mode . xml-format-on-save))))
+  :args '("--format" "-"))
 
-(use-package xml-format
-  :ensure t
-  :demand t
-  :after nxml-mode)
+(add-hook 'nxml-mode-hook #'xml-format-on-save-mode)
+
+(provide 'conf-xml)
+
+;;; conf-xml.el ends here
