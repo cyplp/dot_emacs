@@ -25,6 +25,26 @@
 ;; each 50MB of allocated data (the default is on every 0.76MB)
 (setq gc-cons-threshold (* 64 1024 1024))
 
+;; --- Performance / anti-freeze ---------------------------------------------
+
+;; Les serveurs LSP (gopls, pylsp) envoient de gros paquets JSON. Le defaut
+;; de 4096 octets force Emacs a boucler des milliers de fois par reponse :
+;; c'est la cause n1 des gels avec lsp-mode et eglot.
+(setq read-process-output-max (* 4 1024 1024))
+
+;; Bascule automatiquement en mode degrade sur les fichiers a lignes tres
+;; longues (JSON minifie, logs, dumps SQL), ou font-lock devient inutilisable.
+(global-so-long-mode 1)
+
+;; L'algorithme bidirectionnel de rendu du texte coute cher et n'a aucune
+;; utilite ici : on force la direction gauche-droite.
+(setq-default bidi-paragraph-direction 'left-to-right)
+(setq bidi-inhibit-bpa t)
+
+;; Evite qu'Emacs vide ses caches de fontes sous pression memoire, ce qui
+;; provoque des pauses de redisplay avec les themes riches en glyphes.
+(setq inhibit-compacting-font-caches t)
+
 (setq make-backup-files nil) ; stop creating backup~ files
 (setq auto-save-default nil) ; stop creating #autosave# files
 (setq create-lockfiles nil)  ; stop creating .# files
@@ -92,15 +112,17 @@
 (prefer-coding-system 'mule-utf-8)
 
 ;; move mouse cursor
-(mouse-avoidance-mode 'animate)
+;; mouse-avoidance-mode retire : il s'accroche a `post-command-hook' et
+;; deplace le pointeur pendant le redisplay.
+;; (mouse-avoidance-mode 'banish)
 
 ;; display only tails of lines longer than 80 columns, tabs and
 ;; trailing whitespaces
 (setq whitespace-line-column 88
       whitespace-style '(tabs trailing lines-tail))
 
-;; nuke trailing whitespaces when writing to a file
-(add-hook 'write-file-functions 'delete-trailing-whitespace)
+;; le nettoyage des espaces est assure par global-whitespace-cleanup-mode
+;; (conf-misc.el), qui ne touche que les buffers deja propres.
 
 ;; pretty-icons
 ;;(use-package mode-icons
@@ -182,6 +204,8 @@
 	helm-semantic-fuzzy-match t
 	helm-imenu-fuzzy-match t
 	helm-completion-in-region-fuzzy-match t
+	;; helm garde le minibuffer, corfu garde la completion dans le buffer
+	helm-mode-handle-completion-in-region nil
 	helm-candidate-number-list 150
 	helm-split-window-in-side-p t
 	helm-move-to-line-cycle-in-source t

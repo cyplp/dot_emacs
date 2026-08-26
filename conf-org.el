@@ -61,11 +61,8 @@
 (global-set-key (kbd "<S-f8>") (lambda() (interactive)(find-file (my-org-root "todos.org"))))
 
 ;; nicer bullets
-(use-package org-bullets
-  :ensure t)
-
-(org-bullets-mode t)
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+;; org-bullets retire : org-modern (plus bas) fait le meme travail, et les
+;; deux cumules doublent les overlays de chaque buffer org.
 
 
 (define-key global-map "\C-cl" 'org-store-link)
@@ -106,6 +103,14 @@
    ))
 
 (setq org-src-fontify-natively t)
+
+;; TAB dans un bloc src fait un aller-retour vers un buffer d'edition dans le
+;; mode du langage. Au retour, Org reindentait tout le contenu de
+;; `org-edit-src-content-indentation' colonnes (2 par defaut) : du code colle
+;; a la marge partait definitivement vers la droite des le premier TAB.
+;; Preserver l'indentation rend aussi le tangling fidele, ce qui compte pour
+;; les langages ou l'indentation est semantique (python, yaml).
+(setq org-src-preserve-indentation t)
 
 (setq org-todo-keyword-faces
       '(("ARCHIVE" . (:foreground "light green" :weight bold))

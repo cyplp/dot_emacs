@@ -17,6 +17,11 @@
   (setenv "PATH" (concat gobin path-separator (getenv "PATH"))))
 
 ;; go-mode + eglot
+;; goimports formate ET reorganise les imports en un seul sous-processus
+;; court, la ou eglot-code-actions "source.organizeImports" attendait la
+;; reponse de gopls en bloquant Emacs a chaque sauvegarde.
+(setq gofmt-command "goimports")
+
 (use-package go-mode
   :ensure t
   :hook ((go-mode . eglot-ensure)
@@ -33,12 +38,10 @@
          ("M-n" . flymake-goto-next-error)
          ("M-p" . flymake-goto-prev-error)))
 
-(add-hook 'before-save-hook
-  (lambda ()
-    (when (eq major-mode 'go-mode)
-      (eglot-code-actions nil nil "source.organizeImports" t))))
-
 ;; Global
+;; Plafonne la duree d'un gel si gopls ne repond pas (defaut : 10 s).
+(setq eglot-request-timeout 3)
+
 (setq-default eglot-workspace-configuration
   '((:gopls . ((staticcheck . t)
                (matcher . "CaseSensitive")))))

@@ -54,6 +54,20 @@
   :ensure t)
 (add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode)
 
+;; flycheck cible plutot que global : les modes pilotes par eglot (go)
+;; recoivent deja leurs diagnostics via flymake. `global-flycheck-mode' y
+;; ajoutait go-build / go-vet / go-test en sous-processus a chaque
+;; sauvegarde, pour un resultat redondant.
+(dolist (flycheck-target-hook '(python-mode-hook
+                                rust-mode-hook
+                                rustic-mode-hook
+                                cperl-mode-hook
+                                sh-mode-hook
+                                plantuml-mode-hook
+                                gitlab-ci-mode-hook
+                                emacs-lisp-mode-hook))
+  (add-hook flycheck-target-hook #'flycheck-mode))
+
 (use-package auto-complete-rst
   :ensure t)
 
@@ -91,7 +105,10 @@
   :ensure t)
 
 (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
-(setq highlight-indent-guides-method 'columns)
+(setq highlight-indent-guides-method 'character)
+;; le mode "responsive" reevalue les guides a chaque deplacement du curseur
+(setq highlight-indent-guides-responsive nil)
+(setq highlight-indent-guides-suppress-auto-error t)
 
 
 ;; set parenthe in color
@@ -127,10 +144,13 @@
   (flycheck-plantuml-setup))
 
 ;;powerline
-(use-package spaceline
-  :ensure t)
-(require 'spaceline-config)
-(spaceline-emacs-theme)
+;; spaceline desactive : les separateurs XPM de powerline sont regeneres a
+;; chaque redisplay, ce qui rend la mode-line responsable d'une part
+;; importante du temps d'affichage. On garde la mode-line de modus-operandi.
+;; (use-package spaceline
+;;   :ensure t)
+;; (require 'spaceline-config)
+;; (spaceline-emacs-theme)
 
 ;; (use-package spaceline-all-the-icons
 ;;   :after spaceline
@@ -276,9 +296,11 @@
 (global-set-key (kbd "C-x :") 'undo-tree-visualize)
 
 ;; hl current buffer
-(use-package dimmer
-  :ensure t)
-(dimmer-mode)
+;; dimmer desactive : il recalcule les faces de toutes les fenetres a chaque
+;; changement de buffer ou de fenetre.
+;; (use-package dimmer
+;;   :ensure t)
+;; (dimmer-mode)
 
 ;; keyfreq
 (use-package keyfreq
@@ -301,10 +323,18 @@
   :ensure t)
 
 ;; hl stuf
-(use-package highlight-symbol
+;; highlight-symbol remplace par symbol-overlay : highlight-symbol n'est plus
+;; maintenu et re-parcourait tout le buffer en expression reguliere apres
+;; chaque deplacement du curseur. symbol-overlay borne sa recherche a la
+;; portion affichee et ne pose ses overlays qu'a la demande.
+(use-package symbol-overlay
   :ensure t
-    :init (progn  (add-hook 'prog-mode-hook 'highlight-symbol-mode)
-                  (add-hook 'prog-mode-hook 'highlight-symbol-nav-mode)))
+  :hook (prog-mode . symbol-overlay-mode)
+  :bind (:map symbol-overlay-mode-map
+         ("M-s s" . symbol-overlay-put)
+         ("M-s n" . symbol-overlay-jump-next)
+         ("M-s p" . symbol-overlay-jump-prev)
+         ("M-s r" . symbol-overlay-rename)))
 
 ;; copy from http://ergoemacs.org/emacs/elisp_read_file_content.html
 (defun get-string-from-file (filePath)
@@ -333,10 +363,9 @@
          ("C-c M-d" . 'remind-bindings-specific-mode))) ;; buffer-specific only
 
 
-;; smoth-scrolling
-(use-package smooth-scrolling
-  :ensure t)
-(smooth-scrolling-mode 1)
+;; defilement : smooth-scrolling est obsolete et re-implemente le scroll en
+;; Lisp. Emacs 29+ fournit un defilement au pixel natif.
+(pixel-scroll-precision-mode 1)
 
 ;; tldr
 (use-package tldr

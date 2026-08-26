@@ -1,18 +1,19 @@
-(use-package python-mode
-  :ensure t)
-
-(autoload 'python-mode "python-mode" "Python Mode." t)
-(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
-(add-to-list 'interpreter-mode-alist '("python" . python-mode))
-(add-to-list 'interpreter-mode-alist '("python" . python-mode))
+;; On utilise le python.el integre a Emacs 30 plutot que le paquet MELPA
+;; `python-mode'. Ce dernier lie TAB a `py-indent-line', qui fait defiler les
+;; niveaux d'indentation candidats au lieu de calculer le bon : dans un bloc
+;; src org, le code sautait d'une colonne a l'autre a chaque TAB.
+;; `require' est explicite parce que les `define-key python-mode-map' plus bas
+;; s'executent au chargement de ce fichier.
+;; python.el enregistre lui-meme .py dans `auto-mode-alist' et
+;; `interpreter-mode-alist' via ses autoloads : rien a declarer ici.
+(require 'python)
 
 (add-hook 'python-mode-hook
           (lambda ()
-            (set-variable 'py-indent-offset 4)
-            (set-variable 'py-smart-indentation nil)
-            (setq indent-tabs-mode nil)
-            (setq tab-width 4)
-            (define-key python-mode-map "\C-m" 'newline-and-indent)))
+            ;; buffer-local : `python-indent-offset' est une option globale
+            (setq-local python-indent-offset 4)
+            (setq-local indent-tabs-mode nil)
+            (setq-local tab-width 4)))
 
 
 (defun python-add-breakpoint ()
@@ -98,14 +99,11 @@
   (telnet "127.0.0.1" 4444))
 
 
-(defun py-help-at-point nil)
-
 (use-package sphinx-doc
   :ensure t)
 (add-hook 'python-mode-hook (lambda ()
                                   (require 'sphinx-doc)
                                   (sphinx-doc-mode t)))
-(global-flycheck-mode 1)
 
 (define-key python-mode-map (kbd "C-f") 'flycheck-next-error)
 
@@ -135,8 +133,15 @@
   :custom
   ;; what to use when checking on-save. "check" is default, I prefer clippy
   (lsp-rust-analyzer-cargo-watch-command "clippy")
-  (lsp-eldoc-render-all t)
+  (lsp-eldoc-render-all nil)
   (lsp-idle-delay 0.6)
+  ;; lsp-mode pose un watcher par fichier du workspace : sur un gros depot
+  ;; cela sature les inotify et gele Emacs a l'ouverture du projet.
+  (lsp-enable-file-watchers nil)
+  ;; journalisation des echanges JSON : tres couteuse, inutile hors debug
+  (lsp-log-io nil)
+  ;; corfu est le seul frontal de completion dans les buffers prog-mode
+  (lsp-completion-provider :none)
   ;; enable / disable the hints as you prefer:
   (lsp-rust-analyzer-server-display-inlay-hints t)
   (lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")

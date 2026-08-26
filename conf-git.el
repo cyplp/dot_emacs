@@ -2,7 +2,7 @@
   :ensure t
   :hook (prog-mode . git-gutter-mode)
   :config
-  (setq git-gutter:update-interval 1.0))
+  (setq git-gutter:update-interval 0))
 
 (use-package git-gutter-fringe
   :ensure t
