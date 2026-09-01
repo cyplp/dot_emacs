@@ -241,6 +241,10 @@
     conf-elisp
     conf-yaml
     conf-devops
+    conf-claude
+    conf-antigravity
+    conf-mcp
+    conf-mcp-explorer
     conf-latex
     conf-webserver)
   "Modules de configuration a charger, dans l'ordre.

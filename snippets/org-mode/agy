@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: translate in french
+# key: /agy
+# --
+#+name:${1:title}
+#+begin_src antigravity 
+$0
+#+end_src

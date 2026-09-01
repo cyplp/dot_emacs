@@ -37,6 +37,7 @@ custom.el
 .org-id-locations
 forge-database.sqlite
 recentf
+projects
 request/
 
 magithub/
@@ -45,7 +46,6 @@ tldr/
 
 .litable-lists.el
 aws.el
-dbconnectoions.el
 org-roam.db
 ssh-config-keywords.txt
 

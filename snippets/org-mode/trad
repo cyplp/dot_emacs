@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: translate in french
+# key: /tradc!
+# --
+#+name:${1:title}
+#+begin_src claude :model ${2:$$(yas-choose-value '("haiku" "sonnet" "opus"))}
+traduit en français le bloc suivant
+
+$0
+
+#+end_src
