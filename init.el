@@ -228,6 +228,7 @@
     conf-misc
     conf-python
     conf-git
+    conf-conventional-commit
     conf-shortcut
     conf-auto-load
     conf-jabber

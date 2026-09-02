@@ -82,9 +82,14 @@
 ;; Assistance a la redaction de messages au format Conventional Commits.
 ;; `:vc' remplace l'appel a quelpa : quelpa interrogeait le depot distant a
 ;; chaque demarrage d'Emacs, la ou package-vc n'agit qu'a l'installation.
+;; La coloration du format vit dans `conf-conventional-commit'.
 (use-package conventional-commit
   :vc (:url "https://github.com/akirak/conventional-commit.el" :rev :newest)
-  :hook (git-commit-mode . conventional-commit-setup))
+  ;; `git-commit-setup' lie `git-commit-mode-hook' a nil le temps d'activer le
+  ;; mode mineur : la completion accrochee la n'etait jamais installee sur un
+  ;; commit lance par magit. `git-commit-setup-hook' est le point d'entree que
+  ;; magit prevoit pour la configuration d'un tampon de message.
+  :hook (git-commit-setup . conventional-commit-setup))
 
 (provide 'conf-git)
 
