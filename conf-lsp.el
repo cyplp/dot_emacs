@@ -1,47 +1,46 @@
-;;; conf-lsp.el --- Serveurs de langage et diagnostics -*- lexical-binding: t -*-
+;;; conf-lsp.el --- Language servers and diagnostics -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; Un seul client LSP : eglot, integre a Emacs depuis la version 29.  Il
-;; remplace lsp-mode et lsp-ui, qui faisaient double emploi avec lui langage
-;; par langage — python et rust d'un cote, go de l'autre — avec deux jeux de
-;; reglages, deux frontaux de completion et deux systemes de diagnostics a
-;; maintenir en parallele.
+;; A single LSP client: eglot, bundled with Emacs since version 29.  It
+;; replaces lsp-mode and lsp-ui, which duplicated it language by language —
+;; python and rust on one side, go on the other — with two sets of settings,
+;; two completion frontends and two diagnostic systems to maintain in
+;; parallel.
 ;;
-;; Un seul systeme de diagnostics, egalement : flymake, natif lui aussi et
-;; deja alimente par eglot.  flycheck et ses six greffons faisaient tourner
-;; des sous-processus supplementaires pour produire, dans les modes pilotes
-;; par un serveur de langage, exactement les memes erreurs.
+;; A single diagnostic system as well: flymake, also native and already fed by
+;; eglot.  flycheck and its six plugins ran extra subprocesses to produce, in
+;; the modes driven by a language server, exactly the same errors.
 ;;
-;; Les modules par langage se contentent d'appeler `eglot-ensure' ; tout ce
-;; qui est commun est ici.
+;; The per-language modules only call `eglot-ensure'; everything common lives
+;; here.
 
 ;;; Code:
 
 (require 'eglot)
 
-;; Le buffer d'evenements journalise chaque message JSON echange avec le
-;; serveur. Sur un projet actif cela represente plusieurs mega-octets par
-;; session, formates a chaque insertion. Inutile hors debogage du protocole.
+;; The events buffer logs every JSON message exchanged with the server. On an
+;; active project that is several megabytes per session, formatted on each
+;; insertion. Useless outside protocol debugging.
 (setq eglot-events-buffer-config '(:size 0 :format full))
 
-;; Plafonne la duree d'un gel quand un serveur ne repond pas (defaut : 30 s).
+;; Caps how long a freeze lasts when a server does not answer (default: 30 s).
 (setq eglot-request-timeout 10)
 
-;; Ne bloque pas le demarrage d'Emacs en attendant la poignee de main :
-;; au-dela d'une seconde la connexion se poursuit en arriere-plan.
+;; Does not block Emacs startup waiting for the handshake: past one second the
+;; connection carries on in the background.
 (setq eglot-sync-connect 1)
 
-;; Arrete le serveur avec le dernier buffer du projet, au lieu de laisser
-;; tourner un gopls ou un rust-analyzer par projet visite dans la session.
+;; Stops the server with the last buffer of the project, instead of leaving one
+;; gopls or rust-analyzer running per project visited in the session.
 (setq eglot-autoshutdown t)
 
-;; Permet a `xref' de suivre une definition hors du projet courant, typiquement
-;; dans la bibliotheque standard ou les dependances.
+;; Lets `xref' follow a definition outside the current project, typically into
+;; the standard library or the dependencies.
 (setq eglot-extend-to-xref t)
 
-;; Reglages transmis aux serveurs. La forme plist est celle attendue par eglot
-;; depuis Emacs 29 ; l'ancienne forme alist reste acceptee mais est obsolete.
+;; Settings passed to the servers. The plist form is the one eglot expects
+;; since Emacs 29; the old alist form is still accepted but obsolete.
 (setq-default eglot-workspace-configuration
               '(:gopls (:staticcheck t
                         :matcher "CaseSensitive"
@@ -50,11 +49,11 @@
                                 :cargo (:buildScripts (:enable t))
                                 :procMacro (:enable t))))
 
-;; Note sur Python : `eglot-server-programs' essaie deja, dans l'ordre, pylsp,
-;; basedpyright, pyright, jedi-language-server puis "ruff server". Aucun n'a
-;; besoin d'etre declare ici. Seul ruff est installe sur cette machine, ce qui
-;; donne le formatage et le lint mais ni completion ni types : installer
-;; basedpyright ou pylsp suffirait a obtenir le reste.
+;; Note on Python: `eglot-server-programs' already tries, in order, pylsp,
+;; basedpyright, pyright, jedi-language-server then "ruff server". None needs
+;; to be declared here. Only ruff is installed on this machine, which gives
+;; formatting and linting but neither completion nor types: installing
+;; basedpyright or pylsp would be enough to get the rest.
 
 ;; --- Diagnostics ------------------------------------------------------------
 
@@ -66,14 +65,14 @@
               ("C-c ! l" . flymake-show-buffer-diagnostics)
               ("C-c ! p" . flymake-show-project-diagnostics))
   :custom
-  ;; Le fanion dans la marge suffit ; le soulignement ondule rend illisibles
-  ;; les longues lignes deja colorees.
+  ;; The fringe flag is enough; the wavy underline makes long, already colored
+  ;; lines unreadable.
   (flymake-fringe-indicator-position 'left-fringe)
   (flymake-no-changes-timeout 0.7))
 
-;; shellcheck est le seul backend flymake utile pour les scripts shell. Sans
-;; le binaire, activer flymake ne produirait qu'un avertissement de backend
-;; en echec a chaque ouverture de fichier.
+;; shellcheck is the only useful flymake backend for shell scripts. Without the
+;; binary, enabling flymake would only produce a failed-backend warning every
+;; time a file is opened.
 (when (executable-find "shellcheck")
   (add-hook 'sh-mode-hook #'flymake-mode)
   (add-hook 'bash-ts-mode-hook #'flymake-mode))

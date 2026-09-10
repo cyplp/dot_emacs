@@ -1,17 +1,16 @@
-;;; test-ob-claude.el --- tests des blocs org-babel claude -*- lexical-binding: t -*-
+;;; test-ob-claude.el --- claude org-babel block tests -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; Lancer depuis la racine du depot :
+;; Run from the root of the repository:
 ;;
 ;;   emacs -Q --batch -l ert -l tests/test-ob-claude.el \
 ;;         -f ert-run-tests-batch-and-exit
 ;;
-;; Aucun test n'appelle le vrai CLI : il coute du temps et de l'argent, et sa
-;; reponse n'est pas deterministe. Un script bouchon prend sa place et se
-;; contente de rendre ce qu'il a recu, ce qui suffit a verifier ce qui est
-;; sous notre responsabilite : les arguments construits, le prompt transmis,
-;; et l'endroit ou la reponse atterrit.
+;; No test calls the real CLI: it costs time and money, and its answer is not
+;; deterministic. A stub script takes its place and merely returns what it
+;; received, which is enough to check what is under our responsibility: the
+;; arguments built, the prompt passed, and where the answer lands.
 
 ;;; Code:
 
@@ -28,10 +27,10 @@
 ;;; Helpers
 
 (defvar my-ob-claude-test--stub nil
-  "Chemin du script bouchon qui remplace le CLI pendant les tests.")
+  "Path of the stub script that replaces the CLI during the tests.")
 
 (defun my-ob-claude-test--write-stub (script)
-  "Ecrire SCRIPT dans un fichier executable et renvoyer son chemin."
+  "Write SCRIPT into an executable file and return its path."
   (let ((path (make-temp-file "ob-claude-stub" nil ".sh")))
     (with-temp-file path
       (insert "#!/bin/sh\n" script))
@@ -39,7 +38,7 @@
     path))
 
 (defmacro my-ob-claude-test--with-stub (script &rest body)
-  "Executer BODY avec le CLI remplace par un bouchon lancant SCRIPT."
+  "Execute BODY with the CLI replaced by a stub running SCRIPT."
   (declare (indent 1))
   `(let ((my-ob-claude-test--stub (my-ob-claude-test--write-stub ,script)))
      (unwind-protect
@@ -49,7 +48,7 @@
        (delete-file my-ob-claude-test--stub))))
 
 (defun my-ob-claude-test--execute-block (block)
-  "Evaluer le premier bloc src de BLOCK et renvoyer le buffer org resultant."
+  "Evaluate the first src block of BLOCK and return the resulting org buffer."
   (let ((buffer (generate-new-buffer "*test-ob-claude*")))
     (with-current-buffer buffer
       (org-mode)
@@ -60,119 +59,119 @@
     buffer))
 
 (defun my-ob-claude-test--wait-for-result (buffer)
-  "Attendre que le jeton provisoire de BUFFER soit remplace par la reponse."
+  "Wait until the provisional token of BUFFER is replaced by the answer."
   (let ((deadline (+ (float-time) 10)))
     (while (and (< (float-time) deadline)
                 (with-current-buffer buffer
                   (save-excursion
                     (goto-char (point-min))
-                    (search-forward "claude-en-cours:" nil t))))
+                    (search-forward "claude-running:" nil t))))
       (accept-process-output nil 0.05))))
 
-;;; Construction des arguments
+;;; Argument construction
 
 (ert-deftest my-ob-claude-test-arguments-keep-print ()
-  "Le mode non interactif est toujours demande."
+  "The non-interactive mode is always requested."
   (should (member "--print" (org-babel-claude--build-arguments nil))))
 
 (ert-deftest my-ob-claude-test-arguments-map-headers ()
-  "Chaque en-tete reconnu devient une option suivie de sa valeur."
+  "Every recognized header becomes an option followed by its value."
   (let ((arguments (org-babel-claude--build-arguments
                     '((:model . "sonnet")
                       (:effort . "high")
-                      (:system . "Reponds en francais")))))
+                      (:system . "Answer in English")))))
     (should (equal (member "--model" arguments)
                    '("--model" "sonnet" "--effort" "high"
-                     "--append-system-prompt" "Reponds en francais")))))
+                     "--append-system-prompt" "Answer in English")))))
 
 (ert-deftest my-ob-claude-test-arguments-ignore-unknown-headers ()
-  "Un en-tete hors correspondance n'atteint pas la ligne de commande."
+  "A header outside the mapping does not reach the command line."
   (should-not (member "--results"
                       (org-babel-claude--build-arguments '((:results . "drawer"))))))
 
 (ert-deftest my-ob-claude-test-session-none-is-not-a-session ()
-  "La valeur par defaut d'org pour `:session' ne cree pas de conversation."
+  "The org default value for `:session' creates no conversation."
   (should-not (member "--session-id"
                       (org-babel-claude--build-arguments '((:session . "none"))))))
 
 (ert-deftest my-ob-claude-test-session-is-created-then-resumed ()
-  "Une session est creee au premier bloc, puis reprise par les suivants."
+  "A session is created on the first block, then resumed by the next ones."
   (let ((org-babel-claude--session-identifiers (make-hash-table :test #'equal))
         (org-babel-claude--started-sessions (make-hash-table :test #'equal))
-        (params '((:session . "revue"))))
+        (params '((:session . "review"))))
     (let ((creation (org-babel-claude--build-arguments params)))
       (should (member "--session-id" creation))
-      ;; La reprise n'a de sens qu'apres un appel abouti : c'est la sortie du
-      ;; processus qui marque la session comme demarree.
-      (puthash "revue" t org-babel-claude--started-sessions)
+      ;; Resuming only makes sense after a completed call: it is the process
+      ;; output that marks the session as started.
+      (puthash "review" t org-babel-claude--started-sessions)
       (let ((resumption (org-babel-claude--build-arguments params)))
         (should (member "--resume" resumption))
         (should-not (member "--session-id" resumption))
         (should (equal (cadr (member "--resume" resumption))
                        (cadr (member "--session-id" creation))))))))
 
-;;; Corps du bloc
+;;; Block body
 
 (ert-deftest my-ob-claude-test-expand-body-substitutes-variables ()
-  "Une variable de bloc remplace son marqueur dans le prompt."
+  "A block variable replaces its marker in the prompt."
   (should (equal (org-babel-expand-body:claude
-                  "Traduis {{mot}} en anglais."
-                  '((:var . (mot . "bonjour"))))
-                 "Traduis bonjour en anglais.")))
+                  "Translate {{word}} into French."
+                  '((:var . (word . "hello"))))
+                 "Translate hello into French.")))
 
 (ert-deftest my-ob-claude-test-expand-body-leaves-plain-text ()
-  "Un prompt sans marqueur traverse l'expansion intact."
-  (should (equal (org-babel-expand-body:claude "Rien a substituer" nil)
-                 "Rien a substituer")))
+  "A prompt without a marker goes through the expansion intact."
+  (should (equal (org-babel-expand-body:claude "Nothing to substitute" nil)
+                 "Nothing to substitute")))
 
-;;; Execution synchrone
+;;; Synchronous execution
 
 (ert-deftest my-ob-claude-test-sync-sends-prompt-on-stdin ()
-  "Le prompt est transmis par l'entree standard, pas par la ligne de commande."
+  "The prompt is passed on standard input, not on the command line."
   (my-ob-claude-test--with-stub "cat"
-    (should (equal (org-babel-execute:claude "Bonjour" '((:async . "no")))
-                   "Bonjour"))))
+    (should (equal (org-babel-execute:claude "Hello" '((:async . "no")))
+                   "Hello"))))
 
 (ert-deftest my-ob-claude-test-sync-reports-failure ()
-  "Un code de sortie non nul remonte avec le message d'erreur du CLI."
-  (my-ob-claude-test--with-stub "echo 'quota depasse' >&2; exit 3"
-    (let ((failure (should-error (org-babel-execute:claude "Bonjour"
+  "A non-zero exit code comes back with the error message of the CLI."
+  (my-ob-claude-test--with-stub "echo 'quota exceeded' >&2; exit 3"
+    (let ((failure (should-error (org-babel-execute:claude "Hello"
                                                            '((:async . "no")))
                                  :type 'user-error)))
       (should (string-match-p "code 3" (cadr failure)))
-      (should (string-match-p "quota depasse" (cadr failure))))))
+      (should (string-match-p "quota exceeded" (cadr failure))))))
 
 (ert-deftest my-ob-claude-test-empty-block-is-rejected ()
-  "Un bloc vide echoue avant tout appel au CLI."
+  "An empty block fails before any call to the CLI."
   (should-error (org-babel-execute:claude "   \n" nil) :type 'user-error))
 
-;;; Execution asynchrone
+;;; Asynchronous execution
 
 (ert-deftest my-ob-claude-test-async-inserts-answer-in-drawer ()
-  "La reponse remplace le jeton provisoire dans le tiroir de resultats."
+  "The answer replaces the provisional token in the results drawer."
   (my-ob-claude-test--with-stub "cat"
     (let ((buffer (my-ob-claude-test--execute-block
-                   "#+begin_src claude\nQuelle heure est-il ?\n#+end_src\n")))
+                   "#+begin_src claude\nWhat time is it?\n#+end_src\n")))
       (unwind-protect
           (progn
             (my-ob-claude-test--wait-for-result buffer)
             (with-current-buffer buffer
-              ;; `?' est un metacaractere : la comparaison porte sur la
-              ;; chaine litterale, pas sur une expression reguliere.
-              (should (string-search ":results:\nQuelle heure est-il ?\n:end:"
+              ;; `?' is a metacharacter: the comparison is on the literal
+              ;; string, not on a regular expression.
+              (should (string-search ":results:\nWhat time is it?\n:end:"
                                      (buffer-string)))))
         (kill-buffer buffer)))))
 
 (ert-deftest my-ob-claude-test-async-reports-failure-in-buffer ()
-  "Un echec du CLI est ecrit dans le resultat plutot que perdu."
-  (my-ob-claude-test--with-stub "echo 'session inconnue' >&2; exit 1"
+  "A failure of the CLI is written into the result rather than lost."
+  (my-ob-claude-test--with-stub "echo 'unknown session' >&2; exit 1"
     (let ((buffer (my-ob-claude-test--execute-block
-                   "#+begin_src claude\nReprends la session\n#+end_src\n")))
+                   "#+begin_src claude\nResume the session\n#+end_src\n")))
       (unwind-protect
           (progn
             (my-ob-claude-test--wait-for-result buffer)
             (with-current-buffer buffer
-              (should (string-match-p "session inconnue" (buffer-string)))))
+              (should (string-match-p "unknown session" (buffer-string)))))
         (kill-buffer buffer)))))
 
 (provide 'test-ob-claude)

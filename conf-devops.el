@@ -1,13 +1,13 @@
-;;; conf-devops.el --- Conteneurs, orchestration, infrastructure -*- lexical-binding: t -*-
+;;; conf-devops.el --- Containers, orchestration, infrastructure -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
 ;; Docker, Ansible, Kubernetes, Terraform.
 ;;
-;; Les Dockerfile sont pris en charge par `dockerfile-ts-mode' (conf-treesit.el),
-;; ce qui rend le paquet `dockerfile-mode' inutile.  `marcopolo' — client du
-;; Docker Hub — et `docker-explorer' ont ete retires : tous deux sont sans
-;; maintenance depuis 2016 et le paquet `docker' couvre le meme terrain.
+;; Dockerfiles are handled by `dockerfile-ts-mode' (conf-treesit.el), which
+;; makes the `dockerfile-mode' package useless.  `marcopolo' — a Docker Hub
+;; client — and `docker-explorer' were dropped: both are unmaintained since
+;; 2016 and the `docker' package covers the same ground.
 
 ;;; Code:
 
@@ -19,11 +19,11 @@
 
 (use-package docker-compose-mode
   :ensure t
-  ;; Le motif englobe aussi "compose.yaml", nom retenu par Compose v2, et
-  ;; les fichiers d'override. Il doit par ailleurs differer de l'autoload du
-  ;; paquet : `add-to-list' ignore une entree identique a une entree existante,
-  ;; si bien qu'une declaration a l'identique restait derriere le motif .yaml
-  ;; general de conf-treesit.el et ne s'appliquait jamais.
+  ;; The pattern also covers "compose.yaml", the name kept by Compose v2, and
+  ;; the override files. It must also differ from the package autoload:
+  ;; `add-to-list' ignores an entry identical to an existing one, so that a
+  ;; verbatim declaration stayed behind the general .yaml pattern of
+  ;; conf-treesit.el and never applied.
   :mode ("\\(?:\\`\\|/\\)\\(?:docker-\\)?compose[^/]*\\.ya?ml\\'" . docker-compose-mode)
   :bind (:map docker-compose-mode-map
               ("C-c C-c" . docker-compose)
@@ -35,7 +35,7 @@
 
 (use-package ansible
   :ensure t
-  ;; `ansible' est declaree obsolete depuis 2024 au profit d'`ansible-mode'.
+  ;; `ansible' is declared obsolete since 2024 in favour of `ansible-mode'.
   :commands ansible-mode)
 
 (use-package ansible-doc

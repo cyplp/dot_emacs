@@ -1,18 +1,17 @@
-;;; conf-misc.el --- Outils generaux -*- lexical-binding: t -*-
+;;; conf-misc.el --- General tools -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; Tout ce qui n'appartient a aucun langage : edition, navigation, recherche
-;; web, multimedia, petites commandes maison.
+;; Everything that belongs to no language: editing, navigation, web search,
+;; multimedia, small homemade commands.
 
 ;;; Code:
 
-;; --- Localisation -----------------------------------------------------------
+;; --- Localization -----------------------------------------------------------
 
-;; `setq' et non `defvar' : ces variables sont deja definies par calendar.el,
-;; et `defvar' n'ecrase pas une variable ayant deja une valeur. L'ancienne
-;; version ne fonctionnait que par accident, parce qu'elle s'executait avant le
-;; chargement de calendar.
+;; `setq' and not `defvar': these variables are already defined by calendar.el,
+;; and `defvar' does not override a variable that already has a value. The old
+;; version only worked by accident, because it ran before calendar was loaded.
 (with-eval-after-load 'calendar
   (setq calendar-day-name-array
         ["dimanche" "lundi" "mardi" "mercredi" "jeudi" "vendredi" "samedi"])
@@ -20,27 +19,27 @@
         ["janvier" "février" "mars" "avril" "mai" "juin"
          "juillet" "août" "septembre" "octobre" "novembre" "décembre"]))
 
-;; --- Commandes d'edition ----------------------------------------------------
+;; --- Editing commands -------------------------------------------------------
 
 (defun increment-number-at-point ()
-  "Incrementer de un le nombre situe sous le curseur."
+  "Increment by one the number under the cursor."
   (interactive)
   (skip-chars-backward "0-9")
   (unless (looking-at "[0-9]+")
-    (error "Aucun nombre sous le curseur"))
+    (error "No number under the cursor"))
   (replace-match (number-to-string (1+ (string-to-number (match-string 0))))))
 
 (global-set-key (kbd "C-+") #'increment-number-at-point)
 
 (defun kill-start-of-line ()
-  "Supprimer du curseur jusqu'au debut de la ligne."
+  "Delete from the cursor to the beginning of the line."
   (interactive)
   (kill-line 0))
 
 (global-set-key (kbd "M-k") #'kill-start-of-line)
 
 (defun eol-newline-indent ()
-  "Ouvrir une ligne indentee sous la ligne courante, depuis n'importe ou."
+  "Open an indented line below the current one, from anywhere."
   (interactive)
   (end-of-line)
   (newline-and-indent))
@@ -48,7 +47,7 @@
 (global-set-key (kbd "M-<return>") #'eol-newline-indent)
 
 (defun uniquify-region-lines (region-start region-end)
-  "Supprimer les lignes adjacentes identiques entre REGION-START et REGION-END."
+  "Delete the identical adjacent lines between REGION-START and REGION-END."
   (interactive "*r")
   (save-excursion
     (goto-char region-start)
@@ -56,26 +55,26 @@
       (replace-match "\\1"))))
 
 (defun uniquify-buffer-lines ()
-  "Supprimer les lignes adjacentes identiques dans tout le buffer."
+  "Delete the identical adjacent lines in the whole buffer."
   (interactive)
   (uniquify-region-lines (point-min) (point-max)))
 
 (defun get-string-from-file (file-path)
-  "Renvoyer le contenu de FILE-PATH, sans blancs de bord."
+  "Return the content of FILE-PATH, without surrounding whitespace."
   (with-temp-buffer
     (insert-file-contents file-path)
     (string-trim (buffer-string))))
 
 (defun uuid-create ()
-  "Renvoyer un UUID fourni par le noyau."
+  "Return a UUID provided by the kernel."
   (get-string-from-file "/proc/sys/kernel/random/uuid"))
 
 (defun uuid-insert ()
-  "Inserer un nouvel UUID au point."
+  "Insert a new UUID at point."
   (interactive)
   (insert (uuid-create)))
 
-;; --- Navigation et selection ------------------------------------------------
+;; --- Navigation and selection -----------------------------------------------
 
 (use-package move-text
   :ensure t
@@ -86,10 +85,10 @@
   :ensure t
   :commands iedit-mode)
 
-;; symbol-overlay remplace highlight-symbol : ce dernier n'est plus maintenu et
-;; re-parcourait tout le buffer en expression reguliere apres chaque
-;; deplacement du curseur. symbol-overlay borne sa recherche a la portion
-;; affichee et ne pose ses overlays qu'a la demande.
+;; symbol-overlay replaces highlight-symbol: the latter is no longer maintained
+;; and re-scanned the whole buffer with a regular expression after every cursor
+;; move. symbol-overlay bounds its search to the displayed portion and only
+;; puts its overlays on demand.
 (use-package symbol-overlay
   :ensure t
   :hook (prog-mode . symbol-overlay-mode)
@@ -107,30 +106,29 @@
   :ensure t
   :commands edit-indirect-region)
 
-;; vundo remplace undo-tree, qui etait installe mais dont le mode global
-;; n'etait jamais active : `undo-tree-visualize' echouait donc a l'appel.
-;; vundo se greffe sur l'historique d'annulation natif au lieu de le
-;; remplacer, ne conserve aucun etat sur disque et ne peut pas corrompre
-;; l'historique du buffer.
+;; vundo replaces undo-tree, which was installed but whose global mode was
+;; never enabled: `undo-tree-visualize' therefore failed when called.
+;; vundo hooks onto the native undo history instead of replacing it, keeps no
+;; state on disk and cannot corrupt the buffer history.
 (use-package vundo
   :ensure t
   :bind ("C-x :" . vundo)
   :custom
   (vundo-glyph-alist vundo-unicode-symbols))
 
-;; L'historique d'annulation par defaut est vite tronque sur un gros
-;; refactoring, ce qui rend la visualisation inutile.
+;; The default undo history is quickly truncated on a big refactoring, which
+;; makes the visualization useless.
 (setq undo-limit (* 8 1024 1024))
 (setq undo-strong-limit (* 16 1024 1024))
 
-;; --- Affichage du code ------------------------------------------------------
+;; --- Code display -----------------------------------------------------------
 
 (use-package highlight-indent-guides
   :ensure t
   :hook (prog-mode . highlight-indent-guides-mode)
   :custom
   (highlight-indent-guides-method 'character)
-  ;; le mode "responsive" reevalue les guides a chaque deplacement du curseur
+  ;; the "responsive" mode re-evaluates the guides on every cursor move
   (highlight-indent-guides-responsive nil)
   (highlight-indent-guides-suppress-auto-error t))
 
@@ -138,12 +136,12 @@
   :ensure t
   :hook (prog-mode . highlight-parentheses-mode))
 
-;; Colorise sur place les couleurs ecrites en hexadecimal.
+;; Colorizes colors written in hexadecimal in place.
 (use-package rainbow-mode
   :ensure t
   :commands rainbow-mode)
 
-;; --- Modes majeurs divers ---------------------------------------------------
+;; --- Miscellaneous major modes ----------------------------------------------
 
 (use-package ssh-config-mode
   :ensure t
@@ -171,10 +169,10 @@
   :ensure t
   :mode ("\\.jq\\'" . jq-mode))
 
-;; Emacs 30 fournit `lua-ts-mode' : le paquet MELPA `lua-mode' a ete retire,
-;; l'association de .lua est faite dans conf-treesit.el.
+;; Emacs 30 provides `lua-ts-mode': the MELPA package `lua-mode' was dropped,
+;; the .lua association is done in conf-treesit.el.
 
-;; --- Requetes HTTP ----------------------------------------------------------
+;; --- HTTP requests ----------------------------------------------------------
 
 (use-package restclient
   :ensure t
@@ -184,7 +182,7 @@
   :ensure t
   :after restclient)
 
-;; --- Fichiers et buffers ----------------------------------------------------
+;; --- Files and buffers ------------------------------------------------------
 
 (use-package helm-ls-git
   :ensure t
@@ -200,27 +198,27 @@
 
 (global-set-key (kbd "C-x C-b") #'ibuffer)
 
-;; Nettoyage des espaces en fin de ligne, limite aux buffers deja propres :
-;; un fichier ancien ne se retrouve donc jamais reformate en entier dans un
-;; commit qui ne devait toucher que trois lignes.
+;; Cleanup of trailing whitespace, limited to buffers that are already clean:
+;; an old file therefore never ends up reformatted in full in a commit that was
+;; only supposed to touch three lines.
 (use-package whitespace-cleanup-mode
   :ensure t
   :config
   (global-whitespace-cleanup-mode t))
 
-;; editorconfig est integre a Emacs 30 ; le paquet MELPA n'est plus necessaire.
+;; editorconfig is bundled with Emacs 30; the MELPA package is no longer needed.
 (editorconfig-mode 1)
 
-;; --- Demarrage --------------------------------------------------------------
+;; --- Startup ----------------------------------------------------------------
 
-;; Ecran d'accueil : fichiers recents, projets, marque-pages. Declare ici et
-;; non dans conf-org.el, ou il n'avait rien a faire.
+;; Welcome screen: recent files, projects, bookmarks. Declared here and not in
+;; conf-org.el, where it had no business being.
 (use-package dashboard
   :ensure t
   :config
   (dashboard-setup-startup-hook))
 
-;; --- Documentation et aide --------------------------------------------------
+;; --- Documentation and help -------------------------------------------------
 
 (use-package helm-dash
   :ensure t
@@ -246,20 +244,20 @@
   :bind (("C-c C-d" . remind-bindings-toggle-buffer)
          ("C-c M-d" . remind-bindings-specific-mode)))
 
-;; Statistiques d'utilisation des touches, utiles pour reperer les commandes
-;; frequentes qui meritent un raccourci.
+;; Key usage statistics, useful to spot the frequent commands that deserve a
+;; shortcut.
 (use-package keyfreq
   :ensure t
   :config
   (keyfreq-mode 1)
   (keyfreq-autosave-mode 1))
 
-;; --- Recherche web ----------------------------------------------------------
+;; --- Web search -------------------------------------------------------------
 
-;; Les URL sont toutes en HTTPS : plusieurs moteurs refusent aujourd'hui le
-;; texte clair, et le moteur "rfcs" pointait sur pretty-rfc.herokuapp.com,
-;; hors service depuis l'arret des dynos gratuits Heroku. Il est remplace par
-;; le service officiel de l'IETF.
+;; The URLs are all in HTTPS: several engines now refuse clear text, and the
+;; "rfcs" engine pointed at pretty-rfc.herokuapp.com, out of service since the
+;; free Heroku dynos were shut down. It is replaced by the official IETF
+;; service.
 (use-package engine-mode
   :ensure t
   :config
@@ -292,8 +290,8 @@
   :config
   (emms-all)
   (emms-default-players)
-  ;; libtag est le seul fournisseur de metadonnees : les autres lancent un
-  ;; sous-processus par piste.
+  ;; libtag is the only metadata provider: the others spawn one subprocess per
+  ;; track.
   (require 'emms-info-libtag)
   (setq emms-info-functions '(emms-info-libtag))
   (emms-mode-line 1)
@@ -301,7 +299,7 @@
 
 (defconst my-fip-stream-url
   "https://stream.radiofrance.fr/fip/fip_hifi.m3u8?id=radiofrance"
-  "Flux HLS de la radio FIP.")
+  "HLS stream of the FIP radio.")
 
 (use-package eradio
   :ensure t
@@ -311,33 +309,33 @@
   (eradio-channels (list (cons "fip" my-fip-stream-url))))
 
 (defun eradio-play-fip ()
-  "Lancer directement FIP, sans passer par le choix de station."
+  "Play FIP directly, without going through the station chooser."
   (interactive)
   (require 'eradio)
   (eradio--play-low-level my-fip-stream-url)
   (message "FIP rox !"))
 
-;; Liaison posee hors du `use-package' : passer cette commande par `:bind'
-;; ferait generer a use-package un autoload vers le paquet eradio, qui ne la
-;; definit pas.
+;; Binding installed outside the `use-package': passing this command through
+;; `:bind' would make use-package generate an autoload to the eradio package,
+;; which does not define it.
 (global-set-key (kbd "C-c r f") #'eradio-play-fip)
 
-;; --- Paquets retires --------------------------------------------------------
+;; --- Dropped packages -------------------------------------------------------
 
-;; pocket-reader : le service Pocket a ferme en juillet 2025.
-;; wttrin         : non maintenu, casse par un changement d'API de wttr.in.
-;; multi-term     : non maintenu ; `M-x ansi-term' couvre le meme besoin.
-;; origami        : non maintenu, et aucune touche ne lui etait liee ici.
-;; beacon, ctrlf  : declares mais jamais actives (`ctrf-mode' etait d'ailleurs
-;;                  une coquille pour `ctrlf-mode').
-;; csharp-mode    : integre a Emacs depuis la version 29.
-;; auto-complete-rst : greffon d'auto-complete, remplace par corfu.
-;; flycheck et ses greffons : voir conf-lsp.el.
-;; spaceline / powerline : les separateurs XPM etaient regeneres a chaque
-;;                  redisplay ; la mode-line de modus-operandi les remplace.
-;; dimmer         : recalculait les faces de toutes les fenetres a chaque
-;;                  changement de buffer.
-;; smooth-scrolling : remplace par `pixel-scroll-precision-mode' (init.el).
+;; pocket-reader : the Pocket service shut down in July 2025.
+;; wttrin         : unmaintained, broken by a wttr.in API change.
+;; multi-term     : unmaintained; `M-x ansi-term' covers the same need.
+;; origami        : unmaintained, and no key was bound to it here.
+;; beacon, ctrlf  : declared but never enabled (`ctrf-mode' was moreover a
+;;                  typo for `ctrlf-mode').
+;; csharp-mode    : bundled with Emacs since version 29.
+;; auto-complete-rst : an auto-complete plugin, replaced by corfu.
+;; flycheck and its plugins : see conf-lsp.el.
+;; spaceline / powerline : the XPM separators were regenerated on every
+;;                  redisplay; the modus-operandi mode-line replaces them.
+;; dimmer         : recomputed the faces of every window on each buffer
+;;                  change.
+;; smooth-scrolling : replaced by `pixel-scroll-precision-mode' (init.el).
 
 (provide 'conf-misc)
 

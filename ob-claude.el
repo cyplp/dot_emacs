@@ -1,38 +1,38 @@
-;;; ob-claude.el --- Blocs org-babel executes par le CLI claude -*- lexical-binding: t -*-
+;;; ob-claude.el --- org-babel blocks executed by the claude CLI -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; Permet d'ecrire un prompt dans un bloc org et de l'envoyer au CLI `claude'
-;; par `C-c C-c' :
+;; Lets you write a prompt in an org block and send it to the `claude' CLI with
+;; `C-c C-c':
 ;;
 ;;   #+begin_src claude :model sonnet
-;;   Resume le role de ce depot.
+;;   Summarize the role of this repository.
 ;;   #+end_src
 ;;
-;; Le corps du bloc est le prompt, la reponse devient le resultat du bloc.
+;; The block body is the prompt, the answer becomes the result of the block.
 ;;
-;; L'appel est asynchrone par defaut : une reponse prend des dizaines de
-;; secondes et Emacs est mono-thread, un appel synchrone gelerait l'editeur
-;; pendant toute la duree. Le bloc recoit d'abord un jeton, remplace par la
-;; reponse a la fin du processus. `:async no' rend l'appel bloquant, utile en
-;; batch ou pour les tests.
+;; The call is asynchronous by default: an answer takes tens of seconds and
+;; Emacs is single-threaded, so a synchronous call would freeze the editor for
+;; that whole time. The block first receives a token, replaced by the answer
+;; when the process ends. `:async no' makes the call blocking, useful in batch
+;; mode or for the tests.
 ;;
-;; Le prompt passe par l'entree standard et jamais par la ligne de commande :
-;; un prompt long depasse la limite d'arguments du systeme, et un prompt
-;; contenant des guillemets ou des retours a la ligne n'a pas a etre echappe.
+;; The prompt goes through standard input and never through the command line: a
+;; long prompt exceeds the system argument limit, and a prompt containing
+;; quotes or newlines does not have to be escaped.
 ;;
-;; En-tetes reconnus, en plus de ceux d'org :
+;; Headers recognized, in addition to org's own:
 ;;
-;;   :model           alias ou nom complet du modele (sonnet, opus, ...)
-;;   :effort          niveau d'effort (low, medium, high, xhigh, max)
-;;   :agent           agent a utiliser pour la session
-;;   :system          texte ajoute au prompt systeme
+;;   :model           model alias or full name (sonnet, opus, ...)
+;;   :effort          effort level (low, medium, high, xhigh, max)
+;;   :agent           agent to use for the session
+;;   :system          text appended to the system prompt
 ;;   :permission-mode plan, acceptEdits, bypassPermissions, ...
-;;   :allowed-tools   liste d'outils autorises, separes par des espaces
-;;   :add-dir         repertoires supplementaires accessibles
-;;   :session         nom d'une conversation suivie d'un bloc a l'autre
-;;   :async           yes (defaut) ou no
-;;   :dir             repertoire de travail du CLI, gere par org lui-meme
+;;   :allowed-tools   list of allowed tools, separated by spaces
+;;   :add-dir         extra accessible directories
+;;   :session         name of a conversation followed from one block to the next
+;;   :async           yes (default) or no
+;;   :dir             working directory of the CLI, handled by org itself
 
 ;;; Code:
 
@@ -40,35 +40,35 @@
 (require 'org-id)
 (require 'subr-x)
 
-;; --- Reglages ---------------------------------------------------------------
+;; --- Settings ---------------------------------------------------------------
 
 (defgroup org-babel-claude nil
-  "Execution de blocs org-babel par le CLI claude."
+  "Execution of org-babel blocks by the claude CLI."
   :group 'org-babel)
 
 (defcustom org-babel-claude-command "claude"
-  "Nom ou chemin de l'executable du CLI Claude Code."
+  "Name or path of the Claude Code CLI executable."
   :type 'string
   :group 'org-babel-claude)
 
 (defcustom org-babel-claude-base-arguments '("--print")
-  "Arguments passes a chaque appel, avant ceux deduits des en-tetes.
-`--print' est indispensable : sans lui le CLI ouvre une session interactive
-plein ecran, qui n'a aucun sens derriere un tube."
+  "Arguments passed on every call, before those derived from the headers.
+`--print' is indispensable: without it the CLI opens a full-screen
+interactive session, which makes no sense behind a pipe."
   :type '(repeat string)
   :group 'org-babel-claude)
 
-;; Un bloc sans reponse est une erreur visible ; un bloc qui modifie des
-;; fichiers a l'insu de l'auteur ne l'est pas. Le resultat par defaut est donc
-;; un tiroir — la reponse est du texte libre, souvent multiligne et en
-;; markdown — et l'export n'evalue rien.
+;; A block without an answer is a visible error; a block that modifies files
+;; behind the author's back is not. The default result is therefore a drawer —
+;; the answer is free text, often multiline and in markdown — and export
+;; evaluates nothing.
 (defvar org-babel-default-header-args:claude
   '((:results . "drawer replace")
     (:exports . "both")
     (:eval . "never-export"))
-  "En-tetes par defaut des blocs `claude'.")
+  "Default headers of the `claude' blocks.")
 
-;; --- Traduction des en-tetes en arguments -----------------------------------
+;; --- Translation of the headers into arguments ------------------------------
 
 (defconst org-babel-claude--argument-by-header
   '((:model . "--model")
@@ -78,14 +78,14 @@ plein ecran, qui n'a aucun sens derriere un tube."
     (:permission-mode . "--permission-mode")
     (:allowed-tools . "--allowed-tools")
     (:add-dir . "--add-dir"))
-  "Correspondance entre en-tete de bloc et option du CLI.
-Chaque en-tete present ajoute son option suivie de sa valeur.")
+  "Mapping between block header and CLI option.
+Every header present adds its option followed by its value.")
 
 (defun org-babel-claude--header-value (header params)
-  "Renvoyer la valeur de HEADER dans PARAMS, sous forme de chaine.
-Renvoie nil si l'en-tete est absent ou vide. Org lit les valeurs d'en-tete
-avec `org-babel-read', qui peut rendre un nombre ou un symbole : la valeur
-est reformatee avant d'atterrir dans une ligne de commande."
+  "Return the value of HEADER in PARAMS, as a string.
+Return nil if the header is absent or empty. Org reads the header values with
+`org-babel-read', which can yield a number or a symbol: the value is
+reformatted before landing in a command line."
   (let ((value (cdr (assq header params))))
     (when value
       (let ((text (string-trim (format "%s" value))))
@@ -93,24 +93,25 @@ est reformatee avant d'atterrir dans une ligne de commande."
           text)))))
 
 (defun org-babel-claude--session-name (params)
-  "Renvoyer le nom de session declare dans PARAMS, ou nil.
-Org donne la valeur \"none\" quand aucune session n'est demandee."
+  "Return the session name declared in PARAMS, or nil.
+Org gives the value \"none\" when no session is requested."
   (let ((session (org-babel-claude--header-value :session params)))
     (unless (member session '(nil "none"))
       session)))
 
 (defvar org-babel-claude--session-identifiers (make-hash-table :test #'equal)
-  "Identifiant de conversation du CLI pour chaque nom de session.
-Le premier bloc d'une session cree l'identifiant, les suivants reprennent la
-meme conversation : le contexte des blocs precedents reste disponible.")
+  "CLI conversation identifier for each session name.
+The first block of a session creates the identifier, the following ones
+resume the same conversation: the context of the previous blocks stays
+available.")
 
 (defvar org-babel-claude--started-sessions (make-hash-table :test #'equal)
-  "Sessions dont un bloc a deja ete execute avec succes.
-Une conversation ne peut etre reprise qu'une fois creee : tant qu'aucun bloc
-n'a abouti, l'identifiant doit etre cree et non repris.")
+  "Sessions in which a block has already run successfully.
+A conversation can only be resumed once created: as long as no block has
+completed, the identifier must be created and not resumed.")
 
 (defun org-babel-claude--session-arguments (session-name)
-  "Renvoyer les arguments du CLI reprenant la conversation SESSION-NAME."
+  "Return the CLI arguments that resume the SESSION-NAME conversation."
   (let ((identifier (or (gethash session-name org-babel-claude--session-identifiers)
                         (puthash session-name (org-id-uuid)
                                  org-babel-claude--session-identifiers))))
@@ -119,8 +120,8 @@ n'a abouti, l'identifiant doit etre cree et non repris.")
       (list "--session-id" identifier))))
 
 (defun org-babel-claude-reset-session (session-name)
-  "Oublier la conversation associee a SESSION-NAME.
-Le prochain bloc de cette session repart d'un contexte vide."
+  "Forget the conversation associated with SESSION-NAME.
+The next block of that session starts again from an empty context."
   (interactive (list (completing-read
                       "Session claude : "
                       (hash-table-keys org-babel-claude--session-identifiers)
@@ -130,7 +131,7 @@ Le prochain bloc de cette session repart d'un contexte vide."
   (message "Session claude %s reinitialisee" session-name))
 
 (defun org-babel-claude--build-arguments (params)
-  "Construire la liste d'arguments du CLI a partir de PARAMS."
+  "Build the CLI argument list from PARAMS."
   (let ((arguments (copy-sequence org-babel-claude-base-arguments)))
     (dolist (entry org-babel-claude--argument-by-header)
       (let ((value (org-babel-claude--header-value (car entry) params)))
@@ -144,13 +145,13 @@ Le prochain bloc de cette session repart d'un contexte vide."
 
     arguments))
 
-;; --- Corps du bloc ----------------------------------------------------------
+;; --- Block body -------------------------------------------------------------
 
 (defun org-babel-expand-body:claude (body params)
-  "Substituer les variables de PARAMS dans BODY.
-Une variable declaree par `:var nom=valeur' remplace toutes les occurrences
-de `{{nom}}'. Le double accolade est choisi parce qu'il n'apparait pas dans
-du texte courant, la ou `$nom' se confondrait avec le contenu du prompt."
+  "Substitute the variables of PARAMS in BODY.
+A variable declared with `:var name=value' replaces every occurrence of
+`{{name}}'. The double brace is chosen because it does not appear in ordinary
+text, where `$name' would blend into the content of the prompt."
   (let ((prompt body))
     (dolist (variable (org-babel--get-vars params))
       (setq prompt
@@ -165,17 +166,17 @@ du texte courant, la ou `$nom' se confondrait avec le contenu du prompt."
 ;; --- Execution --------------------------------------------------------------
 
 (defun org-babel-claude--async-p (params)
-  "Dire si le bloc decrit par PARAMS doit s'executer en arriere-plan."
+  "Tell whether the block described by PARAMS must run in the background."
   (not (member (org-babel-claude--header-value :async params) '("no" "nil"))))
 
 (defun org-babel-claude--check-command ()
-  "Verifier que le CLI est joignable, ou signaler une erreur explicite."
+  "Check that the CLI is reachable, or signal an explicit error."
   (unless (executable-find org-babel-claude-command)
-    (user-error "Executable %s introuvable dans `exec-path'"
+    (user-error "Executable %s not found in `exec-path'"
                 org-babel-claude-command)))
 
 (defun org-babel-claude--failure-message (exit-code error-output)
-  "Composer le message d'echec d'un appel sorti en EXIT-CODE avec ERROR-OUTPUT."
+  "Compose the failure message of a call exited with EXIT-CODE and ERROR-OUTPUT."
   (format "claude a echoue (code %s)%s"
           exit-code
           (if (string-empty-p error-output)
@@ -183,9 +184,9 @@ du texte courant, la ou `$nom' se confondrait avec le contenu du prompt."
             (concat " : " error-output))))
 
 (defun org-babel-claude--execute-synchronously (prompt arguments session-name)
-  "Appeler le CLI avec ARGUMENTS et PROMPT, et renvoyer sa reponse.
-SESSION-NAME, s'il est non nil, est marque comme demarre en cas de succes.
-Bloque Emacs jusqu'a la fin de l'appel."
+  "Call the CLI with ARGUMENTS and PROMPT, and return its answer.
+SESSION-NAME, when non-nil, is marked as started on success.
+Blocks Emacs until the call ends."
   (let ((error-file (make-temp-file "ob-claude-error")))
     (unwind-protect
         (with-temp-buffer
@@ -210,18 +211,19 @@ Bloque Emacs jusqu'a la fin de l'appel."
       (delete-file error-file))))
 
 (defun org-babel-claude--replace-placeholder (buffer placeholder result params)
-  "Remplacer PLACEHOLDER par RESULT dans BUFFER, selon les `:results' de PARAMS.
-Le jeton est cherche dans tout le buffer plutot que suivi par un marqueur :
-l'auteur continue d'editer pendant l'appel, et le bloc a pu se deplacer."
+  "Replace PLACEHOLDER with RESULT in BUFFER, per the `:results' of PARAMS.
+The token is searched for in the whole buffer rather than tracked with a
+marker: the author keeps editing during the call, and the block may have
+moved."
   (if (not (buffer-live-p buffer))
-      (message "Reponse de claude perdue : le buffer d'origine est ferme")
+      (message "claude answer lost: the original buffer is closed")
     (with-current-buffer buffer
       (save-excursion
         (save-restriction
           (widen)
           (goto-char (point-min))
           (if (not (search-forward placeholder nil t))
-              (message "Jeton %s introuvable : reponse de claude ignoree" placeholder)
+              (message "Token %s not found: claude answer ignored" placeholder)
             (goto-char (match-beginning 0))
             (let ((case-fold-search t))
               (when (re-search-backward "^[ \t]*#\\+begin_src\\_>" nil t)
@@ -229,9 +231,9 @@ l'auteur continue d'editer pendant l'appel, et le bloc a pu se deplacer."
                                          (cdr (assq :result-params params)))))))))))
 
 (defun org-babel-claude--make-sentinel (context)
-  "Construire la sentinelle du processus decrit par CONTEXT.
-CONTEXT est un plist portant les buffers de sortie, le buffer org d'origine,
-le jeton a remplacer, les parametres du bloc et le nom de session."
+  "Build the sentinel of the process described by CONTEXT.
+CONTEXT is a plist carrying the output buffers, the original org buffer, the
+token to replace, the block parameters and the session name."
   (lambda (process _event)
     (when (memq (process-status process) '(exit signal))
       (let* ((output-buffer (plist-get context :output-buffer))
@@ -257,11 +259,12 @@ le jeton a remplacer, les parametres du bloc et le nom de session."
         (kill-buffer error-buffer)))))
 
 (defun org-babel-claude--execute-asynchronously (prompt arguments params session-name)
-  "Lancer le CLI avec ARGUMENTS et PROMPT sans bloquer Emacs.
-Renvoie le jeton insere comme resultat provisoire du bloc ; la sentinelle le
-remplacera par la reponse. PARAMS sert a reinserer le resultat avec les
-memes `:results', SESSION-NAME a marquer la conversation comme demarree."
-  (let* ((placeholder (format "claude-en-cours:%s" (org-id-uuid)))
+  "Start the CLI with ARGUMENTS and PROMPT without blocking Emacs.
+Return the token inserted as the provisional result of the block; the
+sentinel will replace it with the answer. PARAMS serves to reinsert the
+result with the same `:results', SESSION-NAME to mark the conversation as
+started."
+  (let* ((placeholder (format "claude-running:%s" (org-id-uuid)))
          (output-buffer (generate-new-buffer " *ob-claude-output*"))
          (error-buffer (generate-new-buffer " *ob-claude-error*"))
          (context (list :output-buffer output-buffer
@@ -276,10 +279,10 @@ memes `:results', SESSION-NAME a marquer la conversation comme demarree."
                    :noquery t
                    :connection-type 'pipe
                    :command (cons org-babel-claude-command arguments)
-                   ;; Un tube dedie pour stderr : sans lui les messages
-                   ;; d'erreur se melangent a la reponse dans le meme buffer.
-                   ;; La sentinelle `ignore' evite la ligne "Process finished"
-                   ;; que le traitement par defaut ecrirait dans le buffer.
+                   ;; A dedicated pipe for stderr: without it the error
+                   ;; messages mix with the answer in the same buffer.
+                   ;; The `ignore' sentinel avoids the "Process finished" line
+                   ;; that the default handling would write into the buffer.
                    :stderr (make-pipe-process :name "ob-claude-error"
                                               :buffer error-buffer
                                               :noquery t
@@ -292,8 +295,9 @@ memes `:results', SESSION-NAME a marquer la conversation comme demarree."
 
 ;;;###autoload
 (defun org-babel-execute:claude (body params)
-  "Envoyer BODY comme prompt au CLI claude et renvoyer sa reponse.
-PARAMS porte les en-tetes du bloc. Appele par `org-babel-execute-src-block'."
+  "Send BODY as a prompt to the claude CLI and return its answer.
+PARAMS carries the block headers. Called by `org-babel-execute-src-block'.
+"
   (org-babel-claude--check-command)
   (let ((prompt (string-trim (org-babel-expand-body:claude body params))))
     (when (string-empty-p prompt)

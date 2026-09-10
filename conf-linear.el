@@ -1,0 +1,116 @@
+;;; conf-linear.el --- Linear.app issue tracking -*- lexical-binding: t -*-
+
+;;; Commentary:
+
+;; Two Linear.app integrations live side by side here, for two uses that do not
+;; overlap:
+;;
+;; - `linear-emacs' exports the assigned issues into an org file and pushes the
+;;   TODO state changes back to Linear.  This is the daily-tracking path: the
+;;   issues live in the agenda, with everything else.
+;;
+;; - `linear-app' opens a magit-style browser (collapsible tree, transient
+;;   menus) for everything org does not represent: assignment, labels,
+;;   description, other people's issues.
+;;
+;; Their symbol prefixes differ (`linear-emacs-' and `linear-app-'), so they do
+;; not step on each other.  Neither is on MELPA: they go through `:vc', and
+;; package-vc resolves their `Package-Requires' at install time — no need to
+;; redeclare request, dash, s, magit-section, transient or markdown-mode here.
+;;
+;; This module must be loaded after `conf-org': the path of the output file of
+;; `linear-emacs' is computed from `org-directory'.
+
+;;; Code:
+
+;; These symbols belong to `linear-emacs', loaded on demand by its autoloads.
+;; We only tell the compiler they exist: the module must stay loadable without
+;; the package.
+(defvar linear-emacs-api-key)
+(defvar linear-emacs-org-file-path)
+(declare-function linear-emacs-enable-org-sync "linear-emacs" ())
+
+;; --- API key ----------------------------------------------------------------
+
+;; `linear-app' resolves the key on its own (variable, LINEAR_API_KEY, then
+;; auth-source): only `linear-emacs' has to be fed.
+(defun my-linear-load-api-key ()
+  "Fill `linear-emacs-api-key' from auth-source or from the environment.
+
+The key is a personal secret: it has no place in this repository.
+auth-source reads it from ~/.authinfo.gpg, the LINEAR_API_KEY environment
+variable serving as a fallback when Emacs starts from an already configured
+shell.
+
+Expected entry in ~/.authinfo.gpg:
+
+  machine api.linear.app login apikey password KEY
+
+The key is created in Linear under Settings > Account > API > Personal API keys."
+  (require 'auth-source)
+  (let* ((entry (car (auth-source-search :host "api.linear.app"
+                                         :user "apikey"
+                                         :max 1)))
+         ;; Depending on the backend, `:secret' is already a string or a
+         ;; function that produces it on demand.
+         (stored (plist-get entry :secret))
+         (secret (if (functionp stored) (funcall stored) stored)))
+    (setq linear-emacs-api-key (or secret (getenv "LINEAR_API_KEY")))
+
+    (unless linear-emacs-api-key
+      (message "Linear API key not found (auth-source and LINEAR_API_KEY)"))))
+
+;; --- Issues in org ----------------------------------------------------------
+
+(use-package linear-emacs
+  :vc (:url "https://github.com/anegg0/linear-emacs" :rev :newest)
+  ;; `C-c l' is already taken by org-store-link (conf-org.el); the uppercase
+  ;; prefix is still free and recalls Linear.
+  :bind (("C-c L l" . linear-emacs-list-issues)
+         ("C-c L p" . linear-emacs-list-issues-by-project)
+         ("C-c L n" . linear-emacs-new-issue)
+         ("C-c L s" . linear-emacs-sync-org-to-linear)
+         ("C-c L t" . linear-emacs-test-connection))
+  :init
+  ;; The package default aims at "gtd/linear.org", a subdirectory that does not
+  ;; exist here. At the root of `org-directory', the file moreover lands in
+  ;; `org-agenda-files', which lists that single directory.
+  (setq linear-emacs-org-file-path (expand-file-name "linear.org" org-directory))
+  :config
+  ;; Reading the secret is deferred to first use: an Emacs that never touches
+  ;; Linear should not have to unlock the GPG keyring at startup.
+  (my-linear-load-api-key))
+
+;; --- Synchronization towards Linear -----------------------------------------
+
+(defun my-linear-enable-org-sync-in-issues-file ()
+  "Enable Linear synchronization in the issues file only.
+
+`linear-emacs-enable-org-sync' installs buffer-local hooks that push every
+TODO state change to the API. Enabling them everywhere would trigger a
+network call on the slightest TODO of another org file."
+  (when (and buffer-file-name
+             ;; Comparison on the paths and not with `file-equal-p': the file
+             ;; does not exist yet before the first export.
+             (string-equal (expand-file-name buffer-file-name)
+                           (expand-file-name linear-emacs-org-file-path)))
+    (linear-emacs-enable-org-sync)))
+
+;; `org-mode-hook' rather than `find-file-hook': the test only runs on org
+;; buffers, and the synchronization comes back after a `revert-buffer'.
+(add-hook 'org-mode-hook #'my-linear-enable-org-sync-in-issues-file)
+
+;; --- Magit-style browser ----------------------------------------------------
+
+;; `linear-app' is split across several files and the entry command lives in
+;; `linear-app-list.el'; it is the autoload generated by package-vc that makes
+;; it available, the file of the same name carrying only the options.
+(use-package linear-app
+  :vc (:url "https://github.com/yuann3/linear-app.el" :rev :newest)
+  ;; Same prefix as `linear-emacs': a single entry point to remember for
+  ;; Linear. `b' for the browser.
+  :bind ("C-c L b" . linear-app))
+
+(provide 'conf-linear)
+
+;;; conf-linear.el ends here

@@ -1,85 +1,85 @@
-;;; conf-mcp.el --- Serveurs Model Context Protocol -*- lexical-binding: t -*-
+;;; conf-mcp.el --- Model Context Protocol servers -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; `mcp.el' parle le protocole MCP depuis Emacs : il gere le cycle de vie des
-;; serveurs — processus stdio ou endpoint HTTP — et expose leurs outils,
-;; prompts et ressources au reste d'Emacs.  `mcp-hub' en est le tableau de
-;; bord : liste des serveurs, demarrage, arret, inspection des outils.
+;; `mcp.el' speaks the MCP protocol from Emacs: it manages the life cycle of
+;; the servers — stdio process or HTTP endpoint — and exposes their tools,
+;; prompts and resources to the rest of Emacs.  `mcp-hub' is its dashboard:
+;; server list, start, stop, tool inspection.
 ;;
-;; A ne pas confondre avec le serveur MCP de `conf-claude.el', qui va dans
-;; l'autre sens : celui-la expose Emacs au CLI Claude, celui-ci consomme des
-;; serveurs tiers depuis Emacs.
+;; Not to be confused with the MCP server of `conf-claude.el', which goes the
+;; other way: that one exposes Emacs to the Claude CLI, this one consumes
+;; third-party servers from Emacs.
 ;;
-;; L'adresse et le jeton du serveur HTTP sont des donnees privees : elles
-;; vivent dans `secret.el', hors du depot git.  Ce module se contente de les
-;; cabler, et reste inerte si elles sont absentes — sur une machine sans
-;; `secret.el' la configuration se charge sans erreur, aucun serveur n'est
-;; declare.
+;; The address and the token of the HTTP server are private data: they live in
+;; `secret.el', outside the git repository.  This module only wires them up,
+;; and stays inert if they are missing — on a machine without `secret.el' the
+;; configuration loads without error and no server is declared.
 ;;
-;; `secret.el' doit definir :
+;; `secret.el' must define:
 ;;
-;;   (setq my-mcp-http-server-url   "http://hote:port/mcp")
+;;   (setq my-mcp-http-server-url   "http://host:port/mcp")
 ;;   (setq my-mcp-http-server-token "...")
 
 ;;; Code:
 
-;; --- Parametres prives ------------------------------------------------------
+;; --- Private settings -------------------------------------------------------
 
-;; Valeurs par defaut nil : `secret.el' est charge en fin d'`init.el', donc
-;; apres ce module.  Le `defvar' declare seulement la variable, le `setq' de
-;; `secret.el' l'alimente ensuite.
+;; Default values nil: `secret.el' is loaded at the end of `init.el', hence
+;; after this module.  The `defvar' only declares the variable, the `setq' in
+;; `secret.el' then feeds it.
 
 (defvar my-mcp-http-server-url nil
-  "Adresse du serveur MCP HTTP, ou nil s'il n'y en a pas.
-Definie dans `secret.el', hors du depot git.")
+  "Address of the HTTP MCP server, or nil if there is none.
+Defined in `secret.el', outside the git repository.")
 
 (defvar my-mcp-http-server-token nil
-  "Jeton d'authentification du serveur MCP HTTP.
-Defini dans `secret.el', hors du depot git.")
+  "Authentication token of the HTTP MCP server.
+Defined in `secret.el', outside the git repository.")
 
 (defvar my-mcp-http-server-name "local"
-  "Nom sous lequel le serveur MCP HTTP apparait dans `mcp-hub'.")
+  "Name under which the HTTP MCP server appears in `mcp-hub'.")
 
-;; Declaration sans valeur : la variable appartient a `mcp-hub', on signale
-;; seulement au compilateur qu'elle existe.
+;; Declaration without a value: the variable belongs to `mcp-hub', we only tell
+;; the compiler that it exists.
 (defvar mcp-hub-servers)
 
-;; --- Declaration du serveur -------------------------------------------------
+;; --- Server declaration -----------------------------------------------------
 
 (defun my-mcp-register-http-server ()
-  "Declarer le serveur MCP HTTP prive dans `mcp-hub-servers'.
-Ne fait rien tant que `my-mcp-http-server-url' ou
-`my-mcp-http-server-token' n'est pas renseigne par `secret.el'.
+  "Declare the private HTTP MCP server in `mcp-hub-servers'.
+Does nothing as long as `my-mcp-http-server-url' or
+`my-mcp-http-server-token' is not filled in by `secret.el'.
 
-L'entree est posee par `alist-get' plutot que par un `setq' de la liste
-entiere : les autres serveurs eventuellement declares ailleurs survivent,
-et un second appel met a jour l'entree au lieu de la dupliquer."
+The entry is set with `alist-get' rather than with a `setq' of the whole
+list: the other servers possibly declared elsewhere survive, and a second
+call updates the entry instead of duplicating it."
+
   (when (and my-mcp-http-server-url my-mcp-http-server-token)
     (setf (alist-get my-mcp-http-server-name mcp-hub-servers nil nil #'equal)
           (list :url my-mcp-http-server-url
-                ;; Le mot-cle `:token' de mcp.el n'est pas utilisable ici : il
-                ;; construit un en-tete "Authorization: Bearer ...", alors que
-                ;; ce serveur attend le schema "Token" de Django REST
-                ;; Framework.  On passe donc l'en-tete complet.
+                ;; The `:token' keyword of mcp.el is not usable here: it builds
+                ;; an "Authorization: Bearer ..." header, whereas this server
+                ;; expects the "Token" scheme of Django REST Framework.  We
+                ;; therefore pass the complete header.
                 :headers `(("Authorization"
                             . ,(concat "Token " my-mcp-http-server-token)))))))
 
-;; --- Paquet -----------------------------------------------------------------
+;; --- Package ----------------------------------------------------------------
 
-;; Aucun demarrage automatique : le serveur ecoute en local et n'est pas
-;; toujours lance, une connexion a chaque demarrage d'Emacs echouerait le plus
-;; souvent pour rien.  `mcp-hub' demarre ce qui est utile, a la demande.
+;; No automatic start: the server listens locally and is not always running, so
+;; a connection on every Emacs startup would most often fail for nothing.
+;; `mcp-hub' starts what is useful, on demand.
 ;;
-;; `C-c m' est deja pris par `org-menu' dans les buffers org (conf-org.el).
+;; `C-c m' is already taken by `org-menu' in org buffers (conf-org.el).
 (use-package mcp
   :ensure t
   :bind ("C-c M-m" . mcp-hub)
   :commands (mcp-hub mcp-connect-server))
 
-;; La declaration attend le chargement de `mcp-hub' — donc le premier appel a
-;; `mcp-hub' — pour deux raisons : `mcp-hub-servers' n'existe pas avant, et
-;; `secret.el' est alors certain d'avoir ete charge.
+;; The declaration waits for `mcp-hub' to be loaded — hence for the first call
+;; to `mcp-hub' — for two reasons: `mcp-hub-servers' does not exist before, and
+;; `secret.el' is then certain to have been loaded.
 (with-eval-after-load 'mcp-hub
   (my-mcp-register-http-server))
 

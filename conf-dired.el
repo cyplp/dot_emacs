@@ -1,28 +1,26 @@
-;;; conf-dired.el --- Navigation dans les fichiers -*- lexical-binding: t -*-
+;;; conf-dired.el --- File navigation -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; Reglages du gestionnaire de fichiers integre.
+;; Settings for the built-in file manager.
 ;;
-;; `image-dired+' a ete retire : la generation asynchrone des vignettes qu'il
-;; apportait est native depuis Emacs 29.  `dired-icon' aussi : il faisait
-;; exactement le meme travail qu'`all-the-icons-dired', et les deux poses
-;; d'icones se superposaient sur chaque ligne.
+;; `image-dired+' was dropped: the asynchronous thumbnail generation it added
+;; is native since Emacs 29.  `dired-icon' too: it did exactly the same job as
+;; `all-the-icons-dired', and both icon overlays stacked on every line.
 
 ;;; Code:
 
 (use-package dired
   :custom
-  ;; Groupe les repertoires en tete, tailles lisibles, tri naturel des nombres.
+  ;; Directories first, readable sizes, natural sort of numbers.
   (dired-listing-switches "-alhv --group-directories-first")
-  ;; Avec deux fenetres dired ouvertes, propose l'autre comme destination par
-  ;; defaut d'une copie ou d'un deplacement.
+  ;; With two dired windows open, offer the other one as the default
+  ;; destination of a copy or a move.
   (dired-dwim-target t)
-  ;; Reutilise le buffer courant au lieu d'en ouvrir un par repertoire
-  ;; traverse, qui s'accumulaient jusqu'a saturer la liste des buffers.
+  ;; Reuse the current buffer instead of opening one per directory visited,
+  ;; which piled up until the buffer list was saturated.
   (dired-kill-when-opening-new-dired-buffer t)
-  ;; Recursion sans confirmation pour les copies ; la suppression reste
-  ;; confirmee.
+  ;; Recursion without confirmation for copies; deletion still asks.
   (dired-recursive-copies 'always))
 
 (use-package all-the-icons-dired

@@ -1,8 +1,8 @@
-;;; conf-jabber.el --- Messagerie XMPP -*- lexical-binding: t -*-
+;;; conf-jabber.el --- XMPP messaging -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; Client XMPP.  Les comptes sont declares dans secret.el, hors depot.
+;; XMPP client.  Accounts are declared in secret.el, outside the repository.
 
 ;;; Code:
 

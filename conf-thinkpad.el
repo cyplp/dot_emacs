@@ -1,17 +1,17 @@
-;;; conf-thinkpad.el --- Touches specifiques au ThinkPad -*- lexical-binding: t -*-
+;;; conf-thinkpad.el --- ThinkPad-specific keys -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; Les touches de navigation du clavier ThinkPad sont associees par defaut au
-;; debut et a la fin du buffer, ce qui les rend dangereuses a portee de pouce.
-;; On les ramene au debut et a la fin de ligne.
+;; The ThinkPad navigation keys are bound by default to beginning and end of
+;; buffer, which makes them dangerous within thumb reach.  We bring them back
+;; to beginning and end of line.
 
 ;;; Code:
 
 (global-set-key [XF86Forward] #'move-end-of-line)
 (global-set-key [XF86Back] #'move-beginning-of-line)
 
-;; Le gros bouton bleu pilote la lecture dans Rhythmbox.
+;; The big blue button drives playback in Rhythmbox.
 (use-package helm-rhythmbox
   :ensure t
   :commands (helm-rhythmbox helm-rhythmbox-playpause-song)

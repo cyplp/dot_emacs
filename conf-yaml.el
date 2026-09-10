@@ -2,9 +2,9 @@
 
 ;;; Commentary:
 
-;; Les fichiers .yaml et .yml passent par `yaml-ts-mode' (conf-treesit.el).
-;; Le paquet `yaml-mode' reste installe : `docker-compose-mode', `k8s-mode' et
-;; `ansible' en derivent leurs propres modes majeurs.
+;; .yaml and .yml files go through `yaml-ts-mode' (conf-treesit.el).
+;; The `yaml-mode' package stays installed: `docker-compose-mode', `k8s-mode'
+;; and `ansible' derive their own major modes from it.
 
 ;;; Code:
 
@@ -12,9 +12,9 @@
   :ensure t
   :defer t)
 
-;; Mode dedie aux specifications OpenAPI 3, absent de MELPA.
-;; `:vc' remplace l'appel a quelpa, qui interrogeait le depot distant a chaque
-;; demarrage d'Emacs.
+;; Mode dedicated to OpenAPI 3 specifications, absent from MELPA.
+;; `:vc' replaces the quelpa call, which queried the remote repository on
+;; every Emacs startup.
 (use-package openapi-yaml-mode
   :vc (:url "https://github.com/magoyette/openapi-yaml-mode" :rev :newest)
   :commands openapi-yaml-mode)

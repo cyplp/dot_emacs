@@ -2,7 +2,7 @@
 
 ;;; Commentary:
 
-;; AUCTeX et ses raccourcis de navigation.
+;; AUCTeX and its navigation shortcuts.
 
 ;;; Code:
 

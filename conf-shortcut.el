@@ -1,32 +1,32 @@
-;;; conf-shortcut.el --- Raccourcis globaux -*- lexical-binding: t -*-
+;;; conf-shortcut.el --- Global shortcuts -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; Raccourcis qui ne dependent d'aucun mode majeur.
+;; Shortcuts that depend on no major mode.
 
 ;;; Code:
 
-;; Completion par expansion sur le texte deja present dans les buffers.
+;; Expansion completion over the text already present in the buffers.
 (global-set-key [S-iso-lefttab] #'dabbrev-expand)
 (global-set-key [S-tab] #'dabbrev-expand)
 (global-set-key [f9] #'dabbrev-completion)
 
 (global-set-key [f3] #'revert-buffer)
 
-;; `kill-this-buffer' est declaree obsolete depuis Emacs 29 : hors d'un menu
-;; elle ne fait rien de fiable, faute de savoir quelle fenetre l'a appelee.
+;; `kill-this-buffer' is obsolete since Emacs 29: outside a menu it does
+;; nothing reliable, as it cannot know which window called it.
 (global-set-key [f4] #'kill-current-buffer)
 
 (global-set-key [f5] #'comment-region)
 (global-set-key (kbd "<S-f5>") #'uncomment-region)
 
-;; Diagnostic sous le curseur, cote flymake (flycheck a ete retire).
+;; Diagnostic under point, on the flymake side (flycheck was dropped).
 (global-set-key [f12] #'flymake-show-buffer-diagnostics)
 
 (global-set-key (kbd "C-z") #'undo)
 (global-set-key (kbd "M-g") #'goto-line)
 
-;; Recherche du symbole sous le curseur.
+;; Search for the symbol under point.
 (global-set-key (kbd "C-S-s") #'isearch-forward-symbol-at-point)
 
 (provide 'conf-shortcut)

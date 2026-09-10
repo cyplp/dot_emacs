@@ -2,17 +2,17 @@
 
 ;;; Commentary:
 
-;; La verification syntaxique passe par `elisp-flymake-byte-compile', backend
-;; natif active dans conf-lsp.el.
+;; Syntax checking goes through `elisp-flymake-byte-compile', the native
+;; backend enabled in conf-lsp.el.
 
 ;;; Code:
 
-;; Retrouve une fonction a partir d'un exemple entree / sortie.
+;; Finds a function from an input / output example.
 (use-package suggest
   :ensure t
   :commands suggest)
 
-;; Evalue une expression au fil de la frappe et affiche le resultat en ligne.
+;; Evaluates an expression as you type and shows the result inline.
 (use-package litable
   :ensure t
   :commands litable-mode)

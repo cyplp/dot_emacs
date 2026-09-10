@@ -1,8 +1,8 @@
-;;; conf-webserver.el --- Configuration des serveurs web -*- lexical-binding: t -*-
+;;; conf-webserver.el --- Web server configuration -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; Modes majeurs pour les fichiers de configuration nginx et Caddy.
+;; Major modes for nginx and Caddy configuration files.
 
 ;;; Code:
 

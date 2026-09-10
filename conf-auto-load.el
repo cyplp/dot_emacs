@@ -1,20 +1,20 @@
-;;; conf-auto-load.el --- Association fichiers / modes majeurs -*- lexical-binding: t -*-
+;;; conf-auto-load.el --- File / major-mode associations -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; Associations qui n'appartiennent a aucun module de langage.
+;; Associations that belong to no language module.
 ;;
-;; Les motifs sont ancres en "\\'" (fin de chaine) et non en "$" (fin de
-;; ligne), et le point y est echappe.  Les anciens motifs du type "\.pl$"
-;; etaient lus par Emacs comme "n'importe quel caractere, puis pl" : un
-;; fichier nomme "toto-xpl" ou "script.tpl" ouvrait en cperl-mode.
+;; Patterns are anchored with "\\'" (end of string) and not with "$" (end of
+;; line), and the dot is escaped.  Old patterns such as "\.pl$" were read by
+;; Emacs as "any character, then pl": a file named "toto-xpl" or "script.tpl"
+;; opened in cperl-mode.
 
 ;;; Code:
 
-;; cperl-mode est plus complet que perl-mode et le remplace partout.
-;; `major-mode-remap-alist' est la forme prevue pour cela depuis Emacs 29 ;
-;; l'ancien `defalias' sur `perl-mode' redefinissait la fonction elle-meme,
-;; ce qui empeche tout code appelant explicitement `perl-mode' de l'obtenir.
+;; cperl-mode is more complete than perl-mode and replaces it everywhere.
+;; `major-mode-remap-alist' is the form intended for this since Emacs 29;
+;; the old `defalias' on `perl-mode' redefined the function itself, which
+;; prevents any code explicitly calling `perl-mode' from getting it.
 (add-to-list 'major-mode-remap-alist '(perl-mode . cperl-mode))
 
 (add-to-list 'auto-mode-alist '("\\.pl\\'" . cperl-mode))
@@ -26,10 +26,10 @@
 (add-to-list 'auto-mode-alist '("\\.cfg\\'" . conf-mode))
 (add-to-list 'auto-mode-alist '("\\.ini\\'" . conf-mode))
 
-;; La liaison globale de RET sur `newline-and-indent' a ete retiree :
-;; `electric-indent-mode' est actif par defaut depuis Emacs 24.4 et produit le
-;; meme effet, sans ecraser les RET propres au minibuffer, aux buffers de
-;; commit ou aux modes qui detournent la touche.
+;; The global RET binding to `newline-and-indent' was removed:
+;; `electric-indent-mode' is on by default since Emacs 24.4 and has the same
+;; effect, without overriding the RET keys specific to the minibuffer, to
+;; commit buffers or to modes that repurpose the key.
 
 (provide 'conf-auto-load)
 

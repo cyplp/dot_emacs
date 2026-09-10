@@ -1,16 +1,16 @@
-;;; test-org-emphasis.el --- tests de l'emphase org sur region -*- lexical-binding: t -*-
+;;; test-org-emphasis.el --- tests of org emphasis on a region -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; Lancer depuis la racine du depot :
+;; Run from the root of the repository:
 ;;
 ;;   emacs -Q --batch -l ert -l tests/test-org-emphasis.el \
 ;;         -f ert-run-tests-batch-and-exit
 ;;
-;; Les tests asserent le contenu du buffer, jamais son rendu : en batch ni
-;; `org-appear-mode' ni `org-hide-emphasis-markers' n'entrent en jeu. La seule
-;; assertion de mise en forme passe par l'analyseur d'org, qui lui est
-;; deterministe.
+;; The tests assert the content of the buffer, never its rendering: in batch
+;; mode neither `org-appear-mode' nor `org-hide-emphasis-markers' comes into
+;; play. The only formatting assertion goes through the org parser, which is
+;; deterministic.
 
 ;;; Code:
 
@@ -23,21 +23,21 @@
       nil t)
 
 (define-derived-mode my-org-emphasis-test-derived-mode org-mode "TestOrg"
-  "Mode derive d'org-mode, pour verifier l'heritage de `org-mode-map'.")
+  "Mode derived from org-mode, to check the inheritance of `org-mode-map'.")
 
 ;;; Helpers
 
 (defun my-org-emphasis-test--goto (target)
-  "Placer le point juste apres TARGET.
-TARGET est une chaine a chercher, ou nil pour la fin du buffer."
+  "Put point just after TARGET.
+TARGET is a string to search for, or nil for the end of the buffer."
   (goto-char (point-min))
   (if target
       (search-forward target)
     (goto-char (point-max))))
 
 (defun my-org-emphasis-test--type-on-selection (content selection marker &optional mode)
-  "Selectionner SELECTION dans CONTENT puis frapper MARKER, en MODE.
-Renvoie le texte du buffer resultant. MODE vaut `org-mode' par defaut."
+  "Select SELECTION in CONTENT then type MARKER, in MODE.
+Return the text of the resulting buffer. MODE defaults to `org-mode'."
   (with-temp-buffer
     (funcall (or mode #'org-mode))
     (insert content)
@@ -51,9 +51,9 @@ Renvoie le texte du buffer resultant. MODE vaut `org-mode' par defaut."
     (buffer-substring-no-properties (point-min) (point-max))))
 
 (defun my-org-emphasis-test--type-without-selection (content target marker &optional command)
-  "Placer le point apres TARGET dans CONTENT puis frapper MARKER.
-COMMAND permet de rejouer la meme frappe avec une autre commande, afin de
-comparer notre repli a la commande d'org qu'il delegue."
+  "Put point after TARGET in CONTENT then type MARKER.
+COMMAND allows replaying the same keystroke with another command, so as to
+compare our fallback with the org command it delegates to."
   (with-temp-buffer
     (org-mode)
     (insert content)
@@ -65,7 +65,7 @@ comparer notre repli a la commande d'org qu'il delegue."
     (buffer-substring-no-properties (point-min) (point-max))))
 
 (defun my-org-emphasis-test--bold-contents (content)
-  "Renvoyer la liste des fragments qu'org analyse comme du gras dans CONTENT."
+  "Return the list of the fragments org parses as bold in CONTENT."
   (with-temp-buffer
     (org-mode)
     (insert content)
@@ -75,35 +75,35 @@ comparer notre repli a la commande d'org qu'il delegue."
          (org-element-property :contents-begin bold)
          (org-element-property :contents-end bold))))))
 
-;;; Slice 1 — encadrement de la region active et repli hors region
+;;; Slice 1 — wrapping of the active region and fallback outside a region
 
 (ert-deftest my-org-emphasis-wraps-selection-with-typed-marker ()
-  "Une selection simple est encadree par le marqueur frappe."
+  "A simple selection is wrapped with the typed marker."
   (let ((data (my-org-emphasis-test--type-on-selection
-               "une longue phrase sans interet" "longue phrase" ?*))
-        (expected "une *longue phrase* sans interet"))
+               "a long sentence without interest" "long sentence" ?*))
+        (expected "a *long sentence* without interest"))
     (should (equal data expected))))
 
 (ert-deftest my-org-emphasis-wraps-selection-with-every-marker ()
-  "Chacun des marqueurs d'`org-emphasis-alist' encadre avec lui-meme."
+  "Each of the markers of `org-emphasis-alist' wraps with itself."
   (dolist (emphasis org-emphasis-alist)
     (let* ((marker (string-to-char (car emphasis)))
            (data (my-org-emphasis-test--type-on-selection
-                  "une longue phrase sans interet" "longue phrase" marker))
-           (expected (format "une %clongue phrase%c sans interet" marker marker)))
+                  "a long sentence without interest" "long sentence" marker))
+           (expected (format "a %clong sentence%c without interest" marker marker)))
       (should (equal data expected)))))
 
 (ert-deftest my-org-emphasis-leaves-non-marker-character-unbound ()
-  "Le tiret n'est pas un marqueur org : il ne doit declencher aucun encadrement."
+  "The dash is not an org marker: it must trigger no wrapping."
   (should-not (member "-" (mapcar #'car org-emphasis-alist)))
   (with-temp-buffer
     (org-mode)
     (should-not (eq (key-binding "-") #'my-org-emphasize-region-or-self-insert))))
 
 (ert-deftest my-org-emphasis-without-selection-matches-org-self-insert ()
-  "Sans region, la commande est indiscernable d'`org-self-insert-command'.
-C'est ce qui garantit que le comportement d'org dans les tableaux — blanchiment
-du champ, realignement — est preserve : il est delegue, jamais reimplemente."
+  "Without a region, the command matches `org-self-insert-command' exactly.
+That is what guarantees that org's behaviour in tables — field blanking,
+realignment — is preserved: it is delegated, never reimplemented."
   (let* ((table "| a | b |\n| c | d |\n")
          (data (my-org-emphasis-test--type-without-selection table "| a" ?=))
          (expected (my-org-emphasis-test--type-without-selection
@@ -111,87 +111,87 @@ du champ, realignement — est preserve : il est delegue, jamais reimplemente."
     (should (equal data expected))))
 
 (ert-deftest my-org-emphasis-without-selection-inserts-the-character ()
-  "Sans region, le marqueur s'insere au point comme un caractere ordinaire."
-  (let ((data (my-org-emphasis-test--type-without-selection "une phrase" nil ?*))
-        (expected "une phrase*"))
+  "Without a region, the marker is inserted at point as an ordinary character."
+  (let ((data (my-org-emphasis-test--type-without-selection "a sentence" nil ?*))
+        (expected "a sentence*"))
     (should (equal data expected))))
 
 (ert-deftest my-org-emphasis-keeps-single-emphasis-on-emphasized-selection ()
-  "Une selection deja encadree, marqueurs compris, conserve une emphase unique."
+  "An already wrapped selection, markers included, keeps a single emphasis."
   (let ((data (my-org-emphasis-test--type-on-selection
-               "une *longue phrase* sans interet" "*longue phrase*" ?*))
-        (expected "une *longue phrase* sans interet"))
+               "a *long sentence* without interest" "*long sentence*" ?*))
+        (expected "a *long sentence* without interest"))
     (should (equal data expected))))
 
 (ert-deftest my-org-emphasis-replaces-emphasis-instead-of-nesting ()
-  "Frapper un autre marqueur remplace l'emphase au lieu de l'imbriquer."
+  "Typing another marker replaces the emphasis instead of nesting it."
   (let ((data (my-org-emphasis-test--type-on-selection
-               "une *longue phrase* sans interet" "*longue phrase*" ?/))
-        (expected "une /longue phrase/ sans interet"))
+               "a *long sentence* without interest" "*long sentence*" ?/))
+        (expected "a /long sentence/ without interest"))
     (should (equal data expected))))
 
 (ert-deftest my-org-emphasis-applies-in-modes-derived-from-org ()
-  "Un mode derive d'org-mode herite du comportement et des liaisons."
+  "A mode derived from org-mode inherits the behaviour and the bindings."
   (let ((data (my-org-emphasis-test--type-on-selection
-               "une longue phrase sans interet" "longue phrase" ?*
+               "a long sentence without interest" "long sentence" ?*
                #'my-org-emphasis-test-derived-mode))
-        (expected "une *longue phrase* sans interet"))
+        (expected "a *long sentence* without interest"))
     (should (equal data expected)))
   (with-temp-buffer
     (my-org-emphasis-test-derived-mode)
     (should (eq (key-binding "*") #'my-org-emphasize-region-or-self-insert))))
 
 (ert-deftest my-org-emphasis-does-not-leak-outside-org ()
-  "Hors d'un document org, les marqueurs restent des caracteres ordinaires."
+  "Outside an org document, the markers stay ordinary characters."
   (dolist (emphasis org-emphasis-alist)
     (with-temp-buffer
       (fundamental-mode)
       (should-not (eq (key-binding (car emphasis))
                       #'my-org-emphasize-region-or-self-insert)))))
 
-;;; Slice 2 — rognage des espaces en bord de selection
+;;; Slice 2 — trimming of the spaces at the edges of the selection
 
 (ert-deftest my-org-emphasis-trims-trailing-whitespace ()
-  "Un espace final dans la selection reste hors des marqueurs."
+  "A trailing space in the selection stays outside the markers."
   (let ((data (my-org-emphasis-test--type-on-selection
-               "une longue phrase sans interet" "longue phrase " ?*))
-        (expected "une *longue phrase* sans interet"))
+               "a long sentence without interest" "long sentence " ?*))
+        (expected "a *long sentence* without interest"))
     (should (equal data expected))))
 
 (ert-deftest my-org-emphasis-trims-leading-whitespace ()
-  "Un espace initial dans la selection reste hors des marqueurs."
+  "A leading space in the selection stays outside the markers."
   (let ((data (my-org-emphasis-test--type-on-selection
-               "une longue phrase sans interet" " longue phrase" ?*))
-        (expected "une *longue phrase* sans interet"))
+               "a long sentence without interest" " long sentence" ?*))
+        (expected "a *long sentence* without interest"))
     (should (equal data expected))))
 
 (ert-deftest my-org-emphasis-trims-trailing-newline ()
-  "Un saut de ligne en bord de selection est preserve hors des marqueurs."
+  "A newline at the edge of the selection is preserved outside the markers."
   (let ((data (my-org-emphasis-test--type-on-selection
-               "premiere ligne\nseconde ligne\n" "premiere ligne\n" ?=))
-        (expected "=premiere ligne=\nseconde ligne\n"))
+               "first line\nsecond line\n" "first line\n" ?=))
+        (expected "=first line=\nsecond line\n"))
     (should (equal data expected))))
 
 (ert-deftest my-org-emphasis-produces-emphasis-org-recognizes ()
-  "Le rognage est ce qui fait qu'org analyse reellement le fragment en gras.
-Sans lui, \"*longue phrase *\" resterait du texte brut : le geste echouerait
-en silence, marqueurs visibles et aucune mise en forme."
+  "The trimming is what makes org really parse the fragment as bold.
+Without it, \"*long sentence *\" would stay plain text: the gesture would
+fail silently, markers visible and no formatting at all."
   (let ((data (my-org-emphasis-test--bold-contents
                (my-org-emphasis-test--type-on-selection
-                "une longue phrase sans interet" "longue phrase " ?*)))
-        (expected '("longue phrase")))
+                "a long sentence without interest" "long sentence " ?*)))
+        (expected '("long sentence")))
     (should (equal data expected))))
 
 (ert-deftest my-org-emphasis-ignores-blank-selection ()
-  "Une selection entierement blanche n'est pas encadree."
-  (let ((data (my-org-emphasis-test--type-on-selection "une    phrase" "    " ?*))
-        (expected "une    *phrase"))
+  "A wholly blank selection is not wrapped."
+  (let ((data (my-org-emphasis-test--type-on-selection "a    sentence" "    " ?*))
+        (expected "a    *sentence"))
     (should (equal data expected))))
 
-;;; Slice 3 — inertie hors contexte de texte org
+;;; Slice 3 — inertness outside an org text context
 
 (ert-deftest my-org-emphasis-ignores-selection-in-source-block ()
-  "Une selection dans un bloc de code n'est pas encadree."
+  "A selection inside a code block is not wrapped."
   (let ((data (my-org-emphasis-test--type-on-selection
                "#+begin_src python\nvalue = compute()\n#+end_src\n"
                "compute()" ?=))
@@ -199,28 +199,29 @@ en silence, marqueurs visibles et aucune mise en forme."
     (should (equal data expected))))
 
 (ert-deftest my-org-emphasis-ignores-selection-in-example-block ()
-  "Une selection dans un bloc d'exemple n'est pas encadree."
+  "A selection inside an example block is not wrapped."
   (let ((data (my-org-emphasis-test--type-on-selection
-               "#+begin_example\ntexte exemple\n#+end_example\n"
-               "exemple" ?~))
-        (expected "#+begin_example\ntexte exemple~\n#+end_example\n"))
+               "#+begin_example\nexample text\n#+end_example\n"
+               "text" ?~))
+        (expected "#+begin_example\nexample text~\n#+end_example\n"))
     (should (equal data expected))))
 
 (ert-deftest my-org-emphasis-ignores-selection-on-keyword-line ()
-  "Une selection sur une ligne de mot-cle n'est pas encadree."
+  "A selection on a keyword line is not wrapped."
   (let ((data (my-org-emphasis-test--type-on-selection
-               "#+TITLE: une longue phrase\n" "longue phrase" ?/))
-        (expected "#+TITLE: une longue phrase/\n"))
+               "#+TITLE: a long sentence\n" "long sentence" ?/))
+        (expected "#+TITLE: a long sentence/\n"))
     (should (equal data expected))))
 
 (ert-deftest my-org-emphasis-still-applies-in-ordinary-paragraph ()
-  "La detection de contexte ne doit pas desactiver la feature partout.
-Sans ce cas positif, un predicat trop large passerait tous les autres tests
-de la slice tout en rendant l'encadrement inoperant dans un document normal."
+  "The context detection must not disable the feature everywhere.
+Without this positive case, an over-broad predicate would pass all the other
+tests of the slice while making the wrapping inoperative in a normal
+document."
   (let ((data (my-org-emphasis-test--type-on-selection
-               "#+begin_src python\nvalue = 1\n#+end_src\n\nune longue phrase sans interet\n"
-               "longue phrase" ?*))
-        (expected "#+begin_src python\nvalue = 1\n#+end_src\n\nune *longue phrase* sans interet\n"))
+               "#+begin_src python\nvalue = 1\n#+end_src\n\na long sentence without interest\n"
+               "long sentence" ?*))
+        (expected "#+begin_src python\nvalue = 1\n#+end_src\n\na *long sentence* without interest\n"))
     (should (equal data expected))))
 
 ;;; test-org-emphasis.el ends here

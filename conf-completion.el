@@ -1,41 +1,40 @@
-;;; conf-completion.el --- Completion dans le buffer -*- lexical-binding: t -*-
+;;; conf-completion.el --- In-buffer completion -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; Repartition des roles : helm tient le minibuffer (M-x, fichiers, buffers),
-;; corfu tient la completion au point dans le buffer.  Les deux ne se marchent
-;; pas dessus parce que `helm-mode-handle-completion-in-region' est desactive
-;; dans init.el.
+;; Split of roles: helm owns the minibuffer (M-x, files, buffers), corfu owns
+;; completion at point in the buffer.  They do not step on each other because
+;; `helm-mode-handle-completion-in-region' is disabled in init.el.
 ;;
-;; corfu s'appuie sur `completion-at-point-functions', l'interface standard
-;; d'Emacs : eglot, dabbrev et les modes majeurs l'alimentent sans greffon
-;; dedie.  C'est ce qui remplace auto-complete et company, tous deux presents
-;; auparavant via des paquets satellites (auto-complete-rst, auto-complete-nxml).
+;; corfu relies on `completion-at-point-functions', the standard Emacs
+;; interface: eglot, dabbrev and the major modes feed it without a dedicated
+;; plugin.  That is what replaces auto-complete and company, both previously
+;; present through satellite packages (auto-complete-rst, auto-complete-nxml).
 
 ;;; Code:
 
 (use-package corfu
   :ensure t
   :custom
-  ;; Declenchement automatique : sans cela corfu n'apparait que sur
-  ;; `completion-at-point', ce qui revient a taper le raccourci a chaque fois.
+  ;; Automatic trigger: without it corfu only shows up on
+  ;; `completion-at-point', which amounts to typing the shortcut every time.
   (corfu-auto t)
   (corfu-auto-prefix 2)
   (corfu-auto-delay 0.15)
   (corfu-cycle t)
-  ;; Ne pas completer d'office en quittant : une insertion non voulue au
-  ;; moindre deplacement du curseur est plus couteuse qu'une completion ratee.
+  ;; Do not complete on exit by default: an unwanted insertion at the slightest
+  ;; cursor move costs more than a missed completion.
   (corfu-preview-current nil)
   (corfu-quit-no-match 'separator)
   :init
   (global-corfu-mode 1)
   :config
-  ;; Documentation du candidat courant dans une infobulle laterale.
+  ;; Documentation of the current candidate in a side tooltip.
   (corfu-popupinfo-mode 1))
 
-;; dabbrev sert de source de repli dans les buffers sans serveur de langage.
-;; Par defaut il traverse les buffers d'images et d'archives, ce qui produit
-;; des candidats binaires.
+;; dabbrev is the fallback source in buffers without a language server.
+;; By default it walks image and archive buffers, which produces binary
+;; candidates.
 (use-package dabbrev
   :custom
   (dabbrev-ignored-buffer-regexps '("\\.\\(?:pdf\\|jpe?g\\|png\\|gz\\|zip\\)\\'")))

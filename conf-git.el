@@ -1,20 +1,20 @@
-;;; conf-git.el --- Integration git -*- lexical-binding: t -*-
+;;; conf-git.el --- Git integration -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; magit et ses satellites.  Les reglages de performance sont conserves : le
-;; buffer de statut de magit est le point de contact le plus frequent avec un
-;; depot, et son rafraichissement automatique est ce qui coute le plus cher.
+;; magit and its satellites.  The performance settings are kept: magit's status
+;; buffer is the most frequent point of contact with a repository, and its
+;; automatic refresh is what costs the most.
 
 ;;; Code:
 
-;; Marques de modification dans la marge.
+;; Change marks in the fringe.
 (use-package git-gutter
   :ensure t
   :hook (prog-mode . git-gutter-mode)
   :custom
-  ;; 0 desactive le rafraichissement periodique : la marge se met a jour sur
-  ;; les evenements du buffer, sans minuterie qui reveille Emacs au repos.
+  ;; 0 disables the periodic refresh: the fringe updates on buffer events,
+  ;; without a timer waking Emacs while idle.
   (git-gutter:update-interval 0))
 
 (use-package git-gutter-fringe
@@ -29,14 +29,13 @@
   :ensure t
   :bind ("C-x g" . magit-status)
   :custom
-  ;; Ne pas reconstruire le buffer de statut apres chaque commande : sur un
-  ;; gros depot chaque rafraichissement relance une dizaine de sous-processus
-  ;; git. `g' rafraichit a la demande.
+  ;; Do not rebuild the status buffer after each command: on a big repository
+  ;; every refresh spawns a dozen git subprocesses. `g' refreshes on demand.
   (magit-refresh-status-buffer nil)
-  ;; Mettre a t pour profiler les temps de rafraichissement de magit.
+  ;; Set to t to profile magit refresh times.
   (magit-refresh-verbose nil))
 
-;; Diff colore mot a mot dans magit, via delta.
+;; Word-by-word colored diff in magit, through delta.
 (use-package magit-delta
   :ensure t
   :hook (magit-mode . magit-delta-mode))
@@ -45,15 +44,14 @@
   :ensure t
   :after magit
   :config
-  ;; Ces sections interrogent l'API de la forge a chaque ouverture du statut.
-  ;; Le retrait doit avoir lieu apres le chargement de forge : c'est forge qui
-  ;; les installe, donc les appels a `remove-hook' au chargement du fichier —
-  ;; comme c'etait le cas jusqu'ici — s'executaient avant l'ajout et n'avaient
-  ;; aucun effet.
+  ;; These sections query the forge API every time the status buffer opens.
+  ;; The removal must happen after forge is loaded: forge is what installs
+  ;; them, so the `remove-hook' calls at file load time — as was the case until
+  ;; now — ran before the addition and had no effect.
   (remove-hook 'magit-status-sections-hook 'forge-insert-pullreqs)
   (remove-hook 'magit-status-sections-hook 'forge-insert-issues))
 
-;; Modes majeurs pour .gitconfig, .gitignore, .gitattributes.
+;; Major modes for .gitconfig, .gitignore, .gitattributes.
 (use-package git-modes
   :ensure t)
 
@@ -61,13 +59,13 @@
   :ensure t
   :commands (gist-region gist-buffer gist-list))
 
-;; Affiche le commit responsable de la ligne courante.
-;; Remplace git-messenger, non maintenu depuis 2019 et qui faisait doublon.
+;; Shows the commit responsible for the current line.
+;; Replaces git-messenger, unmaintained since 2019 and redundant with it.
 (use-package vc-msg
   :ensure t
   :bind ("C-x v p" . vc-msg-show))
 
-;; Ouvrir la ligne courante dans l'interface web de la forge.
+;; Open the current line in the forge web interface.
 (use-package browse-at-remote
   :ensure t
   :bind ("C-x v b" . browse-at-remote))
@@ -76,19 +74,19 @@
   :ensure t
   :mode ("\\.gitlab-ci\\.ya?ml\\'" . gitlab-ci-mode))
 
-;; `gitlab-ci-mode-flycheck' est retire avec flycheck ; la validation passe par
-;; `M-x gitlab-ci-lint', qui interroge directement l'API GitLab.
+;; `gitlab-ci-mode-flycheck' is dropped along with flycheck; validation goes
+;; through `M-x gitlab-ci-lint', which queries the GitLab API directly.
 
-;; Assistance a la redaction de messages au format Conventional Commits.
-;; `:vc' remplace l'appel a quelpa : quelpa interrogeait le depot distant a
-;; chaque demarrage d'Emacs, la ou package-vc n'agit qu'a l'installation.
-;; La coloration du format vit dans `conf-conventional-commit'.
+;; Assistance for writing messages in the Conventional Commits format.
+;; `:vc' replaces the quelpa call: quelpa queried the remote repository on
+;; every Emacs startup, where package-vc only acts at install time.
+;; Coloring of the format lives in `conf-conventional-commit'.
 (use-package conventional-commit
   :vc (:url "https://github.com/akirak/conventional-commit.el" :rev :newest)
-  ;; `git-commit-setup' lie `git-commit-mode-hook' a nil le temps d'activer le
-  ;; mode mineur : la completion accrochee la n'etait jamais installee sur un
-  ;; commit lance par magit. `git-commit-setup-hook' est le point d'entree que
-  ;; magit prevoit pour la configuration d'un tampon de message.
+  ;; `git-commit-setup' binds `git-commit-mode-hook' to nil while it enables
+  ;; the minor mode: completion hooked there was never installed on a commit
+  ;; started by magit. `git-commit-setup-hook' is the entry point magit
+  ;; provides for configuring a message buffer.
   :hook (git-commit-setup . conventional-commit-setup))
 
 (provide 'conf-git)

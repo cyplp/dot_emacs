@@ -1,50 +1,51 @@
-;;; conf-python.el --- Configuration Python -*- lexical-binding: t -*-
+;;; conf-python.el --- Python configuration -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; On utilise le python.el integre a Emacs 30 plutot que le paquet MELPA
-;; `python-mode'.  Ce dernier lie TAB a `py-indent-line', qui fait defiler les
-;; niveaux d'indentation candidats au lieu de calculer le bon : dans un bloc
-;; src org, le code sautait d'une colonne a l'autre a chaque TAB.
+;; We use the python.el bundled with Emacs 30 rather than the MELPA package
+;; `python-mode'.  The latter binds TAB to `py-indent-line', which cycles
+;; through the candidate indentation levels instead of computing the right one:
+;; in an org src block, the code jumped from one column to another on every
+;; TAB.
 ;;
-;; Tout s'accroche a `python-base-mode', ancetre commun de `python-mode' et de
-;; `python-ts-mode'.  C'est ce qui fait que la bascule vers tree-sitter decidee
-;; dans conf-treesit.el ne desactive silencieusement ni les raccourcis ni les
-;; modes mineurs declares ici.
+;; Everything hooks onto `python-base-mode', the common ancestor of
+;; `python-mode' and `python-ts-mode'.  That is what keeps the switch to
+;; tree-sitter decided in conf-treesit.el from silently disabling the shortcuts
+;; and the minor modes declared here.
 
 ;;; Code:
 
 (require 'python)
 
-;; eglot est charge par conf-lsp.el, qui precede ce module dans
+;; eglot is loaded by conf-lsp.el, which comes before this module in
 ;; `my-configuration-modules'.
 
 (add-hook 'python-base-mode-hook
           (lambda ()
-            ;; buffer-local : ce sont des options globales par defaut
+            ;; buffer-local: these are global options by default
             (setq-local python-indent-offset 4)
             (setq-local indent-tabs-mode nil)
             (setq-local tab-width 4)))
 
-;; --- Serveur de langage -----------------------------------------------------
+;; --- Language server --------------------------------------------------------
 
 (defconst my-python-language-servers
   '("basedpyright-langserver" "pyright-langserver" "pylsp" "jedi-language-server")
-  "Serveurs de langage Python acceptes, du plus complet au plus simple.
+  "Accepted Python language servers, from the most complete to the simplest.
 
-La liste par defaut d'eglot se rabat aussi sur \"ruff server\". C'est un piege
-ici : pyenv installe un shim `ruff' visible depuis `executable-find' alors que
-le binaire n'existe que dans un interpreteur precis. eglot demarrerait donc un
-serveur qui echoue immediatement, a chaque ouverture de fichier.")
+The default eglot list also falls back to \"ruff server\". That is a trap
+here: pyenv installs a `ruff' shim visible from `executable-find' while the
+binary only exists in one specific interpreter. eglot would therefore start a
+server that fails immediately, every time a file is opened.")
 
 (defun my-python-available-language-server ()
-  "Premier serveur de `my-python-language-servers' present sur la machine."
+  "First server of `my-python-language-servers' present on the machine."
   (seq-find #'executable-find my-python-language-servers))
 
 (defun my-python-setup-eglot ()
-  "Demarrer eglot seulement si un serveur Python est installe.
-Sans cette garde, chaque ouverture d'un fichier Python sur une machine sans
-serveur produit une erreur de connexion."
+  "Start eglot only if a Python server is installed.
+Without this guard, every Python file opened on a machine without a server
+produces a connection error."
   (when (my-python-available-language-server)
     (eglot-ensure)))
 
@@ -59,10 +60,10 @@ serveur produit une erreur de connexion."
 
 (add-hook 'python-base-mode-hook #'my-python-setup-eglot)
 
-;; --- Aides a l'ecriture -----------------------------------------------------
+;; --- Writing helpers --------------------------------------------------------
 
 (defun python-add-breakpoint ()
-  "Inserer un `breakpoint()' sur une nouvelle ligne et sauvegarder."
+  "Insert a `breakpoint()' on a new line and save."
   (interactive)
   (newline-and-indent)
   (insert "breakpoint()")
@@ -71,7 +72,7 @@ serveur produit une erreur de connexion."
   (save-buffer))
 
 (defun python-add-remote-breakpoint ()
-  "Inserer un point d'arret rpdb, accessible par telnet."
+  "Insert an rpdb breakpoint, reachable over telnet."
   (interactive)
   (newline-and-indent)
   (insert "import rpdb; rpdb.set_trace()")
@@ -80,20 +81,20 @@ serveur produit une erreur de connexion."
   (save-buffer))
 
 (defun python-add-noqa ()
-  "Ajouter un marqueur `# NOQA' en fin de ligne courante."
+  "Append a `# NOQA' marker at the end of the current line."
   (interactive)
   (move-end-of-line nil)
   (insert "  # NOQA"))
 
 (defun python-add-nocover ()
-  "Ajouter un marqueur `# pragma: nocover' en fin de ligne courante."
+  "Append a `# pragma: nocover' marker at the end of the current line."
   (interactive)
   (move-end-of-line nil)
   (insert "  # pragma: nocover")
   (save-buffer))
 
 (defun python-replace-quote ()
-  "Remplacer les guillemets doubles par des simples sur la ligne courante."
+  "Replace the double quotes with single ones on the current line."
   (interactive)
   (save-excursion
     (move-beginning-of-line nil)
@@ -102,26 +103,25 @@ serveur produit une erreur de connexion."
         (replace-match "'" nil nil)))))
 
 (defun python-add-header-file ()
-  "Inserer l'en-tete de module : encodage puis docstring."
+  "Insert the module header: encoding then docstring."
   (interactive)
-  ;; `goto-line' est reserve a l'usage interactif et declenche un
-  ;; avertissement a la compilation ; en Lisp on se deplace directement.
+  ;; `goto-line' is reserved for interactive use and triggers a warning at
+  ;; compile time; in Lisp we move directly.
   (goto-char (point-min))
   (insert "# coding: utf-8\n")
   (insert "\"\"\"Some comment.\"\"\"\n\n"))
 
 (defun telnet-rpdb ()
-  "Ouvrir un telnet sur le port par defaut de rpdb."
+  "Open a telnet on the default rpdb port."
   (interactive)
   (telnet "127.0.0.1" 4444))
 
-;; Les raccourcis portent sur `python-base-mode-map' pour valoir aussi bien en
-;; `python-mode' qu'en `python-ts-mode'.
+;; The shortcuts apply to `python-base-mode-map' so as to hold in both
+;; `python-mode' and `python-ts-mode'.
 ;;
-;; Les anciennes liaisons "C-p" (nocover) et "C-f" (erreur suivante) sont
-;; abandonnees : elles ecrasaient `previous-line' et `forward-char' dans tous
-;; les buffers Python. Le parcours des erreurs passe desormais par les M-n /
-;; M-p de flymake (conf-lsp.el).
+;; The old "C-p" (nocover) and "C-f" (next error) bindings are given up: they
+;; overrode `previous-line' and `forward-char' in every Python buffer. Walking
+;; the errors now goes through flymake's M-n / M-p (conf-lsp.el).
 (defconst my-python-key-bindings
   '(("C-c C-b" . python-add-breakpoint)
     ("C-c C-r" . python-add-remote-breakpoint)
@@ -129,25 +129,26 @@ serveur produit une erreur de connexion."
     ("<f8>"    . python-add-header-file)
     ("<f9>"    . python-replace-quote)
     ("<f10>"   . python-add-noqa))
-  "Raccourcis maison des buffers Python.")
+  "Homemade shortcuts of the Python buffers.")
 
-;; Les liaisons sont posees sur les deux keymaps enfants et non sur
-;; `python-base-mode-map'. python.el reserve deja certaines de ces touches dans
-;; les keymaps de `python-mode' et `python-ts-mode' — C-c C-b y vaut
-;; `python-shell-send-block' — et une keymap enfant masque toujours son parent :
-;; declarer dans la keymap commune ne suffit donc pas a reprendre la touche.
+;; The bindings are installed on the two child keymaps and not on
+;; `python-base-mode-map'. python.el already reserves some of these keys in the
+;; keymaps of `python-mode' and `python-ts-mode' — C-c C-b is
+;; `python-shell-send-block' there — and a child keymap always shadows its
+;; parent: declaring in the common keymap is therefore not enough to take the
+;; key back.
 (dolist (python-keymap (list python-mode-map python-ts-mode-map))
   (dolist (binding my-python-key-bindings)
     (define-key python-keymap (kbd (car binding)) (cdr binding))))
 
-;; --- Outils -----------------------------------------------------------------
+;; --- Tools ------------------------------------------------------------------
 
-;; Generation de docstrings au format Sphinx.
+;; Generation of docstrings in the Sphinx format.
 (use-package sphinx-doc
   :ensure t
   :hook (python-base-mode . sphinx-doc-mode))
 
-;; Coloration et raccourcis pour les fichiers reStructuredText.
+;; Coloring and shortcuts for reStructuredText files.
 (use-package sphinx-mode
   :ensure t
   :commands sphinx-mode)
@@ -156,11 +157,11 @@ serveur produit une erreur de connexion."
   :ensure t
   :mode ("requirements\\(?:-[^/]*\\)?\\.txt\\'" . pip-requirements-mode))
 
-;; Note sur le formatage : `blacken' a ete retire, black n'etant pas installe
-;; ici. `ruff format' le remplacerait avantageusement, mais son binaire n'est
-;; accessible que dans l'environnement pyenv 3.11 — le brancher sur
-;; `before-save-hook' ferait echouer chaque sauvegarde ailleurs. A rebrancher
-;; le jour ou l'outil est disponible globalement.
+;; Note on formatting: `blacken' was dropped, black not being installed here.
+;; `ruff format' would replace it advantageously, but its binary is only
+;; reachable in the pyenv 3.11 environment — wiring it onto `before-save-hook'
+;; would make every save elsewhere fail. To be wired back the day the tool is
+;; available globally.
 
 (provide 'conf-python)
 

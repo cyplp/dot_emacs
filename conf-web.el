@@ -1,15 +1,15 @@
-;;; conf-web.el --- Developpement web -*- lexical-binding: t -*-
+;;; conf-web.el --- Web development -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; `json-mode' et `typescript-mode' ont ete retires : Emacs 30 fournit
-;; `json-ts-mode' et `typescript-ts-mode', branches dans conf-treesit.el.
-;; `less-css-mode' aussi : il fait partie de css-mode depuis Emacs 26.
+;; `json-mode' and `typescript-mode' were dropped: Emacs 30 provides
+;; `json-ts-mode' and `typescript-ts-mode', wired up in conf-treesit.el.
+;; `less-css-mode' too: it is part of css-mode since Emacs 26.
 
 ;;; Code:
 
-;; web-mode reste utile la ou tree-sitter ne suffit pas : les gabarits qui
-;; melangent plusieurs langages dans un meme fichier (Jinja, Twig, ERB, Vue).
+;; web-mode stays useful where tree-sitter is not enough: templates that mix
+;; several languages in a single file (Jinja, Twig, ERB, Vue).
 (use-package web-mode
   :ensure t
   :mode (("\\.html?\\'" . web-mode)
@@ -24,8 +24,8 @@
   (web-mode-enable-auto-closing t))
 
 
-;; Emacs n'associe que .js, .jsx et .jsm ; les modules ES (.mjs) et les
-;; modules CommonJS explicites (.cjs) restaient sans mode majeur.
+;; Emacs only associates .js, .jsx and .jsm; ES modules (.mjs) and explicit
+;; CommonJS modules (.cjs) were left without a major mode.
 (add-to-list 'auto-mode-alist '("\\.[cm]js\\'" . js-ts-mode))
 
 (provide 'conf-web)

@@ -2,11 +2,11 @@
 
 ;;; Commentary:
 
-;; Edition SQL, connexions aux bases et mise en forme des requetes.
+;; SQL editing, database connections and query formatting.
 ;;
-;; `db-pg' a ete retire : le paquet est sans maintenance depuis 2013 et
-;; tirait deux dependances (`db', `pg') pour un client PostgreSQL que
-;; `sql-postgres' couvre nativement.
+;; `db-pg' was dropped: the package is unmaintained since 2013 and pulled in
+;; two dependencies (`db', `pg') for a PostgreSQL client that `sql-postgres'
+;; covers natively.
 
 ;;; Code:
 
@@ -14,47 +14,48 @@
   :ensure t
   :hook (sql-mode . sqlind-minor-mode))
 
-;; Passe les mots-cles SQL en majuscules au fil de la frappe.
+;; Uppercases SQL keywords as you type.
 (use-package sqlup-mode
   :ensure t
   :hook ((sql-mode . sqlup-mode)
          (sql-interactive-mode . sqlup-mode))
   :bind ("C-c u" . sqlup-capitalize-keywords-in-region))
 
-;; Menu de selection d'une connexion enregistree.
+;; Selection menu for a saved connection.
 (use-package helm-sql-connect
   :ensure t
   :commands helm-sql-connect
   :config
-  ;; Contournement de https://github.com/eric-hansen/helm-sql-connect/issues/3 :
-  ;; le paquet lit une variable dont il ne definit que l'homonyme.
+  ;; Workaround for https://github.com/eric-hansen/helm-sql-connect/issues/3:
+  ;; the package reads a variable of which it only defines the homonym.
   (defvar helm-sql-connection-pool helm-sql-connect-pool))
 
-;; Les connexions elles-memes vivent dans dbconnections.el, hors depot ; son
-;; chargement est fait par init.el avec les autres fichiers prives.
+;; The connections themselves live in dbconnections.el, outside the repository;
+;; init.el loads it along with the other private files.
 
-;; --- Mise en forme ----------------------------------------------------------
+;; --- Formatting -------------------------------------------------------------
 
 (defconst sql-beautiful-break-after '("," "JOIN" "AND")
-  "Mots-cles apres lesquels la requete passe a la ligne.")
+  "Keywords after which the query breaks to a new line.")
 
 (defconst sql-beautiful-break-before '("FROM" "WHERE")
-  "Mots-cles avant lesquels la requete passe a la ligne.")
+  "Keywords before which the query breaks to a new line.")
 
 (defun sql-beautiful--break (keyword newline-position)
-  "Inserer un saut de ligne autour de chaque occurrence de KEYWORD.
-NEWLINE-POSITION vaut `after' ou `before' selon le cote ou placer le saut.
+  "Insert a line break around each occurrence of KEYWORD.
+NEWLINE-POSITION is `after' or `before', depending on which side the break
+goes.
 
-La recherche est bornee par les limites de la region retrecie par
-l'appelant.  Les mots-cles alphabetiques sont delimites par `\\b' pour ne pas
-couper un identifiant qui les contient, comme la colonne \"BRAND\" pour AND.
-La virgule, elle, ne peut pas l'etre : `\\b' marque une frontiere entre
-caractere de mot et non-mot, et n'en trouve donc jamais autour d'un signe de
-ponctuation isole — le motif ne correspondait a rien.
+The search is bounded by the limits of the region narrowed by the caller.
+Alphabetic keywords are delimited with `\\b' so as not to cut an identifier
+that contains them, such as the \"BRAND\" column for AND.  The comma cannot
+be: `\\b' marks a boundary between a word and a non-word character, and
+therefore never finds one around an isolated punctuation sign — the pattern
+matched nothing.
 
-Le remplacement est litteral : la version precedente construisait un texte
-de remplacement contenant \\1 alors que le motif ne definissait aucun
-groupe, ce qui faisait echouer `replace-match' des le premier mot-cle."
+The replacement is literal: the previous version built a replacement text
+containing \\1 while the pattern defined no group, which made `replace-match'
+fail on the very first keyword."
   (goto-char (point-min))
   (let* ((alphabetic (string-match-p "\\`[[:alpha:]]" keyword))
          (pattern (if alphabetic
@@ -67,7 +68,8 @@ groupe, ce qui faisait echouer `replace-match' des le premier mot-cle."
                      t t))))
 
 (defun sql-beautiful-region (region-start region-end)
-  "Mettre en forme la requete SQL comprise entre REGION-START et REGION-END."
+  "Format the SQL query between REGION-START and REGION-END."
+
   (interactive "r")
   (save-excursion
     (save-restriction

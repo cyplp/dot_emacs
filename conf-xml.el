@@ -1,15 +1,15 @@
-;;; conf-xml.el --- XML et nXML -*- lexical-binding: t -*-
+;;; conf-xml.el --- XML and nXML -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; `auto-complete-nxml' a ete retire : auto-complete n'est plus maintenu et la
-;; completion dans le buffer passe desormais par corfu (conf-completion.el),
-;; qui consomme directement les candidats de nxml via
+;; `auto-complete-nxml' was dropped: auto-complete is no longer maintained and
+;; in-buffer completion now goes through corfu (conf-completion.el), which
+;; consumes nxml's candidates directly through
 ;; `completion-at-point-functions'.
 ;;
-;; Le formatage etait declare deux fois : une fois par `reformatter-define'
-;; ici, une fois par le paquet MELPA `xml-format', qui n'est rien d'autre que
-;; le meme appel. Seule la definition locale subsiste.
+;; Formatting was declared twice: once by `reformatter-define' here, once by
+;; the MELPA package `xml-format', which is nothing but the same call. Only the
+;; local definition remains.
 
 ;;; Code:
 
@@ -25,31 +25,31 @@
          ("\\.pt\\'" . nxml-mode))
   :bind (:map nxml-mode-map
               ("C-c h" . hs-toggle-hiding)
-              ;; Liaison deplacee depuis la keymap globale, ou elle rendait
-              ;; C-<return> inutilisable dans tous les autres modes.
-              ;; `nxml-complete' est obsolete depuis Emacs 26 : la completion
-              ;; passe par `completion-at-point', donc par corfu, qui recupere
-              ;; les memes candidats issus du schema RELAX NG.
+              ;; Binding moved from the global keymap, where it made
+              ;; C-<return> unusable in every other mode.
+              ;; `nxml-complete' is obsolete since Emacs 26: completion goes
+              ;; through `completion-at-point', hence through corfu, which gets
+              ;; the same candidates from the RELAX NG schema.
               ("C-<return>" . completion-at-point))
   :custom
   (nxml-child-indent 2)
   (nxml-attribute-indent 2)
-  ;; Ferme la balise des l'ouverture du chevron fermant.
+  ;; Closes the tag as soon as the closing angle bracket is typed.
   (nxml-slash-auto-complete-flag t))
 
-;; Schemas HTML5 pour la validation nXML.
+;; HTML5 schemas for nXML validation.
 (use-package html5-schema
   :ensure t)
 
-;; Navigation par chemin dans un document structure (XML, JSON).
+;; Path-based navigation in a structured document (XML, JSON).
 (use-package x-path-walker
   :ensure t
   :commands (helm-x-path-walker))
 
-;; --- Repliage ---------------------------------------------------------------
+;; --- Folding ----------------------------------------------------------------
 
-;; hideshow ne connait pas la syntaxe XML : on lui decrit les delimiteurs.
-;; Voir https://emacs.stackexchange.com/questions/2884/
+;; hideshow does not know XML syntax: we describe the delimiters to it.
+;; See https://emacs.stackexchange.com/questions/2884/
 (with-eval-after-load 'hideshow
   (add-to-list 'hs-special-modes-alist
                '(nxml-mode
@@ -61,12 +61,12 @@
 
 (add-hook 'nxml-mode-hook #'hs-minor-mode)
 
-;; --- Formatage --------------------------------------------------------------
+;; --- Formatting -------------------------------------------------------------
 
-;; `:mode' est laisse a sa valeur par defaut : c'est lui qui fait engendrer
-;; `xml-format-on-save-mode' par la macro. Le passer a nil supprimait ce mode,
-;; et le hook plus bas ne survivait que grace au paquet MELPA `xml-format', qui
-;; definissait le meme symbole.
+;; `:mode' is left at its default value: that is what makes the macro generate
+;; `xml-format-on-save-mode'. Setting it to nil removed that mode, and the hook
+;; below only survived thanks to the MELPA package `xml-format', which defined
+;; the same symbol.
 (reformatter-define xml-format
   :program "xmllint"
   :args '("--format" "-"))

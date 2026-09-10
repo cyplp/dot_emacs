@@ -1,79 +1,79 @@
-;;; init.el --- Configuration principale -*- lexical-binding: t -*-
+;;; init.el --- Main configuration -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; Point d'entree unique.  Ce fichier ne contient que ce qui doit exister
-;; avant tout le reste : depots de paquets, reglages du moteur Emacs, et le
-;; chargement des modules `conf-*.el'.  Toute configuration liee a un langage
-;; ou a un outil precis vit dans son propre module.
+;; Single entry point.  This file holds only what must exist before everything
+;; else: package archives, Emacs engine settings, and the loading of the
+;; `conf-*.el' modules.  Any configuration tied to a specific language or tool
+;; lives in its own module.
 
 ;;; Code:
 
 (require 'package)
 
-;; HTTPS partout : le depot GNU etait encore declare en clair.
+;; HTTPS everywhere: the GNU archive was still declared in clear text.
 (setq package-archives
       '(("gnu"    . "https://elpa.gnu.org/packages/")
         ("nongnu" . "https://elpa.nongnu.org/nongnu/")
         ("melpa"  . "https://melpa.org/packages/")))
 
-;; Charge toujours le .el quand il est plus recent que le .elc correspondant.
+;; Always load the .el when it is newer than the matching .elc.
 (setq load-prefer-newer t)
 
 (package-initialize)
 
-;; use-package est integre depuis Emacs 29 : le bootstrap manuel n'a plus
-;; lieu d'etre.  `require' reste necessaire pour que les macros soient
-;; disponibles a la compilation des modules.
+;; use-package is bundled since Emacs 29: the manual bootstrap is no longer
+;; needed.  `require' is still necessary so that the macros are available when
+;; the modules are compiled.
 (require 'use-package)
 
-;; Les avertissements de compilation native remontent en boucle sur des
-;; paquets tiers qu'on ne corrigera pas ; ils masquent les vrais messages.
+;; Native compilation warnings come back in a loop about third-party packages
+;; we will not fix; they hide the real messages.
 (setq native-comp-async-report-warnings-errors 'silent)
 
 ;; --- Performance / anti-freeze ---------------------------------------------
 
-;; Le ramasse-miettes est neutralise pendant l'initialisation, ou l'on alloue
-;; massivement et brievement, puis ramene a un seuil vivable. Le garder a
-;; `most-positive-fixnum' en regime normal repousserait la collecte jusqu'a
-;; une pause de plusieurs secondes.
+;; The garbage collector is neutralized during initialization, where we
+;; allocate massively and briefly, then brought back to a liveable threshold.
+;; Keeping it at `most-positive-fixnum' in normal operation would defer
+;; collection until a pause of several seconds.
 (setq gc-cons-threshold most-positive-fixnum)
 
 (add-hook 'emacs-startup-hook
           (lambda ()
             (setq gc-cons-threshold (* 64 1024 1024))))
 
-;; Les serveurs LSP (gopls, rust-analyzer) envoient de gros paquets JSON. Le
-;; defaut de 4096 octets force Emacs a boucler des milliers de fois par
-;; reponse : c'est la cause n1 des gels avec eglot.
+;; The LSP servers (gopls, rust-analyzer) send large JSON packets. The default
+;; of 4096 bytes forces Emacs to loop thousands of times per answer: this is
+;; the number one cause of freezes with eglot.
 (setq read-process-output-max (* 4 1024 1024))
 
-;; Bascule automatiquement en mode degrade sur les fichiers a lignes tres
-;; longues (JSON minifie, logs, dumps SQL), ou font-lock devient inutilisable.
+;; Automatically switches to degraded mode on files with very long lines
+;; (minified JSON, logs, SQL dumps), where font-lock becomes unusable.
 (global-so-long-mode 1)
 
-;; L'algorithme bidirectionnel de rendu du texte coute cher et n'a aucune
-;; utilite ici : on force la direction gauche-droite.
+;; The bidirectional text rendering algorithm is expensive and of no use here:
+;; we force the left-to-right direction.
 (setq-default bidi-paragraph-direction 'left-to-right)
 (setq bidi-inhibit-bpa t)
 
-;; Evite qu'Emacs vide ses caches de fontes sous pression memoire, ce qui
-;; provoque des pauses de redisplay avec les themes riches en glyphes.
+;; Keeps Emacs from flushing its font caches under memory pressure, which
+;; causes redisplay pauses with glyph-heavy themes.
 (setq inhibit-compacting-font-caches t)
 
 ;; --- Fichiers ---------------------------------------------------------------
 
-(setq make-backup-files nil) ; pas de fichiers backup~
-(setq auto-save-default nil) ; pas de fichiers #autosave#
-(setq create-lockfiles nil)  ; pas de fichiers .#
+(setq make-backup-files nil) ; no backup~ files
+(setq auto-save-default nil) ; no #autosave# files
+(setq create-lockfiles nil)  ; no .# files
 
-;; Avertit a l'ouverture des fichiers de plus de 100 Mo.
+;; Warns when opening files larger than 100 MB.
 (setq large-file-warning-threshold 100000000)
 
 (setq require-final-newline t)
 (setq next-line-add-newlines nil)
 
-;; Recharge un buffer dont le fichier a change sur disque, y compris dired.
+;; Reloads a buffer whose file changed on disk, dired included.
 (setq global-auto-revert-non-file-buffers t)
 (global-auto-revert-mode 1)
 
@@ -84,8 +84,8 @@
 (setq inhibit-splash-screen t)
 (setq ring-bell-function 'ignore)
 
-;; `%d' n'existe pas parmi les specificateurs de `frame-title-format' : le
-;; titre affichait la lettre telle quelle. On montre le buffer et son chemin.
+;; `%d' does not exist among the `frame-title-format' specifiers: the title
+;; showed the letter as is. We show the buffer and its path.
 (setq frame-title-format '("%b" (:eval (if buffer-file-name " — %f" "")) " — Emacs"))
 
 (menu-bar-mode 0)
@@ -94,17 +94,17 @@
 (setq column-number-mode t)
 (setq line-number-mode t)
 
-;; Reponses a une lettre. Remplace l'ancien `fset' sur `yes-or-no-p', qui
-;; ecrasait la fonction pour tout le monde y compris les appels ou une
-;; confirmation longue est voulue.
+;; One-letter answers. Replaces the old `fset' on `yes-or-no-p', which
+;; overrode the function for everyone, including the calls where a long
+;; confirmation is wanted.
 (setq use-short-answers t)
 
 (prefer-coding-system 'utf-8)
 
-;; Affiche seulement la queue des lignes trop longues, les tabulations et les
-;; espaces en fin de ligne. Le nettoyage effectif est assure par
-;; `global-whitespace-cleanup-mode' (conf-misc.el), qui ne touche que les
-;; buffers deja propres.
+;; Shows only the tail of over-long lines, the tabs and the trailing
+;; whitespace. The actual cleanup is handled by
+;; `global-whitespace-cleanup-mode' (conf-misc.el), which only touches buffers
+;; that are already clean.
 (setq whitespace-line-column 88
       whitespace-style '(tabs trailing lines-tail))
 
@@ -112,13 +112,13 @@
 (winner-mode t)
 (delete-selection-mode 1)
 
-;; Paires automatiques. Remplace `skeleton-pair', dont l'activation passait
-;; par des liaisons globales sur "(", "[", "{" et le guillemet : elles
-;; s'appliquaient a tous les buffers, y compris le minibuffer et les modes
-;; texte ou l'auto-appariement n'est pas souhaitable.
+;; Automatic pairs. Replaces `skeleton-pair', whose activation went through
+;; global bindings on "(", "[", "{" and the quote character: they applied to
+;; every buffer, including the minibuffer and the text modes where
+;; auto-pairing is not desirable.
 (electric-pair-mode 1)
 
-;; Defilement au pixel, natif depuis Emacs 29.
+;; Pixel scrolling, native since Emacs 29.
 (pixel-scroll-precision-mode 1)
 
 (setq tramp-default-method "ssh")
@@ -126,18 +126,18 @@
 
 (setq select-enable-clipboard t)
 
-;; Limite la taille du buffer *Messages*.
+;; Limits the size of the *Messages* buffer.
 (setq-default message-log-max 1000)
 
-;; --- Paquets de base --------------------------------------------------------
+;; --- Base packages ----------------------------------------------------------
 
 (use-package try
   :ensure t
   :commands try)
 
-;; quelpa : installation depuis un depot git pour les paquets absents de
-;; MELPA. Conserve pour les paquets deja construits ; les nouveaux passent
-;; par `:vc', integre a use-package depuis Emacs 30.
+;; quelpa: installation from a git repository for packages absent from MELPA.
+;; Kept for the packages already built; the new ones go through `:vc', part of
+;; use-package since Emacs 30.
 (use-package quelpa
   :ensure t
   :defer t)
@@ -155,7 +155,7 @@
   :ensure t
   :bind ("C-œ" . er/expand-region))
 
-;; Utilise par certains snippets yasnippet pour convertir la casse.
+;; Used by some yasnippet snippets to convert case.
 (use-package string-inflection
   :ensure t
   :commands (string-inflection-underscore
@@ -193,7 +193,7 @@
         helm-semantic-fuzzy-match t
         helm-imenu-fuzzy-match t
         helm-completion-in-region-fuzzy-match t
-        ;; helm garde le minibuffer, corfu garde la completion dans le buffer
+        ;; helm keeps the minibuffer, corfu keeps in-buffer completion
         helm-mode-handle-completion-in-region nil
         helm-candidate-number-list 150
         helm-split-window-inside-p t
@@ -204,14 +204,14 @@
   :config
   (helm-mode 1))
 
-;; --- Chargement des modules -------------------------------------------------
+;; --- Module loading ---------------------------------------------------------
 
-;; Les modules sont charges par `require' et non plus par `load-file' : le
-;; chemin absolu disparait des appels, un module deja charge ne l'est pas deux
-;; fois, et la byte-compilation devient possible.
+;; The modules are loaded by `require' and no longer by `load-file': the
+;; absolute path disappears from the calls, a module already loaded is not
+;; loaded twice, and byte-compilation becomes possible.
 (add-to-list 'load-path (expand-file-name "." user-emacs-directory))
 
-;; Custom ecrit dans son propre fichier pour ne pas reecrire celui-ci.
+;; Custom writes into its own file so as not to rewrite this one.
 (setq custom-file (locate-user-emacs-file "custom.el"))
 
 (when (file-exists-p custom-file)
@@ -224,7 +224,7 @@
     ;; org
     conf-org
     conf-org-emphasis
-    ;; divers
+    ;; misc
     conf-misc
     conf-python
     conf-git
@@ -242,32 +242,34 @@
     conf-elisp
     conf-yaml
     conf-devops
+    conf-linear
     conf-claude
     conf-antigravity
     conf-mcp
     conf-mcp-explorer
     conf-latex
     conf-webserver)
-  "Modules de configuration a charger, dans l'ordre.
-L'ordre compte : `conf-treesit' fixe les modes majeurs et `conf-lsp' les
-reglages eglot dont dependent les modules par langage.")
+  "Configuration modules to load, in order.
+The order matters: `conf-treesit' sets the major modes and `conf-lsp' the
+eglot settings that the per-language modules depend on.")
 
 (defun my-load-configuration-module (module)
-  "Charger MODULE en isolant ses erreurs.
-Sans cette isolation, une seule erreur dans un module interrompt tout le
-reste du chargement et laisse Emacs a moitie configure, sans indice sur le
-coupable.
+  "Load MODULE while isolating its errors.
+Without this isolation, a single error in one module interrupts the whole
+rest of the loading and leaves Emacs half configured, with no clue about the
+culprit.
 
-MODULE est un symbole de fonctionnalite (voir `provide')."
+MODULE is a feature symbol (see `provide')."
   (condition-case failure
       (require module)
     (error
-     (message "Module %s non charge : %s" module (error-message-string failure)))))
+     (message "Module %s not loaded: %s" module (error-message-string failure)))))
+
 
 (mapc #'my-load-configuration-module my-configuration-modules)
 
-;; Fichiers hors depot git : secrets, connexions base, reliquats de l'ancien
-;; .emacs. Charges par `load' car ils n'ont pas de `provide'.
+;; Files outside the git repository: secrets, database connections, leftovers
+;; from the old .emacs. Loaded with `load' as they have no `provide'.
 (dolist (private-file '("secret.el" "dbconnections.el" "old.el"))
   (let ((path (locate-user-emacs-file private-file)))
     (when (file-exists-p path)

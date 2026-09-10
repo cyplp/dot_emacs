@@ -1,73 +1,73 @@
-;;; conf-antigravity.el --- Assistant Google Antigravity -*- lexical-binding: t -*-
+;;; conf-antigravity.el --- Google Antigravity assistant -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; Integration du CLI `agy' (Google Antigravity) dans Emacs.
+;; Integration of the `agy' CLI (Google Antigravity) into Emacs.
 ;;
-;; L'integration ne va pas jusqu'a l'editeur, la ou celle de conf-claude.el
-;; le fait : Antigravity ne parle que son propre protocole IDE, reserve a son
-;; extension VS Code, et aucun paquet Emacs ne l'implemente. Pas de diff par
-;; ediff, pas d'outils MCP cotes Emacs — mais une session par projet, une
-;; fenetre laterale, l'envoi d'une reference au fichier courant et les blocs
-;; org-babel de `ob-antigravity.el', ce qui couvre l'usage quotidien.
+;; The integration does not reach the editor, where the one in conf-claude.el
+;; does: Antigravity only speaks its own IDE protocol, reserved for its VS Code
+;; extension, and no Emacs package implements it. No ediff diff, no MCP tools on
+;; the Emacs side — but one session per project, a side window, sending a
+;; reference to the current file and the org-babel blocks of
+;; `ob-antigravity.el', which covers daily use.
 ;;
-;; Le terminal reste `eat', deja installe par conf-claude.el : le CLI est une
-;; application plein ecran que `shell' ou `comint' ne savent pas afficher.
+;; The terminal stays `eat', already installed by conf-claude.el: the CLI is a
+;; full-screen application that `shell' or `comint' cannot display.
 
 ;;; Code:
 
 (require 'project)
 
-;; `eat' n'est chargee qu'au premier appel : sans ces declarations le
-;; compilateur signale des symboles inconnus.
+;; `eat' is only loaded on the first call: without these declarations the
+;; compiler reports unknown symbols.
 (declare-function eat-make "eat" (name program &optional startfile &rest switches))
 (declare-function eat-term-send-string "eat" (terminal string))
 (defvar eat-terminal)
 
-;; --- Reglages ---------------------------------------------------------------
+;; --- Settings ---------------------------------------------------------------
 
 (defgroup antigravity nil
-  "Assistant Google Antigravity dans un terminal Emacs."
+  "Google Antigravity assistant in an Emacs terminal."
   :group 'tools)
 
 (defcustom antigravity-cli-path "agy"
-  "Chemin de l'executable du CLI Antigravity.
-Le repertoire ~/.local/bin ou il s'installe est deja ajoute a `exec-path'
-par conf-claude.el."
+  "Path of the Antigravity CLI executable.
+The ~/.local/bin directory it installs into is already added to `exec-path'
+by conf-claude.el."
   :type 'string
   :group 'antigravity)
 
 (defcustom antigravity-window-width 0.4
-  "Largeur de la fenetre de session, en fraction de la frame."
+  "Width of the session window, as a fraction of the frame."
   :type 'number
   :group 'antigravity)
 
 ;; --- Session ----------------------------------------------------------------
 
 (defun antigravity--project-directory ()
-  "Retourner la racine du projet courant, a defaut `default-directory'."
+  "Return the root of the current project, or `default-directory'."
   (if-let* ((current-project (project-current)))
       (project-root current-project)
     default-directory))
 
 (defun antigravity--session-name ()
-  "Retourner le nom de session associe au projet courant.
-Une session par projet : deux depots ouverts simultanement ne doivent
-partager ni conversation ni repertoire de travail."
+  "Return the session name associated with the current project.
+One session per project: two repositories open at the same time must share
+neither conversation nor working directory."
   (format "agy: %s"
           (file-name-nondirectory
            (directory-file-name (antigravity--project-directory)))))
 
 (defun antigravity--session-buffer ()
-  "Retourner le tampon de la session du projet courant, ou nil.
-`eat-make' entoure le nom d'asterisques ; on reconstruit la meme forme
-plutot que de la memoriser dans une variable a tenir a jour."
+  "Return the session buffer of the current project, or nil.
+`eat-make' surrounds the name with asterisks; we rebuild the same shape
+rather than storing it in a variable that has to be kept up to date."
   (get-buffer (concat "*" (antigravity--session-name) "*")))
 
 (defun antigravity--display-session (session-buffer)
-  "Afficher SESSION-BUFFER dans une fenetre laterale et la retourner.
-Une fenetre laterale survit aux changements de disposition du reste du
-cadre : la conversation ne disparait pas au premier `other-window'."
+  "Display SESSION-BUFFER in a side window and return that window.
+A side window survives the layout changes of the rest of the frame: the
+conversation does not vanish on the first `other-window'."
   (display-buffer session-buffer
                   `((display-buffer-in-side-window)
                     (side . right)
@@ -75,13 +75,13 @@ cadre : la conversation ne disparait pas au premier `other-window'."
 
 ;;;###autoload
 (defun antigravity-start ()
-  "Demarrer la session Antigravity du projet courant, ou la rejoindre."
+  "Start the Antigravity session of the current project, or join it."
   (interactive)
-  ;; conf-claude.el n'autoload `eat' que pour ses propres commandes : ici le
-  ;; chargement est explicite, et differe jusqu'au premier appel.
+  ;; conf-claude.el only autoloads `eat' for its own commands: here the load is
+  ;; explicit, and deferred until the first call.
   (require 'eat)
-  ;; Le CLI herite du repertoire courant ; il doit demarrer a la racine pour
-  ;; que son contexte couvre tout le depot et non le seul fichier ouvert.
+  ;; The CLI inherits the current directory; it must start at the root so that
+  ;; its context covers the whole repository and not just the open file.
   (let* ((default-directory (antigravity--project-directory))
          (session-buffer (eat-make (antigravity--session-name)
                                    antigravity-cli-path)))
@@ -89,7 +89,7 @@ cadre : la conversation ne disparait pas au premier `other-window'."
 
 ;;;###autoload
 (defun antigravity-toggle ()
-  "Afficher ou masquer la fenetre de la session sans arreter le CLI."
+  "Show or hide the session window without stopping the CLI."
   (interactive)
   (let* ((session-buffer (antigravity--session-buffer))
          (session-window (and session-buffer
@@ -99,14 +99,13 @@ cadre : la conversation ne disparait pas au premier `other-window'."
      (session-window (delete-window session-window))
      (t (antigravity--display-session session-buffer)))))
 
-;; --- Reference au code courant ----------------------------------------------
+;; --- Reference to the current code ------------------------------------------
 
 (defun antigravity--current-reference ()
-  "Retourner une reference textuelle vers la region active ou la ligne courante.
-Le chemin est relatif a la racine du projet, seule forme que le CLI resout
-depuis son propre repertoire de travail.  Aucun prefixe `@' : dans le TUI ce
-caractere ouvre un selecteur de fichiers qui avalerait le reste de la
-chaine."
+  "Return a textual reference to the active region or the current line.
+The path is relative to the project root, the only form the CLI resolves from
+its own working directory.  No `@' prefix: in the TUI that character opens a
+file selector that would swallow the rest of the string."
   (let* ((project-directory (antigravity--project-directory))
          (path (if buffer-file-name
                    (file-relative-name buffer-file-name project-directory)
@@ -123,9 +122,9 @@ chaine."
 
 ;;;###autoload
 (defun antigravity-insert-reference ()
-  "Envoyer a la session une reference vers la region ou la ligne courante.
-La reference est seulement inseree, sans validation : la question reste a
-ecrire autour."
+  "Send the session a reference to the region or the current line.
+The reference is only inserted, without submitting: the question is still to
+be written around it."
   (interactive)
   (let ((reference (antigravity--current-reference)))
     (unless (antigravity--session-buffer)
@@ -135,28 +134,28 @@ ecrire autour."
         (eat-term-send-string eat-terminal (concat reference " ")))
       (select-window (antigravity--display-session session-buffer)))))
 
-;; --- Raccourcis -------------------------------------------------------------
+;; --- Shortcuts --------------------------------------------------------------
 
-;; F5 et non F2 — pris par conf-claude.el — ni F3/F4, reserves aux macros
-;; clavier, ni F7 a F10, repris par conf-python.el.  Meme repartition que pour
-;; Claude : touche nue pour ouvrir, S- pour montrer/masquer, C- pour citer.
+;; F5 and not F2 — taken by conf-claude.el — nor F3/F4, reserved for keyboard
+;; macros, nor F7 to F10, taken over by conf-python.el.  Same layout as for
+;; Claude: bare key to open, S- to toggle, C- to quote.
 (global-set-key (kbd "<f5>") #'antigravity-start)
 (global-set-key (kbd "<S-f5>") #'antigravity-toggle)
 (global-set-key (kbd "<C-f5>") #'antigravity-insert-reference)
 
-;; --- Blocs org --------------------------------------------------------------
+;; --- Org blocks -------------------------------------------------------------
 
-;; `ob-antigravity' fait de `antigravity' un langage org-babel : le corps du
-;; bloc est un prompt, `C-c C-c' l'envoie au CLI et la reponse devient le
-;; resultat.
+;; `ob-antigravity' makes `antigravity' an org-babel language: the block body
+;; is a prompt, `C-c C-c' sends it to the CLI and the answer becomes the
+;; result.
 (with-eval-after-load 'org
   (require 'ob-antigravity)
 
-  ;; Le prompt et la reponse sont du markdown : `org-edit-special' ouvre le
-  ;; bloc dans markdown-mode plutot que dans `fundamental-mode'.
+  ;; The prompt and the answer are markdown: `org-edit-special' opens the block
+  ;; in markdown-mode rather than in `fundamental-mode'.
   (add-to-list 'org-src-lang-modes '("antigravity" . markdown))
 
-  ;; `<ag' puis TAB insere le bloc.
+  ;; `<ag' then TAB inserts the block.
   (add-to-list 'org-structure-template-alist '("ag" . "src antigravity")))
 
 (provide 'conf-antigravity)

@@ -1,46 +1,45 @@
-;;; ob-antigravity.el --- Blocs org-babel executes par le CLI agy -*- lexical-binding: t -*-
+;;; ob-antigravity.el --- org-babel blocks executed by the agy CLI -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; Permet d'ecrire un prompt dans un bloc org et de l'envoyer au CLI `agy'
-;; (Google Antigravity) par `C-c C-c' :
+;; Lets you write a prompt in an org block and send it to the `agy' CLI
+;; (Google Antigravity) with `C-c C-c':
 ;;
 ;;   #+begin_src antigravity :model gemini-3.1-pro-high
-;;   Resume le role de ce depot.
+;;   Summarize the role of this repository.
 ;;   #+end_src
 ;;
-;; Le corps du bloc est le prompt, la reponse devient le resultat du bloc.
+;; The block body is the prompt, the answer becomes the result of the block.
 ;;
-;; Meme fonctionnement que `ob-claude', a deux differences pres imposees par
-;; le CLI :
+;; Same behaviour as `ob-claude', with two differences imposed by the CLI:
 ;;
-;; - le prompt voyage dans la ligne de commande, comme valeur de `--print', et
-;;   non sur l'entree standard : `agy --print' exige sa valeur, et il ne lit
-;;   stdin qu'en `--input-format stream-json', qui obligerait a suivre un flux
-;;   NDJSON pour un seul aller-retour ;
+;; - the prompt travels in the command line, as the value of `--print', and not
+;;   on standard input: `agy --print' requires its value, and it only reads
+;;   stdin with `--input-format stream-json', which would force us to follow an
+;;   NDJSON stream for a single round trip;
 ;;
-;; - la sortie est demandee en JSON, seule forme qui porte l'identifiant de
-;;   conversation. `agy' attribue cet identifiant lui-meme, la ou le CLI de
-;;   Claude accepte qu'on le lui impose : une session ne peut donc etre reprise
-;;   qu'une fois un premier bloc abouti.
+;; - the output is requested in JSON, the only form that carries the
+;;   conversation identifier. `agy' assigns that identifier itself, where the
+;;   Claude CLI accepts being given one: a session can therefore only be
+;;   resumed once a first block has completed.
 ;;
-;; L'appel est asynchrone par defaut : une reponse prend des dizaines de
-;; secondes et Emacs est mono-thread, un appel synchrone gelerait l'editeur
-;; pendant toute la duree. Le bloc recoit d'abord un jeton, remplace par la
-;; reponse a la fin du processus. `:async no' rend l'appel bloquant, utile en
-;; batch ou pour les tests.
+;; The call is asynchronous by default: an answer takes tens of seconds and
+;; Emacs is single-threaded, so a synchronous call would freeze the editor for
+;; that whole time. The block first receives a token, replaced by the answer
+;; when the process ends. `:async no' makes the call blocking, useful in batch
+;; mode or for the tests.
 ;;
-;; En-tetes reconnus, en plus de ceux d'org :
+;; Headers recognized, in addition to org's own:
 ;;
-;;   :model    identifiant de modele, tel que liste par `agy models'
-;;   :effort   niveau de raisonnement (low, medium, high)
-;;   :agent    agent a utiliser pour la session
-;;   :mode     mode d'execution (accept-edits, plan)
-;;   :project  identifiant ou nom du projet Antigravity
-;;   :add-dir  repertoire supplementaire ajoute a l'espace de travail
-;;   :session  nom d'une conversation suivie d'un bloc a l'autre
-;;   :async    yes (defaut) ou no
-;;   :dir      repertoire de travail du CLI, gere par org lui-meme
+;;   :model    model identifier, as listed by `agy models'
+;;   :effort   reasoning level (low, medium, high)
+;;   :agent    agent to use for the session
+;;   :mode     execution mode (accept-edits, plan)
+;;   :project  Antigravity project identifier or name
+;;   :add-dir  extra directory added to the workspace
+;;   :session  name of a conversation followed from one block to the next
+;;   :async    yes (default) or no
+;;   :dir      working directory of the CLI, handled by org itself
 
 ;;; Code:
 
@@ -48,41 +47,41 @@
 (require 'org-id)
 (require 'subr-x)
 
-;; --- Reglages ---------------------------------------------------------------
+;; --- Settings ---------------------------------------------------------------
 
 (defgroup org-babel-antigravity nil
-  "Execution de blocs org-babel par le CLI Antigravity."
+  "Execution of org-babel blocks by the Antigravity CLI."
   :group 'org-babel)
 
 (defcustom org-babel-antigravity-command "agy"
-  "Nom ou chemin de l'executable du CLI Antigravity."
+  "Name or path of the Antigravity CLI executable."
   :type 'string
   :group 'org-babel-antigravity)
 
 (defcustom org-babel-antigravity-base-arguments '("--output-format" "json")
-  "Arguments passes a chaque appel, avant ceux deduits des en-tetes.
-La sortie JSON n'est pas un confort d'analyse : c'est la seule qui porte
-l'identifiant de conversation et un statut d'erreur exploitable."
+  "Arguments passed on every call, before those derived from the headers.
+The JSON output is not a parsing convenience: it is the only one that carries
+the conversation identifier and a usable error status."
   :type '(repeat string)
   :group 'org-babel-antigravity)
 
-;; Un bloc sans reponse est une erreur visible ; un bloc qui modifie des
-;; fichiers a l'insu de l'auteur ne l'est pas. Le resultat par defaut est donc
-;; un tiroir — la reponse est du texte libre, souvent multiligne et en
-;; markdown — et l'export n'evalue rien.
+;; A block without an answer is a visible error; a block that modifies files
+;; behind the author's back is not. The default result is therefore a drawer —
+;; the answer is free text, often multiline and in markdown — and export
+;; evaluates nothing.
 (defvar org-babel-default-header-args:antigravity
   '((:results . "drawer replace")
     (:exports . "both")
     (:eval . "never-export"))
-  "En-tetes par defaut des blocs `antigravity'.")
+  "Default headers of the `antigravity' blocks.")
 
-;; Linux plafonne chaque argument a 128 Kio (MAX_ARG_STRLEN). Au-dela, l'appel
-;; echoue sur un E2BIG que rien ne rattache au prompt : la limite est verifiee
-;; ici pour que le message nomme la cause.
+;; Linux caps each argument at 128 KiB (MAX_ARG_STRLEN). Beyond that, the call
+;; fails with an E2BIG that nothing ties back to the prompt: the limit is
+;; checked here so that the message names the cause.
 (defconst org-babel-antigravity--maximum-prompt-bytes 130000
-  "Taille maximale du prompt, en octets, une fois porte par `--print'.")
+  "Maximum size of the prompt, in bytes, once carried by `--print'.")
 
-;; --- Traduction des en-tetes en arguments -----------------------------------
+;; --- Translation of the headers into arguments ------------------------------
 
 (defconst org-babel-antigravity--argument-by-header
   '((:model . "--model")
@@ -91,14 +90,14 @@ l'identifiant de conversation et un statut d'erreur exploitable."
     (:mode . "--mode")
     (:project . "--project")
     (:add-dir . "--add-dir"))
-  "Correspondance entre en-tete de bloc et option du CLI.
-Chaque en-tete present ajoute son option suivie de sa valeur.")
+  "Mapping between block header and CLI option.
+Every header present adds its option followed by its value.")
 
 (defun org-babel-antigravity--header-value (header params)
-  "Renvoyer la valeur de HEADER dans PARAMS, sous forme de chaine.
-Renvoie nil si l'en-tete est absent ou vide. Org lit les valeurs d'en-tete
-avec `org-babel-read', qui peut rendre un nombre ou un symbole : la valeur
-est reformatee avant d'atterrir dans une ligne de commande."
+  "Return the value of HEADER in PARAMS, as a string.
+Return nil if the header is absent or empty. Org reads the header values with
+`org-babel-read', which can yield a number or a symbol: the value is
+reformatted before landing in a command line."
   (let ((value (cdr (assq header params))))
     (when value
       (let ((text (string-trim (format "%s" value))))
@@ -108,29 +107,29 @@ est reformatee avant d'atterrir dans une ligne de commande."
 ;; --- Sessions ---------------------------------------------------------------
 
 (defvar org-babel-antigravity--conversation-identifiers (make-hash-table :test #'equal)
-  "Identifiant de conversation rendu par le CLI, pour chaque nom de session.
-Tant qu'un nom n'y figure pas, sa session n'a pas encore de conversation :
-le prochain bloc en ouvrira une, et c'est la reponse du CLI qui livrera
-l'identifiant a memoriser.")
+  "Conversation identifier returned by the CLI, for each session name.
+As long as a name is absent from it, its session has no conversation yet: the
+next block will open one, and it is the answer of the CLI that will deliver
+the identifier to remember.")
 
 (defun org-babel-antigravity--session-name (params)
-  "Renvoyer le nom de session declare dans PARAMS, ou nil.
-Org donne la valeur \"none\" quand aucune session n'est demandee."
+  "Return the session name declared in PARAMS, or nil.
+Org gives the value \"none\" when no session is requested."
   (let ((session (org-babel-antigravity--header-value :session params)))
     (unless (member session '(nil "none"))
       session)))
 
 (defun org-babel-antigravity--session-arguments (session-name)
-  "Renvoyer les arguments reprenant la conversation de SESSION-NAME.
-Renvoie nil tant qu'aucune conversation n'a ete ouverte pour ce nom."
+  "Return the arguments that resume the conversation of SESSION-NAME.
+Return nil as long as no conversation has been opened for that name."
   (when-let* ((identifier (gethash session-name
                                    org-babel-antigravity--conversation-identifiers)))
     (list "--conversation" identifier)))
 
 (defun org-babel-antigravity--remember-conversation (session-name response)
-  "Associer a SESSION-NAME l'identifiant de conversation porte par RESPONSE.
-Sans nom de session, la conversation est volontairement oubliee : le bloc
-suivant repart d'un contexte vide."
+  "Associate with SESSION-NAME the conversation identifier carried by RESPONSE.
+Without a session name, the conversation is deliberately forgotten: the next
+block starts again from an empty context."
   (when session-name
     (let ((identifier (alist-get 'conversation_id response)))
       (when (and identifier (not (string-empty-p identifier)))
@@ -138,8 +137,8 @@ suivant repart d'un contexte vide."
                  org-babel-antigravity--conversation-identifiers)))))
 
 (defun org-babel-antigravity-reset-session (session-name)
-  "Oublier la conversation associee a SESSION-NAME.
-Le prochain bloc de cette session repart d'un contexte vide."
+  "Forget the conversation associated with SESSION-NAME.
+The next block of that session starts again from an empty context."
   (interactive (list (completing-read
                       "Session antigravity : "
                       (hash-table-keys org-babel-antigravity--conversation-identifiers)
@@ -147,12 +146,12 @@ Le prochain bloc de cette session repart d'un contexte vide."
   (remhash session-name org-babel-antigravity--conversation-identifiers)
   (message "Session antigravity %s reinitialisee" session-name))
 
-;; --- Ligne de commande ------------------------------------------------------
+;; --- Command line -----------------------------------------------------------
 
 (defun org-babel-antigravity--build-arguments (params)
-  "Construire la liste d'arguments du CLI a partir de PARAMS.
-Le prompt n'en fait pas partie : il est ajoute en dernier, ou le CLI exige
-qu'il soit."
+  "Build the CLI argument list from PARAMS.
+The prompt is not part of it: it is appended last, where the CLI requires it
+to be."
   (let ((arguments (copy-sequence org-babel-antigravity-base-arguments)))
     (dolist (entry org-babel-antigravity--argument-by-header)
       (let ((value (org-babel-antigravity--header-value (car entry) params)))
@@ -168,18 +167,18 @@ qu'il soit."
     arguments))
 
 (defun org-babel-antigravity--prompt-argument (prompt)
-  "Renvoyer l'argument portant PROMPT.
-La valeur est collee a l'option : `agy' prend sinon l'option suivante pour
-le prompt et ignore le reste de la ligne."
+  "Return the argument that carries PROMPT.
+The value is glued to the option: otherwise `agy' takes the next option as
+the prompt and ignores the rest of the line."
   (format "--print=%s" prompt))
 
-;; --- Lecture de la reponse --------------------------------------------------
+;; --- Reading the answer -----------------------------------------------------
 
 (defun org-babel-antigravity--parse-response (output)
-  "Analyser OUTPUT, la sortie standard du CLI, et renvoyer son alist.
-Renvoie nil quand la sortie n'est pas du JSON : un CLI qui meurt avant sa
-reponse ecrit du texte libre, qu'il vaut mieux montrer tel quel que masquer
-derriere une erreur d'analyse."
+  "Parse OUTPUT, the standard output of the CLI, and return its alist.
+Return nil when the output is not JSON: a CLI that dies before its answer
+writes free text, which is better shown as is than hidden behind a parsing
+error."
   (condition-case nil
       (json-parse-string output
                          :object-type 'alist
@@ -188,23 +187,22 @@ derriere une erreur d'analyse."
     (error nil)))
 
 (defun org-babel-antigravity--successful-p (exit-code response)
-  "Dire si un appel sorti en EXIT-CODE avec RESPONSE a abouti.
-Le code de sortie ne suffit pas : le CLI decrit l'echec dans son champ
-`status', et les deux doivent concorder pour qu'une reponse soit publiee."
+  "Tell whether a call exited with EXIT-CODE and RESPONSE succeeded.
+The exit code is not enough: the CLI describes the failure in its `status'
+field, and both must agree for an answer to be published."
   (and (equal exit-code 0)
        (or (null response)
            (equal (alist-get 'status response) "SUCCESS"))))
 
 (defun org-babel-antigravity--response-text (response output)
-  "Renvoyer le texte de RESPONSE, ou OUTPUT quand le JSON manque."
+  "Return the text of RESPONSE, or OUTPUT when the JSON is missing."
   (string-trim (or (and response (alist-get 'response response))
                    output)))
 
 (defun org-babel-antigravity--failure-message (exit-code response error-output)
-  "Composer le message d'echec d'un appel sorti en EXIT-CODE.
-Le motif est cherche d'abord dans le champ `error' de RESPONSE, ou le CLI
-l'ecrit ; ERROR-OUTPUT ne sert que lorsqu'il meurt avant d'avoir produit son
-JSON."
+  "Compose the failure message of a call exited with EXIT-CODE.
+The reason is looked up first in the `error' field of RESPONSE, where the CLI
+writes it; ERROR-OUTPUT only serves when it dies before producing its JSON."
   (let ((reason (string-trim (or (and response (alist-get 'error response))
                                  error-output
                                  ""))))
@@ -215,13 +213,13 @@ JSON."
               (concat " : " reason)))))
 
 (defun org-babel-antigravity--interpret-output (exit-code output error-output session-name)
-  "Interpreter la sortie d'un appel et renvoyer un plist.
-Le plist porte `:successful' et `:text'. En cas de succes, SESSION-NAME —
-s'il est non nil — retient l'identifiant de conversation rendu par le CLI,
-pour que le bloc suivant de la meme session la reprenne.
+  "Interpret the output of a call and return a plist.
+The plist carries `:successful' and `:text'. On success, SESSION-NAME — when
+non-nil — keeps the conversation identifier returned by the CLI, so that the
+next block of the same session resumes it.
 
-EXIT-CODE, OUTPUT et ERROR-OUTPUT sont le code de sortie, la sortie standard
-et la sortie d'erreur du processus."
+EXIT-CODE, OUTPUT and ERROR-OUTPUT are the exit code, the standard output and
+the error output of the process."
   (let ((response (org-babel-antigravity--parse-response output)))
     (if (org-babel-antigravity--successful-p exit-code response)
         (progn
@@ -232,13 +230,13 @@ et la sortie d'erreur du processus."
             :text (org-babel-antigravity--failure-message
                    exit-code response error-output)))))
 
-;; --- Corps du bloc ----------------------------------------------------------
+;; --- Block body -------------------------------------------------------------
 
 (defun org-babel-expand-body:antigravity (body params)
-  "Substituer les variables de PARAMS dans BODY.
-Une variable declaree par `:var nom=valeur' remplace toutes les occurrences
-de `{{nom}}'. Le double accolade est choisi parce qu'il n'apparait pas dans
-du texte courant, la ou `$nom' se confondrait avec le contenu du prompt."
+  "Substitute the variables of PARAMS in BODY.
+A variable declared with `:var name=value' replaces every occurrence of
+`{{name}}'. The double brace is chosen because it does not appear in ordinary
+text, where `$name' would blend into the content of the prompt."
   (let ((prompt body))
     (dolist (variable (org-babel--get-vars params))
       (setq prompt
@@ -253,37 +251,37 @@ du texte courant, la ou `$nom' se confondrait avec le contenu du prompt."
 ;; --- Execution --------------------------------------------------------------
 
 (defun org-babel-antigravity--async-p (params)
-  "Dire si le bloc decrit par PARAMS doit s'executer en arriere-plan."
+  "Tell whether the block described by PARAMS must run in the background."
   (not (member (org-babel-antigravity--header-value :async params) '("no" "nil"))))
 
 (defun org-babel-antigravity--check-command ()
-  "Verifier que le CLI est joignable, ou signaler une erreur explicite."
+  "Check that the CLI is reachable, or signal an explicit error."
   (unless (executable-find org-babel-antigravity-command)
-    (user-error "Executable %s introuvable dans `exec-path'"
+    (user-error "Executable %s not found in `exec-path'"
                 org-babel-antigravity-command)))
 
 (defun org-babel-antigravity--check-prompt-length (prompt)
-  "Refuser PROMPT quand il depasse ce qu'un argument peut porter."
+  "Reject PROMPT when it exceeds what an argument can carry."
   (when (> (string-bytes prompt) org-babel-antigravity--maximum-prompt-bytes)
-    (user-error "Prompt trop long pour agy : %d octets, maximum %d"
+    (user-error "Prompt too long for agy: %d bytes, maximum %d"
                 (string-bytes prompt)
                 org-babel-antigravity--maximum-prompt-bytes)))
 
 (defun org-babel-antigravity--file-contents (path)
-  "Renvoyer le contenu du fichier PATH."
+  "Return the content of the file PATH."
   (with-temp-buffer
     (insert-file-contents path)
     (buffer-string)))
 
 (defun org-babel-antigravity--execute-synchronously (arguments session-name)
-  "Appeler le CLI avec ARGUMENTS et renvoyer sa reponse.
-SESSION-NAME, s'il est non nil, retient l'identifiant de conversation en cas
-de succes. Bloque Emacs jusqu'a la fin de l'appel."
+  "Call the CLI with ARGUMENTS and return its answer.
+SESSION-NAME, when non-nil, keeps the conversation identifier on success.
+Blocks Emacs until the call ends."
   (let ((error-file (make-temp-file "ob-antigravity-error")))
     (unwind-protect
         (with-temp-buffer
-          ;; Entree standard vide : le CLI ne lit pas le prompt sur stdin, et
-          ;; un tube ouvert le laisserait attendre.
+          ;; Empty standard input: the CLI does not read the prompt on stdin,
+          ;; and an open pipe would leave it waiting.
           (let* ((exit-code (apply #'call-process
                                    org-babel-antigravity-command
                                    nil (list t error-file) nil
@@ -299,18 +297,19 @@ de succes. Bloque Emacs jusqu'a la fin de l'appel."
       (delete-file error-file))))
 
 (defun org-babel-antigravity--replace-placeholder (buffer placeholder result params)
-  "Remplacer PLACEHOLDER par RESULT dans BUFFER, selon les `:results' de PARAMS.
-Le jeton est cherche dans tout le buffer plutot que suivi par un marqueur :
-l'auteur continue d'editer pendant l'appel, et le bloc a pu se deplacer."
+  "Replace PLACEHOLDER with RESULT in BUFFER, per the `:results' of PARAMS.
+The token is searched for in the whole buffer rather than tracked with a
+marker: the author keeps editing during the call, and the block may have
+moved."
   (if (not (buffer-live-p buffer))
-      (message "Reponse de agy perdue : le buffer d'origine est ferme")
+      (message "agy answer lost: the original buffer is closed")
     (with-current-buffer buffer
       (save-excursion
         (save-restriction
           (widen)
           (goto-char (point-min))
           (if (not (search-forward placeholder nil t))
-              (message "Jeton %s introuvable : reponse de agy ignoree" placeholder)
+              (message "Token %s not found: agy answer ignored" placeholder)
             (goto-char (match-beginning 0))
             (let ((case-fold-search t))
               (when (re-search-backward "^[ \t]*#\\+begin_src\\_>" nil t)
@@ -318,9 +317,9 @@ l'auteur continue d'editer pendant l'appel, et le bloc a pu se deplacer."
                                          (cdr (assq :result-params params)))))))))))
 
 (defun org-babel-antigravity--make-sentinel (context)
-  "Construire la sentinelle du processus decrit par CONTEXT.
-CONTEXT est un plist portant les buffers de sortie, le buffer org d'origine,
-le jeton a remplacer, les parametres du bloc et le nom de session."
+  "Build the sentinel of the process described by CONTEXT.
+CONTEXT is a plist carrying the output buffers, the original org buffer, the
+token to replace, the block parameters and the session name."
   (lambda (process _event)
     (when (memq (process-status process) '(exit signal))
       (let* ((output-buffer (plist-get context :output-buffer))
@@ -342,11 +341,12 @@ le jeton a remplacer, les parametres du bloc et le nom de session."
         (kill-buffer error-buffer)))))
 
 (defun org-babel-antigravity--execute-asynchronously (arguments params session-name)
-  "Lancer le CLI avec ARGUMENTS sans bloquer Emacs.
-Renvoie le jeton insere comme resultat provisoire du bloc ; la sentinelle le
-remplacera par la reponse. PARAMS sert a reinserer le resultat avec les
-memes `:results', SESSION-NAME a retenir la conversation ouverte."
-  (let* ((placeholder (format "antigravity-en-cours:%s" (org-id-uuid)))
+  "Start the CLI with ARGUMENTS without blocking Emacs.
+Return the token inserted as the provisional result of the block; the
+sentinel will replace it with the answer. PARAMS serves to reinsert the
+result with the same `:results', SESSION-NAME to keep the conversation that
+was opened."
+  (let* ((placeholder (format "antigravity-running:%s" (org-id-uuid)))
          (output-buffer (generate-new-buffer " *ob-antigravity-output*"))
          (error-buffer (generate-new-buffer " *ob-antigravity-error*"))
          (context (list :output-buffer output-buffer
@@ -361,26 +361,27 @@ memes `:results', SESSION-NAME a retenir la conversation ouverte."
                    :noquery t
                    :connection-type 'pipe
                    :command (cons org-babel-antigravity-command arguments)
-                   ;; Un tube dedie pour stderr : sans lui les messages
-                   ;; d'erreur se melangent a la reponse JSON dans le meme
-                   ;; buffer et la rendent inanalysable. La sentinelle
-                   ;; `ignore' evite la ligne "Process finished" que le
-                   ;; traitement par defaut ecrirait dans le buffer.
+                   ;; A dedicated pipe for stderr: without it the error
+                   ;; messages mix with the JSON answer in the same buffer and
+                   ;; make it unparseable. The `ignore' sentinel avoids the
+                   ;; "Process finished" line that the default handling would
+                   ;; write into the buffer.
                    :stderr (make-pipe-process :name "ob-antigravity-error"
                                               :buffer error-buffer
                                               :noquery t
                                               :sentinel #'ignore)
                    :sentinel nil)))
     (set-process-sentinel process (org-babel-antigravity--make-sentinel context))
-    ;; Le prompt est deja dans la ligne de commande : fermer l'entree standard
-    ;; evite que le CLI attende une saisie qui ne viendra pas.
+    ;; The prompt is already in the command line: closing standard input keeps
+    ;; the CLI from waiting for an input that will never come.
     (process-send-eof process)
     placeholder))
 
 ;;;###autoload
 (defun org-babel-execute:antigravity (body params)
-  "Envoyer BODY comme prompt au CLI agy et renvoyer sa reponse.
-PARAMS porte les en-tetes du bloc. Appele par `org-babel-execute-src-block'."
+  "Send BODY as a prompt to the agy CLI and return its answer.
+PARAMS carries the block headers. Called by `org-babel-execute-src-block'.
+"
   (org-babel-antigravity--check-command)
   (let ((prompt (string-trim (org-babel-expand-body:antigravity body params))))
     (when (string-empty-p prompt)

@@ -1,17 +1,17 @@
-;;; conf-rust.el --- Configuration Rust -*- lexical-binding: t -*-
+;;; conf-rust.el --- Rust configuration -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
 ;; `rust-ts-mode' (Emacs 30) + eglot + rust-analyzer.
 ;;
-;; Cette pile remplace quatre paquets qui se recouvraient : `rust-mode' et
-;; `rustic' fournissaient chacun un mode majeur pour .rs, `racer' proposait la
-;; completion et la documentation — le projet est archive depuis 2021, son role
-;; ayant ete repris par rust-analyzer — et `cargo' faisait double emploi avec
-;; `cargo-mode', tous deux activant un `cargo-minor-mode' sur le meme hook.
+;; This stack replaces four overlapping packages: `rust-mode' and `rustic' each
+;; provided a major mode for .rs, `racer' offered completion and documentation
+;; — the project has been archived since 2021, its role taken over by
+;; rust-analyzer — and `cargo' was redundant with `cargo-mode', both enabling a
+;; `cargo-minor-mode' on the same hook.
 ;;
-;; `flycheck-rust' disparait avec flycheck : les diagnostics de clippy arrivent
-;; desormais par rust-analyzer, donc par flymake (voir conf-lsp.el).
+;; `flycheck-rust' goes away with flycheck: clippy diagnostics now arrive
+;; through rust-analyzer, hence through flymake (see conf-lsp.el).
 
 ;;; Code:
 
@@ -19,39 +19,40 @@
   :ensure t
   :demand t)
 
-;; rustfmt lit stdin et ecrit stdout : le formatage ne passe pas par le serveur
-;; de langage et ne peut donc pas geler Emacs en attendant rust-analyzer.
+;; rustfmt reads stdin and writes stdout: formatting does not go through the
+;; language server and therefore cannot freeze Emacs waiting for rust-analyzer.
 (reformatter-define rust-format
   :program "rustfmt"
   :args '("--emit" "stdout" "--quiet"))
 
 (defun my-rust-setup ()
-  "Reglages communs aux buffers Rust."
+  "Settings common to Rust buffers."
+
   (eglot-ensure)
   (rust-format-on-save-mode 1))
 
-;; Les indices de type en ligne, principal apport de rust-analyzer sur du code
-;; fortement infere, sont actives par eglot lui-meme des que le serveur declare
-;; la capacite. Les allumer depuis le hook du mode majeur echouait : a cet
-;; instant `eglot-ensure' n'a pas encore etabli la connexion, et la commande
-;; remontait une erreur "No current JSON-RPC connection" a chaque ouverture de
-;; fichier .rs.
+;; Inline type hints, rust-analyzer's main contribution on heavily inferred
+;; code, are enabled by eglot itself as soon as the server declares the
+;; capability. Turning them on from the major-mode hook failed: at that point
+;; `eglot-ensure' has not yet established the connection, and the command
+;; raised a "No current JSON-RPC connection" error every time a .rs file was
+;; opened.
 
 (add-hook 'rust-ts-mode-hook #'my-rust-setup)
 
-;; Lancement des commandes cargo depuis le buffer courant.
+;; Running cargo commands from the current buffer.
 (use-package cargo-mode
   :ensure t
   :hook (rust-ts-mode . cargo-minor-mode)
-  ;; La keymap du mode mineur s'appelle `cargo-minor-mode-map' ; le nom
-  ;; `cargo-mode-map' n'existe pas, et la liaison echouait a l'activation du
-  ;; mode par un "void-variable".
+  ;; The minor mode keymap is called `cargo-minor-mode-map'; the name
+  ;; `cargo-mode-map' does not exist, and the binding failed with a
+  ;; "void-variable" when the mode was enabled.
   :bind (:map cargo-minor-mode-map
               ("C-c b" . cargo-mode-build)
               ("C-c t" . cargo-mode-test)))
 
-;; Les reglages rust-analyzer (clippy, build scripts, macros procedurales)
-;; sont dans conf-lsp.el.
+;; The rust-analyzer settings (clippy, build scripts, procedural macros) are
+;; in conf-lsp.el.
 
 (provide 'conf-rust)
 

@@ -1,18 +1,17 @@
-;;; test-ob-antigravity.el --- tests des blocs org-babel antigravity -*- lexical-binding: t -*-
+;;; test-ob-antigravity.el --- antigravity org-babel block tests -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; Lancer depuis la racine du depot :
+;; Run from the root of the repository:
 ;;
 ;;   emacs -Q --batch -l ert -l tests/test-ob-antigravity.el \
 ;;         -f ert-run-tests-batch-and-exit
 ;;
-;; Aucun test n'appelle le vrai CLI : il coute du temps et de l'argent, et sa
-;; reponse n'est pas deterministe. Un script bouchon prend sa place et rejoue
-;; la forme exacte de la sortie de `agy' — une enveloppe JSON — ce qui suffit
-;; a verifier ce qui est sous notre responsabilite : les arguments construits,
-;; le prompt transmis, l'identifiant de conversation retenu, et l'endroit ou
-;; la reponse atterrit.
+;; No test calls the real CLI: it costs time and money, and its answer is not
+;; deterministic. A stub script takes its place and replays the exact shape of
+;; the output of `agy' — a JSON envelope — which is enough to check what is
+;; under our responsibility: the arguments built, the prompt passed, the
+;; conversation identifier kept, and where the answer lands.
 
 ;;; Code:
 
@@ -33,18 +32,18 @@
 for argument in \"$@\"; do last=\"$argument\"; done
 printf '{\"conversation_id\":\"conv-1\",\"status\":\"SUCCESS\",\"response\":\"%s\"}' \"${last#--print=}\"
 "
-  "Bouchon rendant le prompt recu dans l'enveloppe JSON du CLI.
-Le prompt est lu dans le dernier argument, seul endroit ou `agy' l'accepte :
-le test echoue si le prompt cesse d'y etre porte.")
+  "Stub returning the prompt received in the JSON envelope of the CLI.
+The prompt is read from the last argument, the only place `agy' accepts it:
+the test fails if the prompt stops being carried there.")
 
 (defconst my-ob-antigravity-test--error-stub
-  "printf '{\"conversation_id\":\"\",\"status\":\"ERROR\",\"response\":\"\",\"error\":\"quota depasse\"}'
+  "printf '{\"conversation_id\":\"\",\"status\":\"ERROR\",\"response\":\"\",\"error\":\"quota exceeded\"}'
 exit 1
 "
-  "Bouchon rejouant un echec annonce par le CLI : JSON sur stdout, code 1.")
+  "Stub replaying a failure announced by the CLI: JSON on stdout, code 1.")
 
 (defun my-ob-antigravity-test--write-stub (script)
-  "Ecrire SCRIPT dans un fichier executable et renvoyer son chemin."
+  "Write SCRIPT into an executable file and return its path."
   (let ((path (make-temp-file "ob-antigravity-stub" nil ".sh")))
     (with-temp-file path
       (insert "#!/bin/sh\n" script))
@@ -52,7 +51,7 @@ exit 1
     path))
 
 (defmacro my-ob-antigravity-test--with-stub (script &rest body)
-  "Executer BODY avec le CLI remplace par un bouchon lancant SCRIPT."
+  "Execute BODY with the CLI replaced by a stub running SCRIPT."
   (declare (indent 1))
   `(let ((stub-path (my-ob-antigravity-test--write-stub ,script)))
      (unwind-protect
@@ -64,7 +63,7 @@ exit 1
        (delete-file stub-path))))
 
 (defun my-ob-antigravity-test--execute-block (block)
-  "Evaluer le premier bloc src de BLOCK et renvoyer le buffer org resultant."
+  "Evaluate the first src block of BLOCK and return the resulting org buffer."
   (let ((buffer (generate-new-buffer "*test-ob-antigravity*")))
     (with-current-buffer buffer
       (org-mode)
@@ -75,25 +74,25 @@ exit 1
     buffer))
 
 (defun my-ob-antigravity-test--wait-for-result (buffer)
-  "Attendre que le jeton provisoire de BUFFER soit remplace par la reponse."
+  "Wait until the provisional token of BUFFER is replaced by the answer."
   (let ((deadline (+ (float-time) 10)))
     (while (and (< (float-time) deadline)
                 (with-current-buffer buffer
                   (save-excursion
                     (goto-char (point-min))
-                    (search-forward "antigravity-en-cours:" nil t))))
+                    (search-forward "antigravity-running:" nil t))))
       (accept-process-output nil 0.05))))
 
-;;; Construction des arguments
+;;; Argument construction
 
 (ert-deftest my-ob-antigravity-test-arguments-keep-json-output ()
-  "La sortie JSON est toujours demandee : elle seule porte la conversation."
+  "The JSON output is always requested: only it carries the conversation."
   (let ((arguments (org-babel-antigravity--build-arguments nil)))
     (should (equal (member "--output-format" arguments)
                    '("--output-format" "json")))))
 
 (ert-deftest my-ob-antigravity-test-arguments-map-headers ()
-  "Chaque en-tete reconnu devient une option suivie de sa valeur."
+  "Every recognized header becomes an option followed by its value."
   (let ((arguments (org-babel-antigravity--build-arguments
                     '((:model . "gemini-3.1-pro-high")
                       (:effort . "high")
@@ -103,138 +102,138 @@ exit 1
                      "--mode" "plan")))))
 
 (ert-deftest my-ob-antigravity-test-arguments-ignore-unknown-headers ()
-  "Un en-tete hors correspondance n'atteint pas la ligne de commande."
+  "A header outside the mapping does not reach the command line."
   (should-not (member "--results"
                       (org-babel-antigravity--build-arguments
                        '((:results . "drawer"))))))
 
 (ert-deftest my-ob-antigravity-test-prompt-is-attached-to-its-option ()
-  "Le prompt est colle a `--print' : detache, le CLI l'ignore."
-  (should (equal (org-babel-antigravity--prompt-argument "Bonjour")
-                 "--print=Bonjour")))
+  "The prompt is glued to `--print': detached, the CLI ignores it."
+  (should (equal (org-babel-antigravity--prompt-argument "Hello")
+                 "--print=Hello")))
 
 ;;; Sessions
 
 (ert-deftest my-ob-antigravity-test-session-none-is-not-a-session ()
-  "La valeur par defaut d'org pour `:session' ne reprend aucune conversation."
+  "The org default value for `:session' resumes no conversation."
   (should-not (member "--conversation"
                       (org-babel-antigravity--build-arguments
                        '((:session . "none"))))))
 
 (ert-deftest my-ob-antigravity-test-first-block-opens-the-conversation ()
-  "Une session inconnue n'a pas d'identifiant a reprendre."
+  "An unknown session has no identifier to resume."
   (let ((org-babel-antigravity--conversation-identifiers
          (make-hash-table :test #'equal)))
     (should-not (member "--conversation"
                         (org-babel-antigravity--build-arguments
-                         '((:session . "revue")))))))
+                         '((:session . "review")))))))
 
 (ert-deftest my-ob-antigravity-test-session-is-resumed-after-a-reply ()
-  "L'identifiant rendu par le CLI est repris par le bloc suivant."
+  "The identifier returned by the CLI is resumed by the next block."
   (my-ob-antigravity-test--with-stub my-ob-antigravity-test--echo-prompt-stub
-    (org-babel-execute:antigravity "Bonjour" '((:async . "no")
-                                               (:session . "revue")))
+    (org-babel-execute:antigravity "Hello" '((:async . "no")
+                                             (:session . "review")))
     (should (equal (member "--conversation"
                            (org-babel-antigravity--build-arguments
-                            '((:session . "revue"))))
+                            '((:session . "review"))))
                    '("--conversation" "conv-1")))))
 
 (ert-deftest my-ob-antigravity-test-conversation-is-not-kept-without-session ()
-  "Sans `:session', un bloc n'ouvre aucune conversation suivie."
+  "Without `:session', a block opens no tracked conversation."
   (my-ob-antigravity-test--with-stub my-ob-antigravity-test--echo-prompt-stub
-    (org-babel-execute:antigravity "Bonjour" '((:async . "no")))
+    (org-babel-execute:antigravity "Hello" '((:async . "no")))
     (should (zerop (hash-table-count
                     org-babel-antigravity--conversation-identifiers)))))
 
 (ert-deftest my-ob-antigravity-test-reset-session-forgets-the-conversation ()
-  "Une session reinitialisee repart sans identifiant a reprendre."
+  "A reset session starts again with no identifier to resume."
   (let ((org-babel-antigravity--conversation-identifiers
          (make-hash-table :test #'equal)))
-    (puthash "revue" "conv-1" org-babel-antigravity--conversation-identifiers)
-    (org-babel-antigravity-reset-session "revue")
-    (should-not (org-babel-antigravity--session-arguments "revue"))))
+    (puthash "review" "conv-1" org-babel-antigravity--conversation-identifiers)
+    (org-babel-antigravity-reset-session "review")
+    (should-not (org-babel-antigravity--session-arguments "review"))))
 
-;;; Corps du bloc
+;;; Block body
 
 (ert-deftest my-ob-antigravity-test-expand-body-substitutes-variables ()
-  "Une variable de bloc remplace son marqueur dans le prompt."
+  "A block variable replaces its marker in the prompt."
   (should (equal (org-babel-expand-body:antigravity
-                  "Traduis {{mot}} en anglais."
-                  '((:var . (mot . "bonjour"))))
-                 "Traduis bonjour en anglais.")))
+                  "Translate {{word}} into French."
+                  '((:var . (word . "hello"))))
+                 "Translate hello into French.")))
 
 (ert-deftest my-ob-antigravity-test-expand-body-leaves-plain-text ()
-  "Un prompt sans marqueur traverse l'expansion intact."
-  (should (equal (org-babel-expand-body:antigravity "Rien a substituer" nil)
-                 "Rien a substituer")))
+  "A prompt without a marker goes through the expansion intact."
+  (should (equal (org-babel-expand-body:antigravity "Nothing to substitute" nil)
+                 "Nothing to substitute")))
 
-;;; Execution synchrone
+;;; Synchronous execution
 
 (ert-deftest my-ob-antigravity-test-sync-returns-the-response-field ()
-  "La reponse est extraite de l'enveloppe JSON, jamais rendue brute."
+  "The answer is extracted from the JSON envelope, never returned raw."
   (my-ob-antigravity-test--with-stub my-ob-antigravity-test--echo-prompt-stub
-    (should (equal (org-babel-execute:antigravity "Bonjour" '((:async . "no")))
-                   "Bonjour"))))
+    (should (equal (org-babel-execute:antigravity "Hello" '((:async . "no")))
+                   "Hello"))))
 
 (ert-deftest my-ob-antigravity-test-sync-reports-declared-failure ()
-  "Un echec annonce par le CLI remonte avec son propre motif."
+  "A failure announced by the CLI comes back with its own reason."
   (my-ob-antigravity-test--with-stub my-ob-antigravity-test--error-stub
     (let ((failure (should-error (org-babel-execute:antigravity
-                                  "Bonjour" '((:async . "no")))
+                                  "Hello" '((:async . "no")))
                                  :type 'user-error)))
       (should (string-match-p "code 1" (cadr failure)))
-      (should (string-match-p "quota depasse" (cadr failure))))))
+      (should (string-match-p "quota exceeded" (cadr failure))))))
 
 (ert-deftest my-ob-antigravity-test-sync-reports-crash-without-json ()
-  "Un CLI mort avant sa reponse remonte par sa sortie d'erreur."
-  (my-ob-antigravity-test--with-stub "echo 'panique' >&2; exit 2"
+  "A CLI dead before its answer comes back through its error output."
+  (my-ob-antigravity-test--with-stub "echo 'panic' >&2; exit 2"
     (let ((failure (should-error (org-babel-execute:antigravity
-                                  "Bonjour" '((:async . "no")))
+                                  "Hello" '((:async . "no")))
                                  :type 'user-error)))
       (should (string-match-p "code 2" (cadr failure)))
-      (should (string-match-p "panique" (cadr failure))))))
+      (should (string-match-p "panic" (cadr failure))))))
 
 (ert-deftest my-ob-antigravity-test-empty-block-is-rejected ()
-  "Un bloc vide echoue avant tout appel au CLI."
+  "An empty block fails before any call to the CLI."
   (should-error (org-babel-execute:antigravity "   \n" nil) :type 'user-error))
 
 (ert-deftest my-ob-antigravity-test-oversized-prompt-is-rejected ()
-  "Un prompt trop long pour un argument est refuse avec un motif nomme.
-Sans ce garde-fou, l'appel echouerait sur un E2BIG que rien ne rattache au
-prompt."
+  "A prompt too long for an argument is refused with a named reason.
+Without this guard, the call would fail on an E2BIG that nothing ties back
+to the prompt."
   (my-ob-antigravity-test--with-stub my-ob-antigravity-test--echo-prompt-stub
     (let ((failure (should-error
                     (org-babel-execute:antigravity
                      (make-string (1+ org-babel-antigravity--maximum-prompt-bytes) ?x)
                      '((:async . "no")))
                     :type 'user-error)))
-      (should (string-match-p "trop long" (cadr failure))))))
+      (should (string-match-p "too long" (cadr failure))))))
 
-;;; Execution asynchrone
+;;; Asynchronous execution
 
 (ert-deftest my-ob-antigravity-test-async-inserts-answer-in-drawer ()
-  "La reponse remplace le jeton provisoire dans le tiroir de resultats."
+  "The answer replaces the provisional token in the results drawer."
   (my-ob-antigravity-test--with-stub my-ob-antigravity-test--echo-prompt-stub
     (let ((buffer (my-ob-antigravity-test--execute-block
-                   "#+begin_src antigravity\nQuelle heure est-il\n#+end_src\n")))
+                   "#+begin_src antigravity\nWhat time is it\n#+end_src\n")))
       (unwind-protect
           (progn
             (my-ob-antigravity-test--wait-for-result buffer)
             (with-current-buffer buffer
-              (should (string-search ":results:\nQuelle heure est-il\n:end:"
+              (should (string-search ":results:\nWhat time is it\n:end:"
                                      (buffer-string)))))
         (kill-buffer buffer)))))
 
 (ert-deftest my-ob-antigravity-test-async-reports-failure-in-buffer ()
-  "Un echec du CLI est ecrit dans le resultat plutot que perdu."
+  "A failure of the CLI is written into the result rather than lost."
   (my-ob-antigravity-test--with-stub my-ob-antigravity-test--error-stub
     (let ((buffer (my-ob-antigravity-test--execute-block
-                   "#+begin_src antigravity\nReprends la session\n#+end_src\n")))
+                   "#+begin_src antigravity\nResume the session\n#+end_src\n")))
       (unwind-protect
           (progn
             (my-ob-antigravity-test--wait-for-result buffer)
             (with-current-buffer buffer
-              (should (string-match-p "quota depasse" (buffer-string)))))
+              (should (string-match-p "quota exceeded" (buffer-string)))))
         (kill-buffer buffer)))))
 
 (provide 'test-ob-antigravity)

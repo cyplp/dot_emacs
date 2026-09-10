@@ -1,73 +1,71 @@
-;;; conf-claude.el --- Assistant Claude Code -*- lexical-binding: t -*-
+;;; conf-claude.el --- Claude Code assistant -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; Integration du CLI `claude' dans Emacs par claude-code-ide.el.
+;; Integration of the `claude' CLI into Emacs through claude-code-ide.el.
 ;;
-;; Le paquet ne se limite pas a ouvrir un terminal : il demarre un serveur MCP
-;; auquel le CLI se connecte, ce qui donne a Claude l'etat d'Emacs — buffer
-;; courant, region selectionnee, diagnostics flymake, resultats xref — et fait
-;; passer les propositions de modification par `ediff' au lieu d'un patch
-;; affiche dans le terminal.
+;; The package does more than open a terminal: it starts an MCP server the CLI
+;; connects to, which gives Claude the state of Emacs — current buffer,
+;; selected region, flymake diagnostics, xref results — and routes proposed
+;; edits through `ediff' instead of a patch printed in the terminal.
 ;;
-;; Le paquet est absent de MELPA : il est installe par `:vc', integre a
-;; use-package depuis Emacs 30.
+;; The package is absent from MELPA: it is installed by `:vc', part of
+;; use-package since Emacs 30.
 
 ;;; Code:
 
 ;; --- Terminal ---------------------------------------------------------------
 
-;; Le CLI est une application plein ecran : il lui faut un vrai emulateur de
-;; terminal, `shell' ou `comint' ne suffisent pas. `eat' est ecrit en Emacs
-;; Lisp pur, la ou `vterm' — backend par defaut du paquet — exige une
-;; compilation native (cmake, libtool) absente de cette machine.
+;; The CLI is a full-screen application: it needs a real terminal emulator,
+;; `shell' or `comint' are not enough. `eat' is written in pure Emacs Lisp,
+;; where `vterm' — the package's default backend — requires a native build
+;; (cmake, libtool) missing on this machine.
 (use-package eat
   :ensure t
   :commands (eat eat-mode))
 
 ;; --- Claude Code ------------------------------------------------------------
 
-;; Filet de securite : le CLI s'installe dans ~/.local/bin, que le PATH d'un
-;; Emacs lance depuis un menu graphique ne contient pas toujours. Meme idiome
-;; que pour ~/go/bin dans conf-go.el.
+;; Safety net: the CLI installs into ~/.local/bin, which the PATH of an Emacs
+;; started from a graphical menu does not always contain. Same idiom as for
+;; ~/go/bin in conf-go.el.
 (let ((local-binary-directory (expand-file-name "~/.local/bin")))
   (add-to-list 'exec-path local-binary-directory)
   (setenv "PATH" (concat local-binary-directory path-separator (getenv "PATH"))))
 
-;; Les raccourcis partent de F2 et non de F8 : conf-org.el occupe deja F8,
-;; C-F8 et S-F8 pour les captures, et conf-python.el reprend F8 dans
-;; python-mode-map. F2 n'a pour role par defaut que le prefixe two-column,
-;; inutilise ici.
+;; The shortcuts start at F2 and not at F8: conf-org.el already uses F8, C-F8
+;; and S-F8 for captures, and conf-python.el takes F8 over in python-mode-map.
+;; F2 only serves as the two-column prefix by default, unused here.
 (use-package claude-code-ide
   :vc (:url "https://github.com/manzaltu/claude-code-ide.el" :rev :newest)
   :bind (("<f2>" . claude-code-ide-menu)
-         ;; Affiche ou masque la fenetre de la session sans l'arreter.
+         ;; Shows or hides the session window without stopping it.
          ("<S-f2>" . claude-code-ide-toggle)
-         ;; Passe a Claude une reference vers la region ou le fichier courant.
+         ;; Passes Claude a reference to the region or the current file.
          ("<C-f2>" . claude-code-ide-insert-at-mentioned))
   :custom
   (claude-code-ide-terminal-backend 'eat)
-  ;; Le backend recommande en amont, `ghostel', n'est pas installe ici : le
-  ;; rappel affiche une fois par session d'Emacs n'apporterait rien.
+  ;; The backend recommended upstream, `ghostel', is not installed here: the
+  ;; reminder shown once per Emacs session would bring nothing.
   (claude-code-ide-show-backend-recommendation nil)
   :config
-  ;; Expose a Claude les outils MCP cotes Emacs : xref, imenu, project,
-  ;; diagnostics. Sans cet appel le serveur MCP se limite aux notifications de
-  ;; selection et au diff par ediff.
+  ;; Exposes the Emacs-side MCP tools to Claude: xref, imenu, project,
+  ;; diagnostics. Without this call the MCP server is limited to selection
+  ;; notifications and to the ediff diff.
   (claude-code-ide-emacs-tools-setup))
 
-;; --- Blocs org --------------------------------------------------------------
+;; --- Org blocks -------------------------------------------------------------
 
-;; `ob-claude' fait de `claude' un langage org-babel : le corps du bloc est un
-;; prompt, `C-c C-c' l'envoie au CLI et la reponse devient le resultat.
+;; `ob-claude' makes `claude' an org-babel language: the block body is a
+;; prompt, `C-c C-c' sends it to the CLI and the answer becomes the result.
 (with-eval-after-load 'org
   (require 'ob-claude)
 
-  ;; Le prompt et la reponse sont du markdown : `org-edit-special' ouvre le
-  ;; bloc dans markdown-mode plutot que dans `fundamental-mode'.
+  ;; The prompt and the answer are markdown: `org-edit-special' opens the block
+  ;; in markdown-mode rather than in `fundamental-mode'.
   (add-to-list 'org-src-lang-modes '("claude" . markdown))
 
-  ;; `<cl' puis TAB insere le bloc.
+  ;; `<cl' then TAB inserts the block.
   (add-to-list 'org-structure-template-alist '("cl" . "src claude")))
 
 (provide 'conf-claude)

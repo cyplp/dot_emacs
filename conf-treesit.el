@@ -1,24 +1,24 @@
-;;; conf-treesit.el --- Modes majeurs tree-sitter -*- lexical-binding: t -*-
+;;; conf-treesit.el --- tree-sitter major modes -*- lexical-binding: t -*-
 
 ;;; Commentary:
 
-;; Emacs 30 embarque un mode tree-sitter pour la plupart des langages utilises
-;; ici.  Ces modes analysent reellement la syntaxe au lieu de l'approcher par
-;; expressions regulieres : la coloration reste juste dans les chaines et les
-;; imbrications, l'indentation suit la grammaire, et `imenu' / le repliage
-;; deviennent fiables.  Ils remplacent plusieurs paquets MELPA non maintenus
-;; (go-mode, rust-mode, lua-mode, typescript-mode, csharp-mode).
+;; Emacs 30 ships a tree-sitter mode for most of the languages used here.
+;; These modes really parse the syntax instead of approximating it with regular
+;; expressions: coloring stays correct inside strings and nestings, indentation
+;; follows the grammar, and `imenu' / folding become reliable.  They replace
+;; several unmaintained MELPA packages (go-mode, rust-mode, lua-mode,
+;; typescript-mode, csharp-mode).
 ;;
-;; Deux precautions structurent ce fichier.
+;; Two precautions structure this file.
 ;;
-;; 1. Les revisions de grammaires sont epinglees.  Emacs 30.1 lit les ABI 13 a
-;;    14 (voir `treesit-library-abi-version'), or la plupart des grammaires ont
-;;    bascule en ABI 15 courant 2025 : compiler la branche par defaut produit
-;;    une bibliotheque qui se compile sans erreur mais refuse de se charger.
-;;    Chaque revision listee ici a ete verifiee a 14 ou moins.
+;; 1. Grammar revisions are pinned.  Emacs 30.1 reads ABI 13 to 14 (see
+;;    `treesit-library-abi-version'), yet most grammars switched to ABI 15
+;;    during 2025: building the default branch produces a library that compiles
+;;    without error but refuses to load.  Every revision listed here has been
+;;    checked to be 14 or lower.
 ;;
-;; 2. Rien n'est active sans grammaire.  Une grammaire absente ou illisible
-;;    laisse le mode classique en place plutot que d'ouvrir le fichier en
+;; 2. Nothing is enabled without a grammar.  A missing or unreadable grammar
+;;    leaves the classic mode in place rather than opening the file in
 ;;    `fundamental-mode'.
 
 ;;; Code:
@@ -58,54 +58,53 @@
     (tsx        tsx-ts-mode        nil            "\\.tsx\\'")
     (c-sharp    csharp-ts-mode     csharp-mode    nil)
     (lua        lua-ts-mode        nil            "\\.lua\\'"))
-  "Correspondance entre grammaire, mode tree-sitter et mode classique.
+  "Mapping between grammar, tree-sitter mode and classic mode.
 
-Chaque entree vaut (GRAMMAIRE TS-MODE MODE-CLASSIQUE REGEXP-FICHIER).
+Each entry is (GRAMMAR TS-MODE CLASSIC-MODE FILE-REGEXP).
 
-MODE-CLASSIQUE, quand il est non nil, designe le mode qu'Emacs choisirait
-sans tree-sitter ; il est alors redirige via `major-mode-remap-alist', ce qui
-preserve les regles d'`auto-mode-alist' existantes et reste reversible.  Une
-liste est acceptee, pour les langages qu'`auto-mode-alist' designe tantot par
-un nom tantot par son alias — `js-mode' et `javascript-mode' pointent sur la
-meme fonction, mais le remappage compare les symboles.
+CLASSIC-MODE, when non-nil, is the mode Emacs would choose without
+tree-sitter; it is then redirected through `major-mode-remap-alist', which
+preserves the existing `auto-mode-alist' rules and stays reversible.  A list
+is accepted, for the languages that `auto-mode-alist' designates sometimes by
+a name and sometimes by its alias — `js-mode' and `javascript-mode' point to
+the same function, but the remapping compares symbols.
 
-REGEXP-FICHIER couvre le cas inverse : les modes tree-sitter ne s'inscrivent
-pas eux-memes dans `auto-mode-alist', et sans paquet MELPA pour le faire une
-extension comme .go ou .rs n'a plus aucun mode associe.  Le cas de go.mod est
-le plus surprenant : Emacs l'associe par defaut a `m2-mode', c'est-a-dire
-Modula-2.
+FILE-REGEXP covers the opposite case: the tree-sitter modes do not register
+themselves in `auto-mode-alist', and without a MELPA package to do it an
+extension such as .go or .rs no longer has any mode associated.  The go.mod
+case is the most surprising: Emacs associates it by default with `m2-mode',
+that is, Modula-2.
 
-Certaines entrees fixent les deux champs. C'est necessaire quand un paquet
-encore installe garde un autoload sur la meme extension — json-mode sur .json,
-go-mode sur go.mod : le seul remappage ne suffirait pas, puisque c'est le
-paquet, et non le mode natif, qu'`auto-mode-alist' designerait.")
+Some entries set both fields. That is necessary when a still-installed package
+keeps an autoload on the same extension — json-mode on .json, go-mode on
+go.mod: the remapping alone would not be enough, since it is the package, and
+not the native mode, that `auto-mode-alist' would designate.")
 
 (defun my-treesit-missing-grammars ()
-  "Liste des grammaires declarees mais non utilisables.
-Une grammaire compilee dans une ABI incompatible est signalee ici au meme
-titre qu'une grammaire absente : dans les deux cas le mode tree-sitter ne
-peut pas demarrer."
+  "List of the grammars declared but not usable.
+A grammar built against an incompatible ABI is reported here just like a
+missing grammar: in both cases the tree-sitter mode cannot start."
   (seq-remove (lambda (language)
                 (treesit-ready-p language t))
               (mapcar #'car treesit-language-source-alist)))
 
 (defun my-treesit-install-missing-grammars ()
-  "Compiler et installer les grammaires manquantes.
-Necessite git et un compilateur C. L'operation prend plusieurs minutes au
-premier lancement ; elle n'a rien a faire ensuite."
+  "Build and install the missing grammars.
+Requires git and a C compiler. The operation takes several minutes on the
+first run; it has nothing to do afterwards."
   (interactive)
   (let ((missing (my-treesit-missing-grammars)))
     (if (null missing)
-        (message "Toutes les grammaires tree-sitter sont installees")
+        (message "All tree-sitter grammars are installed")
       (dolist (language missing)
-        (message "Installation de la grammaire %s..." language)
+        (message "Installing the %s grammar..." language)
         (treesit-install-language-grammar language))
-      (message "Grammaires installees : %s" missing))))
+      (message "Grammars installed: %s" missing))))
 
 (defun my-treesit-activate-modes ()
-  "Router chaque langage vers son mode tree-sitter quand la grammaire repond.
-Les langages sans grammaire utilisable gardent leur mode classique, ce qui
-evite qu'une grammaire cassee rende des fichiers entiers illisibles."
+  "Route each language to its tree-sitter mode when the grammar answers.
+The languages without a usable grammar keep their classic mode, which keeps a
+broken grammar from making whole files unreadable."
   (dolist (entry my-treesit-major-modes)
     (let ((language (nth 0 entry))
           (treesit-mode (nth 1 entry))
@@ -122,19 +121,19 @@ evite qu'une grammaire cassee rende des fichiers entiers illisibles."
 
 (my-treesit-activate-modes)
 
-;; Niveau de decoration maximal : les modes tree-sitter distinguent alors les
-;; appels de fonction, les proprietes et les operateurs, la ou le niveau 3 par
-;; defaut s'arrete aux mots-cles et aux chaines.
+;; Maximal decoration level: the tree-sitter modes then distinguish function
+;; calls, properties and operators, where the default level 3 stops at keywords
+;; and strings.
 (setq treesit-font-lock-level 4)
 
-;; Signale une seule fois ce qui manque, sans rien installer a l'insu de
-;; l'utilisateur : compiler des grammaires telecharge du code et fait tourner
-;; un compilateur, ce qui n'a pas sa place dans un demarrage silencieux.
+;; Reports what is missing only once, without installing anything behind the
+;; user's back: building grammars downloads code and runs a compiler, which has
+;; no place in a silent startup.
 (add-hook 'emacs-startup-hook
           (lambda ()
             (let ((missing (my-treesit-missing-grammars)))
               (when missing
-                (message "Grammaires tree-sitter manquantes (%s) : M-x my-treesit-install-missing-grammars"
+                (message "Missing tree-sitter grammars (%s): M-x my-treesit-install-missing-grammars"
                          (mapconcat #'symbol-name missing " "))))))
 
 (provide 'conf-treesit)
