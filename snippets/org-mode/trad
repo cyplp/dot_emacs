@@ -2,9 +2,9 @@
 # name: translate in french
 # key: /tradc
 # --
-#+name:${1:title}
-#+begin_src claude :model ${2:$$(yas-choose-value '("haiku" "sonnet" "opus"))}
-traduit en français le bloc suivant
+#+name:traduction-`(format "%04x" (random 65536))`
+#+begin_src claude :model ${1:$$(yas-choose-value '("haiku" "sonnet" "opus"))}
+traduit en ${2:$$(yas-choose-value '("français" "anglais"))} le bloc suivant
 
 $0
 
