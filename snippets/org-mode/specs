@@ -5,6 +5,7 @@
 #+name:specs $1
 #+begin_src markdown
 /specs
+dans un worktree ${1:$(sluggify yas-text)},
 
 $0
 #+end_src

@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: execute claude
+# key: /claude
+# --
+#+name:$1
+#+begin_src claude :model ${2:$$(yas-choose-value '("haiku" "sonnet" "opus"))}
+écrit en org-mode
+
+$0
+
+#+end_src
