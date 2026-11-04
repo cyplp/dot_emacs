@@ -157,6 +157,15 @@
 
 (add-hook 'org-babel-after-execute-hook #'my-org-redisplay-inline-images)
 
+;; Used by the dot and uml snippets to derive the image file name from the
+;; block title.
+(defun sluggify (str)
+  "Return STR lowercased, with every character outside [a-z0-9-] turned into -."
+  (replace-regexp-in-string
+   "[^a-z0-9-]"
+   "-"
+   (downcase str)))
+
 ;; --- Export -----------------------------------------------------------------
 
 (use-package ox-rst :ensure t :after org)
