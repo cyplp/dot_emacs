@@ -28,6 +28,21 @@
 ;; CommonJS modules (.cjs) were left without a major mode.
 (add-to-list 'auto-mode-alist '("\\.[cm]js\\'" . js-ts-mode))
 
+
+;; HTTP requests in plain text files, run through the hurl CLI. Successor of
+;; restclient.el (archived): the same .hurl files also run in CI.
+;; Absent from MELPA, hence `:vc'. The package autoload already maps .hurl
+;; files to `hurl-mode'.
+(use-package hurl-mode
+  :vc (:url "https://github.com/JasZhe/hurl-mode" :rev :newest)
+  :commands hurl-mode)
+
+;; ob-hurl ships in the same repository but has no autoload: Babel only finds
+;; `org-babel-execute:hurl' once the file is loaded.
+(use-package ob-hurl
+  :ensure nil
+  :after org)
+
 (provide 'conf-web)
 
 ;;; conf-web.el ends here
