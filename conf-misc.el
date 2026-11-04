@@ -320,6 +320,12 @@
 ;; which does not define it.
 (global-set-key (kbd "C-c r f") #'eradio-play-fip)
 
+(use-package hl-line
+  :ensure nil
+  :config
+  (global-hl-line-mode 1))
+
+
 ;; --- Dropped packages -------------------------------------------------------
 
 ;; pocket-reader : the Pocket service shut down in July 2025.
