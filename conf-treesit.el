@@ -30,6 +30,10 @@
         (c-sharp    "https://github.com/tree-sitter/tree-sitter-c-sharp"    "v0.23.1")
         (css        "https://github.com/tree-sitter/tree-sitter-css"        "v0.23.2")
         (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile" "v0.2.0")
+        ;; Not routed through `my-treesit-major-modes': the commit message
+        ;; buffer is opened by magit, which picks the major mode itself
+        ;; (see `git-commit-major-mode' in conf-git.el). v0.5.0 moved to ABI 15.
+        (gitcommit  "https://github.com/gbprod/tree-sitter-gitcommit"        "v0.4.0")
         (go         "https://github.com/tree-sitter/tree-sitter-go"         "v0.23.4")
         (gomod      "https://github.com/camdencheek/tree-sitter-go-mod"     "v1.1.0")
         (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "v0.23.1")

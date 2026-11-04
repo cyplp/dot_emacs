@@ -2,7 +2,7 @@
 # name: translate in french
 # key: /tradc
 # --
-#+name:traduction-`(format "%04x" (random 65536))`
+#+name:traduction-`(org-id-uuid)`
 #+begin_src claude :model ${1:$$(yas-choose-value '("haiku" "sonnet" "opus"))}
 traduit en ${2:$$(yas-choose-value '("français" "anglais"))} le bloc suivant
 

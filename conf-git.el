@@ -89,6 +89,21 @@
   ;; provides for configuring a message buffer.
   :hook (git-commit-setup . conventional-commit-setup))
 
+;; Tree-sitter parsing of the commit message. The grammar turns the subject,
+;; the Conventional Commits prefix, the trailers and git's comments into real
+;; nodes, where git-commit approximates them with regular expressions. The mode
+;; is only chosen when the grammar answers (declared in conf-treesit.el): the
+;; message would otherwise open in `prog-mode' without any coloring, while
+;; `text-mode' keeps git-commit's regexp coloring. The package itself is only
+;; installed once the grammar is there: `my-treesit-install-missing-grammars'
+;; then a restart.
+(use-package git-commit-ts-mode
+  :ensure t
+  :if (treesit-ready-p 'gitcommit t)
+  :commands (git-commit-ts-mode)
+  :init
+  (setq git-commit-major-mode #'git-commit-ts-mode))
+
 (provide 'conf-git)
 
 ;;; conf-git.el ends here
