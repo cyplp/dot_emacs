@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: gnuplot
+# key: gp
+# group: helpers
+# --
+#+name: ${1:title}
+#+begin_src gnuplot :file imgs/${1:$(sluggify yas-text)}.png :exports results
+set title "$1"
+set xlabel "${2:x}"
+set ylabel "${3:y}"
+set grid
+$0
+#+end_src
