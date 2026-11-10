@@ -124,6 +124,10 @@
 
 ;; --- Code blocks ------------------------------------------------------------
 
+;; ob-gnuplot ships with Org but requires the `gnuplot' package, which does
+;; not: it must be installed before the languages below are loaded.
+(use-package gnuplot :ensure t)
+
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((sql . t)
@@ -132,7 +136,8 @@
    (plantuml . t)
    (restclient . t)
    (rust . t)
-   (dot . t)))
+   (dot . t)
+   (gnuplot . t)))
 
 (use-package ob-restclient :ensure t :after org)
 (use-package ob-rust :ensure t :after org)
