@@ -122,6 +122,20 @@
           (?B :foreground "orange" :weight bold :height 1.1)
           (?C :foreground "green"  :weight bold :height 1.1))))
 
+;; --- Queries ----------------------------------------------------------------
+
+;; Searches the org files with a query language (todo, tags, dates,
+;; properties...) instead of the fixed views of `org-agenda'. Declared here so
+;; that a fresh elpa/ reinstalls it: it was only installed by hand until now.
+(use-package org-ql
+  :ensure t
+  :after org
+  :commands (org-ql-search org-ql-view org-ql-find)
+  :init
+  ;; The `#+BEGIN: org-ql' dynamic block is not autoloaded upstream: without
+  ;; this, C-c C-c on it fails until some org-ql command has been run.
+  (autoload 'org-dblock-write:org-ql "org-ql-search"))
+
 ;; --- Code blocks ------------------------------------------------------------
 
 ;; ob-gnuplot ships with Org but requires the `gnuplot' package, which does
