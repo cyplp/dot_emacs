@@ -200,7 +200,44 @@
 (use-package org-modern
   :ensure t
   :hook ((org-mode . org-modern-mode)
-         (org-agenda-finalize . org-modern-agenda)))
+         (org-agenda-finalize . org-modern-agenda))
+  :custom
+  ;; Each keyword gets a pale background and a border of its own darker
+  ;; shade: the state stays recognizable at a glance without the saturated
+  ;; blocks org-modern draws by default (inverse video of `org-todo').
+  (org-modern-todo-faces
+   '(("TODO"       :background "#fde8e8" :foreground "#b42318"
+                   :box (:line-width -1 :color "#b42318"))
+     ("INPROGRESS" :background "#e7f6ec" :foreground "#1e7a3c"
+                   :box (:line-width -1 :color "#1e7a3c"))
+     ("LATER"      :background "#fdeef6" :foreground "#a3346b"
+                   :box (:line-width -1 :color "#a3346b"))
+     ("DISPATCHED" :background "#e8f1fd" :foreground "#1f5fa8"
+                   :box (:line-width -1 :color "#1f5fa8"))
+     ("DONE"
+      :background "#e3f4ef"
+      :foreground "#0f6b55"
+      :box (:line-width -1 :color "#0f6b55"))
+     ("ARCHIVE"    :background "#f0f0f0" :foreground "#6b6b6b"
+                   :box (:line-width -1 :color "#9e9e9e"))
+     ;; Any other keyword declared in a file by #+TODO.
+     (t            :background "#f5f5f5" :foreground "#444444"
+                   :box (:line-width -1 :color "#888888"))))
+  )
+
+;; =verbatim= is for literal text (commands, values, names): a light grey,
+;; thin face sets it apart from the prose without drawing the eye to it.
+(set-face-attribute 'org-verbatim nil
+                    :foreground "gray40"
+                    :weight 'light)
+
+;; Pending tasks stand out: their headline is darker than the regular
+;; headlines, whose modus-operandi colors (blue, purple...) are lighter.
+(setq org-fontify-todo-headline t)
+
+(set-face-attribute 'org-headline-todo nil
+                    :foreground "#1a1a1a"
+                    :weight 'semibold)
 
 ;; Keeps the title of the current section visible at the top of the window.
 (use-package org-sticky-header
